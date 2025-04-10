@@ -12,3 +12,8 @@ By Victor
 n: new length time series based on the observation grouped by sitenewname. (ie number of observation for each sitenewname factor group)  
 Date2: conversion of Date (we used here strptime() function from R to convert Date from character)
 
+### ebms folder
+- Ebs stand for "English Beech Masting Survey"
+- Come from here: https://osf.io/dqwzn (paper: https://www.pnas.org/doi/10.1073/pnas.2423181122)
+- Note: this is NOT seed trap data
+The ground below each tree was searched for seeds for 7 min, and the collected seeds were later sorted and counted in the laboratory
