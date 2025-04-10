@@ -238,7 +238,7 @@ util$check_all_expectand_diagnostics(base_samples)
 # Retrodicive Check
 par(mfrow=c(1, 1))
 
-util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 300, 25,
+util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 400, 25,
                          baseline_values=data$seed_counts, 
                          xlab="Seed Counts")
 
