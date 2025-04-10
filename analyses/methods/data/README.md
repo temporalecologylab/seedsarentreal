@@ -17,3 +17,7 @@ Date2: conversion of Date (we used here strptime() function from R to convert Da
 - Come from here: https://osf.io/dqwzn (paper: https://www.pnas.org/doi/10.1073/pnas.2423181122)
 - Note: this is NOT seed trap data:
 > The ground below each tree was searched for seeds for 7 min, and the collected seeds were later sorted and counted in the laboratory
+
+#### comast folder
+- See https://doi.org/10.5061/dryad.69p8cz98q
+- Details in the README in the folder
