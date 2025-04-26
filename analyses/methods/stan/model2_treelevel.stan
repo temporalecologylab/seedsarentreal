@@ -14,22 +14,22 @@ functions {
 
 data {
   int<lower=1> N;           // Total number of observations
-  int<lower=1> N_traps;     // Number of traps
+  int<lower=1> N_trees;     // Number of trees
 
-  // Number of observations per trap
-  array[N_traps] int<lower=1, upper=N> N_years;
+  // Number of observations per tree
+  array[N_trees] int<lower=1, upper=N> N_years;
 
-  // Size of trap
-  array[N_traps] real<lower=0> sizes;
+  // Size of search area below tree
+  array[N_trees] real<lower=0> sizes;
 
-  // Trap observation years
+  // Tree observation years
   array[N] real years;
 
   // Ragged array indexing
-  array[N_traps] int<lower=1, upper=N> trap_start_idxs;
-  array[N_traps] int<lower=1, upper=N> trap_end_idxs;
+  array[N_trees] int<lower=1, upper=N> tree_start_idxs;
+  array[N_trees] int<lower=1, upper=N> tree_end_idxs;
 
-  // Number of seeds in each trap each year
+  // Number of seeds in each tree each year
   array[N] int<lower=0> seed_counts;
 }
 
@@ -39,9 +39,9 @@ transformed data {
 }
 
 parameters {
-  real<lower=0> lambda1;       // Non-masting intensity for trap 1
-  real<lower=0> psi1;          // Non-masting dispersion for trap 1
-  real<lower=lambda1> lambda2; // Masting intensity for trap 1
+  real<lower=0> lambda1;       // Non-masting intensity for tree 1
+  real<lower=0> psi1;          // Non-masting dispersion for tree 1
+  real<lower=lambda1> lambda2; // Masting intensity for tree 1
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
@@ -52,19 +52,19 @@ model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, 1 / 2.57); // 0 <~ lambda1 <~ 500
+  lambda1 ~ normal(0, 500 / 2.57); // 0 <~ lambda1 <~ 500
   psi1 ~ normal(0, 5 / 2.57);      // 0 <~  psi2   <~ 5
-  lambda2 ~ normal(10, 50 / 2.57); // 0 <~ lambda2 <~ 500
+  lambda2 ~ normal(0, 500 / 2.57); // 0 <~ lambda2 <~ 500
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm
 
-  for (t in 1:N_traps) {
-    real trap_size = sizes[t];
-    real l1 = lambda1 * trap_size / base_size;
-    real l2 = lambda2 * trap_size / base_size;
+  for (t in 1:N_trees) {
+    real tree_size = sizes[t];
+    real l1 = lambda1 * tree_size / base_size;
+    real l2 = lambda2 * tree_size / base_size;
 
     matrix[2, N_years[t]] log_omega;
     for (n in 1:N_years[t]) {
-      int y = seed_counts[trap_start_idxs[t] + n - 1];
+      int y = seed_counts[tree_start_idxs[t] + n - 1];
       log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1);
       log_omega[2, n] = poisson_lpmf(y | l2);
     }
@@ -82,28 +82,28 @@ generated quantities {
     matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                            [tau_m_nm, 1 - tau_m_nm] ];
 
-    for (t in 1:N_traps) {
-      array[N_years[t]] int trap_idxs
+    for (t in 1:N_trees) {
+      array[N_years[t]] int tree_idxs
         = linspaced_int_array(N_years[t],
-                              trap_start_idxs[t],
-                              trap_end_idxs[t]);
+                              tree_start_idxs[t],
+                              tree_end_idxs[t]);
 
-      real trap_size = sizes[t];
-      real l1 = lambda1 * trap_size / base_size;
-      real l2 = lambda2 * trap_size / base_size;
+      real tree_size = sizes[t];
+      real l1 = lambda1 * tree_size / base_size;
+      real l2 = lambda2 * tree_size / base_size;
 
       matrix[2, N_years[t]] log_omega;
       for (n in 1:N_years[t]) {
-        int y = seed_counts[trap_start_idxs[t] + n - 1];
+        int y = seed_counts[tree_start_idxs[t] + n - 1];
         log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1);
         log_omega[2, n] = poisson_lpmf(y | l2);
       }
 
-      state_pred[trap_idxs]
+      state_pred[tree_idxs]
         = hmm_latent_rng(log_omega, Gamma, [1 - rho0, rho0]');
 
       for (n in 1:N_years[t]) {
-        int idx = trap_start_idxs[t] + n - 1;
+        int idx = tree_start_idxs[t] + n - 1;
         if(state_pred[idx] == 1) {
           seed_count_pred[idx] = neg_binomial_alt_rng(l1, psi1);
         } else if(state_pred[idx] == 2) {
@@ -111,7 +111,7 @@ generated quantities {
         }
       }
 
-      p_masting[trap_idxs]
+      p_masting[tree_idxs]
         = to_array_1d(hmm_hidden_state_prob(log_omega,
                                             Gamma,
                                             [1 - rho0, rho0]')[2,]);

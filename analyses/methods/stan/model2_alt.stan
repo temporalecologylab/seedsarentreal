@@ -19,10 +19,10 @@ data {
   // Number of observations per trap
   array[N_traps] int<lower=1, upper=N> N_years;
 
-  // Size of trap
+  // Size of search area below trap
   array[N_traps] real<lower=0> sizes;
 
-  // Trap observation years
+  // trap observation years
   array[N] real years;
 
   // Ragged array indexing
@@ -40,8 +40,9 @@ transformed data {
 
 parameters {
   real<lower=0> lambda1;       // Non-masting intensity for trap 1
-  real<lower=0> psi1;          // Non-masting dispersion for trap 1
+  real<lower=0> psi1;          // Non-masting intensity for trap 1
   real<lower=lambda1> lambda2; // Masting intensity for trap 1
+  real<lower=0> psi2;          // Masting dispersion for trap 1
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
@@ -52,9 +53,10 @@ model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, 1 / 2.57); // 0 <~ lambda1 <~ 500
-  psi1 ~ normal(0, 5 / 2.57);      // 0 <~  psi2   <~ 5
-  lambda2 ~ normal(10, 50 / 2.57); // 0 <~ lambda2 <~ 500
+  lambda1 ~ normal(0, 10 / 2.57); // 0 <~ lambda1 <~ 10
+  psi1 ~ normal(0, 5 / 2.57); // 0 <~  psi1  <~ 2
+  lambda2 ~ normal(0, 500 / 2.57); 
+  psi2 ~ normal(0, 5 / 2.57); // 0 <~  psi2   <~ 5
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm
 
   for (t in 1:N_traps) {
@@ -65,8 +67,10 @@ model {
     matrix[2, N_years[t]] log_omega;
     for (n in 1:N_years[t]) {
       int y = seed_counts[trap_start_idxs[t] + n - 1];
-      log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1);
-      log_omega[2, n] = poisson_lpmf(y | l2);
+      
+      log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1); // No-masting
+      log_omega[2, n] = neg_binomial_alt_lpmf(y | l2, psi2); // Masting
+      
     }
 
     target += hmm_marginal(log_omega, Gamma, [1 - rho0, rho0]');
@@ -95,8 +99,9 @@ generated quantities {
       matrix[2, N_years[t]] log_omega;
       for (n in 1:N_years[t]) {
         int y = seed_counts[trap_start_idxs[t] + n - 1];
-        log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1);
-        log_omega[2, n] = poisson_lpmf(y | l2);
+        log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1); 
+        log_omega[2, n] = neg_binomial_alt_lpmf(y | l2, psi2); 
+        
       }
 
       state_pred[trap_idxs]
@@ -107,7 +112,7 @@ generated quantities {
         if(state_pred[idx] == 1) {
           seed_count_pred[idx] = neg_binomial_alt_rng(l1, psi1);
         } else if(state_pred[idx] == 2) {
-          seed_count_pred[idx] = poisson_rng(l2);
+          seed_count_pred[idx] = neg_binomial_alt_rng(l2, psi2);
         }
       }
 
