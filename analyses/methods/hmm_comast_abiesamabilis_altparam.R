@@ -14,7 +14,7 @@ for(t in 1:N_trees){
 }
 
 ggplot(data = tau_nm_m) +
-  geom_density(aes(x = s), linewidth = 0.3) +
+  geom_density(aes(x = s, group = t, color = t), linewidth = 0.3) +
   scale_color_gradientn(colors = kippenberger) +
   theme_bw() + 
   theme(panel.grid = element_blank(),
@@ -90,7 +90,7 @@ ggplot(data = lambda2) +
         plot.margin = margin(r = 10, l = 5),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
-  scale_x_continuous(expand = c(0,0), limits = c(0,200)) +
+  scale_x_continuous(expand = c(0,0), limits = c(0,500)) +
   labs(y = "Density", x = TeX(r"( $\lambda_{masting}$ )"))
 
 lambda1 <- data.frame()
@@ -113,7 +113,7 @@ ggplot(data = lambda1) +
         plot.margin = margin(r = 10, l = 5),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
-  scale_x_continuous(expand = c(0,0), limits = c(0,2)) +
+  scale_x_continuous(expand = c(0,0), limits = c(0,100)) +
   labs(y = "Density", x = TeX(r"( $\lambda_{non-masting}$ )"))
 
 
@@ -142,7 +142,7 @@ ggplot(data = rho0) +
   labs(y = "Density", x = TeX(r"( $\rho_0 )"))
 
 
-year <- 2000
+year <- 1990
 pmasting <- data.frame()
 for(t in 1:N_trees){
   idxs <- tree_start_idxs[t]:tree_end_idxs[t]

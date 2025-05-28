@@ -34,7 +34,6 @@ parameters {
   array[N_trees] real<lower=0> lambda1;       // Non-masting intensity for tree 1
   array[N_trees] real<lower=0> psi1;          // Non-masting intensity for tree 1
   array[N_trees] real<lower=lambda1> lambda2; // Masting intensity for tree 1
-  array[N_trees] real<lower=0> psi2;          // Masting dispersion for tree 1
 
   array[N_trees] real<lower=0, upper=1> rho0;  // Initial masting probability
   array[N_trees] real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
@@ -46,7 +45,6 @@ model {
   lambda1 ~ normal(0, 500 / 2.57); // 0 <~ lambda1 <~ 100
   psi1 ~ normal(0, 5 / 2.57); // 0 <~  psi1  <~ 2
   lambda2 ~ normal(0, 500 / 2.57); 
-  psi2 ~ normal(0, 5 / 2.57); // 0 <~  psi2   <~ 5
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm
 
   for (t in 1:N_trees) {
@@ -59,7 +57,7 @@ model {
       int y = seed_counts[tree_start_idxs[t] + n - 1];
       
       log_omega[1, n] = neg_binomial_alt_lpmf(y | lambda1[t], psi1[t]); // No-masting
-      log_omega[2, n] = neg_binomial_alt_lpmf(y | lambda2[t], psi2[t]); // Masting
+      log_omega[2, n] = poisson_lpmf(y | lambda2[t]); // Masting 
       
     }
 
@@ -86,7 +84,7 @@ generated quantities {
       for (n in 1:N_years[t]) {
         int y = seed_counts[tree_start_idxs[t] + n - 1];
         log_omega[1, n] = neg_binomial_alt_lpmf(y | lambda1[t], psi1[t]); 
-        log_omega[2, n] = neg_binomial_alt_lpmf(y | lambda2[t], psi2[t]); 
+        log_omega[2, n] = poisson_lpmf(y | lambda2[t]);
         
       }
 
@@ -98,7 +96,7 @@ generated quantities {
         if(state_pred[idx] == 1) {
           seed_count_pred[idx] = neg_binomial_alt_rng(lambda1[t], psi1[t]);
         } else if(state_pred[idx] == 2) {
-          seed_count_pred[idx] = neg_binomial_alt_rng(lambda2[t], psi2[t]);
+          seed_count_pred[idx] = poisson_rng(lambda2[t]);
         }
       }
 

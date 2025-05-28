@@ -1,7 +1,7 @@
 library(latex2exp)
 library(ggplot2)
 
-set.seed(04111954)
+set.seed(06111954)
 wd <- "~/projects/seedsarentreal/analyses/methods"
 
 # Simulate data
@@ -13,8 +13,8 @@ ids <- 20
 tau_nm_m <- runif(1) # non-masting to masting probability
 tau_m_nm <- runif(1, min = 0.8, max = 1) # masting to non-masting probability
 
-tau_nm_m <- 1 # non-masting to masting probability
-tau_m_nm <- 1 # masting to non-masting probability
+tau_nm_m <- 0.001 # non-masting to masting probability
+tau_m_nm <- 0.9 # masting to non-masting probability
 
 for(id in 1:ids){
   
@@ -67,7 +67,7 @@ ggplot(data = seeds) +
   theme_bw() +
   theme(panel.grid = element_blank())
 
-ggplot(data = seeds[seeds$id == 15,]) + 
+ggplot(data = seeds[seeds$id == 3,]) + 
   geom_line(aes(x = year, y = n, group = id),
             linewidth = 0.1, alpha = 0.7) +
   theme_bw() +
@@ -127,7 +127,7 @@ data <- mget(c('N', 'N_trees', 'sizes',
 
 # Posterior quantification
 fit <- stan(file= file.path(wd, "stan", "model2_treelevel_diffdist.stan"),
-            data=data, seed=04111954, cores =4,
+            data=data, seed=06111954, cores =4,
             warmup=1000, iter=4000, refresh=100)
 
 diagnostics <- util$extract_hmc_diagnostics(fit)
@@ -187,32 +187,30 @@ rho0 <- data.frame()
 for(t in 1:N_trees){
   tsamp <- c()
   for(c in 1:4){
-    csamp <- samples[[paste0('rho0[',t,']')]][c,]
+    csamp <- samples[[paste0('rho0')]][c,]
     tsamp <- c(tsamp, csamp)
   }
   tsamp <- data.frame(t = t, sim = params[t, 'rho0'], samp = tsamp)
   rho0 <- rbind(rho0, tsamp)
 }
-tau_m_nm <- data.frame()
-for(t in 1:N_trees){
-  tsamp <- c()
-  for(c in 1:4){
-    csamp <- samples[[paste0('tau_m_nm[',t,']')]][c,]
-    tsamp <- c(tsamp, csamp)
-  }
-  tsamp <- data.frame(t = t, sim = params[t, 'tau_m_nm'], samp = tsamp)
-  tau_m_nm <- rbind(tau_m_nm, tsamp)
+
+
+
+tsamp <- c()
+for(c in 1:4){
+  csamp <- samples[[paste0('tau_m_nm')]][c,]
+  tsamp <- c(tsamp, csamp)
 }
-tau_nm_m <- data.frame()
-for(t in 1:N_trees){
-  tsamp <- c()
-  for(c in 1:4){
-    csamp <- samples[[paste0('tau_nm_m[',t,']')]][c,]
-    tsamp <- c(tsamp, csamp)
-  }
-  tsamp <- data.frame(t = t, sim = params[t, 'tau_nm_m'], samp = tsamp)
-  tau_nm_m <- rbind(tau_nm_m, tsamp)
+tau_m_nm <- data.frame(sim = params[t, 'tau_m_nm'], samp = tsamp)  
+
+tsamp <- c()
+for(c in 1:4){
+  csamp <- samples[[paste0('tau_nm_m')]][c,]
+  tsamp <- c(tsamp, csamp)
 }
+tau_nm_m <- data.frame(sim = params[t, 'tau_nm_m'], samp = tsamp)  
+  
+
 
 ggplot() +
   geom_boxplot(data = lambda2, aes(y = samp, x = t, group = t), outliers = FALSE, width = 0.5,
@@ -227,7 +225,8 @@ ggplot() +
         plot.margin = margin(r = 5, l = 5),
         axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  labs(y = TeX(r"( $\lambda_{masting}$ )"))
+  labs(y = TeX(r"( $\lambda_{masting}$ )")) +
+  lims(y = c(0,300))
 
 
 ggplot() +
@@ -243,9 +242,10 @@ ggplot() +
         plot.margin = margin(r = 5, l = 5),
         axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  labs(y = TeX(r"( $\lambda_{non-masting}$ )"))
+  labs(y = TeX(r"( $\lambda_{non-masting}$ )")) +
+  lims(y = c(0,10))
 
-ggplot(data = seeds[seeds$id == 10,]) + 
+ggplot(data = seeds[seeds$id == 6,]) + 
   geom_line(aes(x = year, y = n, group = id),
             linewidth = 0.1, alpha = 0.7) +
   geom_point(aes(x = year, y = n, group = id, color = as.character(state))) +
@@ -257,13 +257,13 @@ ggplot(data = seeds[seeds$id == 10,]) +
 
 ggplot() +
   stat_summary(
-    data = tau_m_nm, aes(y = samp, x = t, group = t),
+    data = tau_m_nm, aes(y = samp,x = 1),
     fun.min = function(z) { quantile(z,0.1)},
     fun.max = function(z) { quantile(z,0.9)},
     fun = median, color = 'grey80') +
-  geom_point(data = unique(tau_m_nm[,c('sim', 't')]), aes(y = sim, x = t, group = t), color = 'white', shape = '-',
+  geom_point(aes(y = unique(tau_m_nm[,c('sim')]), x = 1), color = 'white', shape = '-',
              size = 12) +
-  geom_point(data = unique(tau_m_nm[,c('sim', 't')]), aes(y = sim, x = t, group = t), color = 'red', shape = '-',
+  geom_point(aes(y = unique(tau_m_nm[,c('sim')]), x = 1), color = 'red', shape = '-',
              size = 8) +
   theme_bw() + 
   theme(panel.grid = element_blank(),
@@ -271,7 +271,29 @@ ggplot() +
         plot.margin = margin(r = 5, l = 5),
         axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  labs(y = TeX(r"( $\tau_{masting \rightarrow non-masting}$ )"))
+  labs(y = TeX(r"( $\tau_{masting \rightarrow non-masting}$ )")) +
+  lims(y=c(0.5,1))
+
+
+ggplot() +
+  stat_summary(
+    data = tau_nm_m, aes(y = samp,x = 1),
+    fun.min = function(z) { quantile(z,0.1)},
+    fun.max = function(z) { quantile(z,0.9)},
+    fun = median, color = 'grey80') +
+  geom_point(aes(y = unique(tau_nm_m[,c('sim')]), x = 1), color = 'white', shape = '-',
+             size = 12) +
+  geom_point(aes(y = unique(tau_nm_m[,c('sim')]), x = 1), color = 'red', shape = '-',
+             size = 8) +
+  theme_bw() + 
+  theme(panel.grid = element_blank(),
+        legend.position = 'none',
+        plot.margin = margin(r = 5, l = 5),
+        axis.text.x = element_blank(), axis.title.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(y = TeX(r"( $\tau_{non-masting \rightarrow masting}$ )")) +
+  lims(y=c(0,0.5))
+
 
 ggplot() +
   stat_summary(
@@ -289,7 +311,7 @@ ggplot() +
         plot.margin = margin(r = 5, l = 5),
         axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  labs(y = TeX(r"( $\tau_{non-masting \rightarrow masting}$ )"))
+  labs(y = TeX(r"( $\tau_{non-masting \rightarrow masting}$ )")) 
 
 ggplot() +
   stat_summary(

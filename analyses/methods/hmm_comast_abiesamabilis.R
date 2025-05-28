@@ -9,7 +9,7 @@ tokeep <- obscount[obscount$Freq == length(c(1962:2016)), "Var1"]
 length(tokeep)
 raw_data_filt <- raw_data_filt[raw_data_filt$uniqueID %in% tokeep,]
 
-ggplot(data = raw_data_filt[raw_data_filt$plant_ID %in% c('CNCT_51ABAM19', 'CNCT_01ABAM11', 'CNCT_51ABAM12'),]) + 
+ggplot(data = raw_data_filt) + 
   geom_line(aes(x = year, y = count, group = uniqueID),
             linewidth = 0.1, alpha = 0.7) +
   theme_bw() +
@@ -71,7 +71,7 @@ data <- mget(c('N', 'N_trees', 'sizes',
                'seed_counts', 'years', 'N_years',
                'tree_start_idxs', 'tree_end_idxs'))
 
-fit <- stan(file= file.path(wd, "stan", "model2_treelevel_alt_diffparam.stan"),
+fit <- stan(file= file.path(wd, "stan", "model2_treelevel_diffdist.stan"),
             data=data, seed=5838299, cores =4,
             warmup=1000, iter=4000, refresh=100)
 
@@ -80,15 +80,17 @@ util$check_all_hmc_diagnostics(diagnostics)
 
 samples <- util$extract_expectand_vals(fit)
 base_samples <- util$filter_expectands(samples,
-                                       c('lambda1', 'lambda2', 
-                                         'psi1', 'rho0',
-                                         'tau_nm_m', 'tau_m_nm'))
+                                       c('rho0',
+                                         'tau_nm_m', 'tau_m_nm',
+                                         'lambda1', 'psi1',
+                                         'lambda2'),
+                                       check_arrays=TRUE)
 util$check_all_expectand_diagnostics(base_samples)
 
 # Retrodicive Check
 par(mfrow=c(1, 1))
 
-util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 300, 5,
+util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 500, 5,
                          baseline_values=data$seed_counts, 
                          xlab="Seed Counts")
 
@@ -157,11 +159,11 @@ util$plot_expectand_pushforward(samples[['rho0[3]']], 25,
                                 display_name="rho", flim = c(0,1))
 
 par(mfrow=c(1, 3))
-util$plot_expectand_pushforward(samples[['lambda2[1]']], 25,
+util$plot_expectand_pushforward(samples[['lambda1[1]']], 25,
                                 display_name="rho", flim = c(0,200))
-util$plot_expectand_pushforward(samples[['lambda2[2]']], 25,
+util$plot_expectand_pushforward(samples[['lambda1[2]']], 25,
                                 display_name="rho", flim = c(0,200))
-util$plot_expectand_pushforward(samples[['lambda2[3]']], 25,
+util$plot_expectand_pushforward(samples[['lambda1[3]']], 25,
                                 display_name="rho", flim = c(0,200))
 
 par(mfrow=c(3, 2))
