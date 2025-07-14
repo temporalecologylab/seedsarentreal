@@ -39,8 +39,10 @@ transformed data {
 }
 
 parameters {
-  real<lower=0> lambda1;       // Non-masting intensity for tree 1
-  real<lower=0> psi1;          // Non-masting intensity for tree 1
+  real<lower=0> lambda1; // Non-masting intensity for tree 1
+  // real<lower=0> psi1; // Non-masting intensity for tree 1
+  real<lower=0, upper=1> theta1; // probability of drawing a zero
+  
   real<lower=lambda1> lambda2; // Masting intensity for tree 1
   real<lower=0> psi2;          // Masting dispersion for tree 1
 
@@ -53,9 +55,9 @@ model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, 10 / 2.57); 
-  psi1 ~ normal(0, 2 / 2.57); 
-  lambda2 ~ normal(100, 500 / 2.57); 
+  lambda1 ~ normal(0, 500 / 2.57); 
+  // psi1 ~ normal(0, 2 / 2.57); 
+  lambda2 ~ normal(0, 500 / 2.57); 
   psi2 ~ normal(0, 5 / 2.57); 
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm
 
@@ -68,7 +70,15 @@ model {
     for (n in 1:N_years[t]) {
       int y = seed_counts[tree_start_idxs[t] + n - 1];
       
-      log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1); // No-masting
+      // Non-masting
+      if (y == 0){
+        log_omega[1, n] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1));
+      }else{
+        log_omega[1, n] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1);
+      }
+      
+      
+      
       log_omega[2, n] = neg_binomial_alt_lpmf(y | l2, psi2); // Masting
       
     }
@@ -99,7 +109,13 @@ generated quantities {
       matrix[2, N_years[t]] log_omega;
       for (n in 1:N_years[t]) {
         int y = seed_counts[tree_start_idxs[t] + n - 1];
-        log_omega[1, n] = neg_binomial_alt_lpmf(y | l1, psi1); 
+        
+        if (y == 0){
+        log_omega[1, n] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1));
+        }else{
+          log_omega[1, n] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1);
+        }
+      
         log_omega[2, n] = neg_binomial_alt_lpmf(y | l2, psi2); 
         
       }
@@ -110,12 +126,18 @@ generated quantities {
       for (n in 1:N_years[t]) {
         int idx = tree_start_idxs[t] + n - 1;
         if(state_pred[idx] == 1) {
-          seed_count_pred[idx] = neg_binomial_alt_rng(l1, psi1);
+          
+          if(bernoulli_rng(theta1)){
+            seed_count_pred[idx] = 0;
+          }else{
+            seed_count_pred[idx] = poisson_rng(l1);
+          }
+          
         } else if(state_pred[idx] == 2) {
           seed_count_pred[idx] = neg_binomial_alt_rng(l2, psi2);
         }
       }
-
+    
       p_masting[tree_idxs]
         = to_array_1d(hmm_hidden_state_prob(log_omega,
                                             Gamma,
