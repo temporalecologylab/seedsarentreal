@@ -31,6 +31,8 @@ data {
 
   // Number of seeds in each tree each year
   array[N] int<lower=0> seed_counts;
+  
+  array[N] real<lower=0> prev_summer_temp;
 }
 
 transformed data {
@@ -40,27 +42,28 @@ transformed data {
 
 parameters {
   real<lower=0> lambda1; // Non-masting intensity for tree 1
+  // real<lower=0> psi1; // Non-masting intensity for tree 1
   real<lower=0, upper=1> theta1; // probability of drawing a zero
   
-  real<lower=0> delta_lambda;  // delta > 0
+  real<lower=lambda1> lambda2; // Masting intensity for tree 1
+  real beta; // Masting intensity for tree 1
+  real<lower=0> psi2;          // Masting dispersion for tree 1
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
   real<lower=0, upper=1> tau_m_nm; // Masting to no-masting probability
 }
 
-transformed parameters{
-  
-  real lambda2 = lambda1 + delta_lambda;
-  
-}
-
 model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, 10 / 2.57); 
-  delta_lambda ~ normal(100, 500 / 2.57); 
+  lambda1 ~ normal(0, 500 / 2.57); 
+  // psi1 ~ normal(0, 2 / 2.57); 
+  lambda2 ~ normal(50, 500 / 2.57); 
+  beta ~ normal(0, log(1.2) / 2.57); 
+  psi2 ~ normal(0, 5 / 2.57); 
+  // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm
 
   for (t in 1:N_trees) {
     real tree_size = sizes[t];
@@ -70,6 +73,7 @@ model {
     matrix[2, N_years[t]] log_omega;
     for (n in 1:N_years[t]) {
       int y = seed_counts[tree_start_idxs[t] + n - 1];
+      real prev_summer_temp_y = prev_summer_temp[tree_start_idxs[t] + n - 1];
       
       // Non-masting
       if (y == 0){
@@ -78,7 +82,8 @@ model {
         log_omega[1, n] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1);
       }
       
-      log_omega[2, n] = poisson_lpmf(y | l2);
+      real l2_exp = l2*exp(beta*prev_summer_temp_y);
+      log_omega[2, n] = neg_binomial_alt_lpmf(y | l2_exp, psi2); // Masting
       
     }
 
@@ -89,7 +94,7 @@ model {
 generated quantities {
   array[N] int<lower=1, upper=2> state_pred;
   array[N] int<lower=0> seed_count_pred;
-
+  //array[N_years] real<lower=0, upper=1> p_masting;
   array[N] real p_masting;
   {
     matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
@@ -104,18 +109,21 @@ generated quantities {
       real tree_size = sizes[t];
       real l1 = lambda1 * tree_size / base_size;
       real l2 = lambda2 * tree_size / base_size;
+      
 
       matrix[2, N_years[t]] log_omega;
       for (n in 1:N_years[t]) {
         int y = seed_counts[tree_start_idxs[t] + n - 1];
+        real prev_summer_temp_y = prev_summer_temp[tree_start_idxs[t] + n - 1];
         
         if (y == 0){
-          log_omega[1, n] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1));
+        log_omega[1, n] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1));
         }else{
           log_omega[1, n] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1);
         }
-      
-        log_omega[2, n] = poisson_lpmf(y | l2);
+        
+        real l2_exp = l2*exp(beta*prev_summer_temp_y);
+        log_omega[2, n] = neg_binomial_alt_lpmf(y | l2_exp, psi2); 
         
       }
 
@@ -133,7 +141,10 @@ generated quantities {
           }
           
         } else if(state_pred[idx] == 2) {
-          seed_count_pred[idx] = poisson_rng(l2);
+          
+          real prev_summer_temp_y = prev_summer_temp[idx];
+          real l2_exp = l2*exp(beta*prev_summer_temp_y);
+          seed_count_pred[idx] = neg_binomial_alt_rng(l2_exp, psi2);
         }
       }
     

@@ -10,6 +10,7 @@ functions {
     real c = exp(-psi);
     return neg_binomial_2_rng(mu,  1 / psi);
   }
+  
 }
 
 data {
@@ -76,8 +77,6 @@ model {
       }else{
         log_omega[1, n] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | l1);
       }
-      
-      
       
       log_omega[2, n] = neg_binomial_alt_lpmf(y | l2, psi2); // Masting
       
