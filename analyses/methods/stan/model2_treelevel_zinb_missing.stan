@@ -44,6 +44,7 @@ transformed data {
 
 parameters {
   real<lower=0> lambda1; // Non-masting intensity for tree 1
+  real<lower=0> psi1;          // Masting dispersion for tree 1
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
   real<lower=lambda1> lambda2; // Masting intensity for tree 1
@@ -58,7 +59,8 @@ model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, 500 / 2.57); 
+  lambda1 ~ normal(0, 20 / 2.57); 
+  psi1 ~ normal(0, 5 / 2.57); 
   lambda2 ~ normal(0, 500 / 2.57); 
   psi2 ~ normal(0, 5 / 2.57); 
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm, and theta1
@@ -74,9 +76,10 @@ model {
       
       // Non-masting
       if (y == 0){
-        log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | lambda1));
+        log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) 
+        + neg_binomial_alt_lpmf(y | lambda1, psi1));
       }else{
-        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | lambda1);
+        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
       }
       
       log_omega[2, i] = neg_binomial_alt_lpmf(y | lambda2, psi2); // Masting
@@ -110,9 +113,10 @@ generated quantities {
         int i = observed_years[tree_start_idxs[t] + n - 1];
 
         if (y == 0){
-        log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | lambda1));
+        log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1)
+        + neg_binomial_alt_lpmf(y | lambda1, psi1));
         }else{
-          log_omega[1, i] = bernoulli_lpmf(0 | theta1) + poisson_lpmf(y | lambda1);
+          log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
         }
 
         log_omega[2, i] = neg_binomial_alt_lpmf(y | lambda2, psi2);
@@ -136,7 +140,7 @@ generated quantities {
           if(bernoulli_rng(theta1)){
             seed_count_pred[idx] = 0;
           }else{
-            seed_count_pred[idx] = poisson_rng(lambda1);
+            seed_count_pred[idx] = neg_binomial_alt_rng(lambda1, psi1);
           }
 
         } else if(state_pred[idx] == 2) {

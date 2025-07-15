@@ -169,14 +169,17 @@ util$check_all_expectand_diagnostics(base_samples)
 # Retrodicive Check
 par(mfrow=c(1, 1), mar = c(4,4,2,2))
 
-util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 40, 1,
+util$plot_hist_quantiles(samples, 'seed_count_pred', 0, 325, 25,
                          baseline_values=data$seed_counts, 
                          xlab="Seed counts")
 
 par(mfrow=c(3, 3))
 
-for (t in 1:data$N_traps) {
+for (t in 1:data$N_trees) {
+  
   idxs <- tree_start_idxs[t]:tree_end_idxs[t]
+  
+  
   names <- sapply(idxs,
                   function(n) paste0('seed_count_pred[', n, ']'))
   util$plot_disc_pushforward_quantiles(samples, names, 
@@ -194,7 +197,7 @@ for (n in c(10, 20, 30, 40, 50, 60, 70, 80, 90)) {
   tid <- tail(which(data$tree_start_idxs <= n), 1)
   name <- paste0('seed_count_pred[', n, ']')
   util$plot_expectand_pushforward(samples[[name]],
-                                  50, flim=c(0, 300),
+                                  10, flim=c(0, 300),
                                   baseline=data$seed_count[n],
                                   display_name="Predicted Seed Counts",
                                   main=paste0("Tree ", uniq_tree_ids[tid],
@@ -218,6 +221,7 @@ lines(xs, ys, lwd=2, col=util$c_light)
 
 util$plot_expectand_pushforward(samples[['psi1']], 25,
                                 display_name="psi1")
+
 xs <- seq(0, 5, 0.1)
 ys <- dnorm(xs, 0, 2 / 2.57)
 lines(xs, ys, lwd=2, col=util$c_light)

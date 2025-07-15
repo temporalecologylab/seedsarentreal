@@ -32,7 +32,7 @@ trapstokeep <- obscount[obscount$Freq == 26, "Var1"]
 raw_data_filt <- raw_data_filt[raw_data_filt$uniqueID %in% trapstokeep,]
 
 s <- sample(unique(raw_data_filt$uniqueID), 1)
-ggplot(data = raw_data_filt[raw_data_filt$uniqueID == "TF_Upper24",]) + 
+ggplot(data = raw_data_filt) + 
   geom_line(aes(x = year, y = count, group = paste0(plot, trap)),
             linewidth = 0.1, alpha = 0.7) +
   theme_bw() +
@@ -96,13 +96,13 @@ trap_end_idxs <- as.array(trap_end_idxs)
 
 # Format data
 N <- length(years)
-data <- mget(c('N', 'N_traps', 'sizes',
+data <- mget(c('N', 'N_traps', 
                'seed_counts', 'years', 'N_years',
                'trap_start_idxs', 'trap_end_idxs'))
 
-fit <- stan(file= file.path(wd, "stan", "model2_alt.stan"),
+fit <- stan(file= file.path(wd, "stan", "hmm_wbrokentraps.stan"),
             data=data, seed=5838299,
-            warmup=1000, iter=4000, refresh=100)
+            warmup=1000, iter=2024, refresh=100, chains = 4)
 
 
 diagnostics <- util$extract_hmc_diagnostics(fit)
@@ -111,7 +111,6 @@ util$check_all_hmc_diagnostics(diagnostics)
 samples <- util$extract_expectand_vals(fit)
 base_samples <- util$filter_expectands(samples,
                                        c('lambda1', 'lambda2', 
-                                         'psi1', 'rho0',
                                          'tau_nm_m', 'tau_m_nm'))
 util$check_all_expectand_diagnostics(base_samples)
 
@@ -126,40 +125,10 @@ xs <- seq(0, 100, 0.01)
 ys <- dnorm(xs, 0, 1 / 2.57)
 lines(xs, ys, lwd=2, col=util$c_light)
 
-util$plot_expectand_pushforward(samples[['psi1']], 25,
-                                display_name="psi1")
-xs <- seq(0, 100, 0.1)
-ys <- dnorm(xs, 0, 5 / 2.57)
-lines(xs, ys, lwd=2, col=util$c_light)
-
 util$plot_expectand_pushforward(samples[['lambda2']], 25,
                                 display_name="lambda2")
 xs <- seq(0, 800, 0.5)
 ys <- dnorm(xs, 0, 500 / 2.57)
-lines(xs, ys, lwd=2, col=util$c_light)
-
-
-util$plot_expectand_pushforward(samples[['psi2']], 25,
-                                display_name="psi2")
-xs <- seq(0, 50, 0.5)
-ys <- dnorm(xs, 0, 5 / 2.57)
-lines(xs, ys, lwd=2, col=util$c_light)
-
-
-
-par(mfrow=c(1, 2))
-hist(MASS::rnegbin(10000, mean(samples$lambda1), 1/mean(samples$psi1)), 
-     main = "Non-masting", xlab = "Seed count", , breaks = 50)
- hist(rpois(10000, mean(samples$lambda2)), main = "Masting", xlab = "Seed count")
-hist(MASS::rnegbin(10000, mean(samples$lambda2), 1/mean(samples$psi2)), 
-     main = "Non-masting", xlab = "Seed count", breaks = 50)
-
-par(mfrow=c(1, 3))
-util$plot_expectand_pushforward(samples[['rho0']], 
-                                22, flim=c(0, 1.1),
-                                display_name="rho0",)
-xs <- seq(0, 1.1, 0.01)
-ys <- rep(1, length(xs))
 lines(xs, ys, lwd=2, col=util$c_light)
 
 util$plot_expectand_pushforward(samples[['tau_nm_m']], 
@@ -177,20 +146,19 @@ ys <- rep(1, length(xs))
 lines(xs, ys, lwd=2, col=util$c_light)
 
 par(mfrow=c(3, 3))
-for (n in seq(1,10,1)) {
-  tid <- tail(which(data$tree_start_idxs <= n), 1)
+for (n in 10*seq(1,9,1)) {
+  tid <- tail(which(data$trap_start_idxs <= n), 1)
   name <- paste0('seed_count_pred[', n, ']')
   util$plot_expectand_pushforward(samples[[name]],
                                   50, flim=c(0, 100),
                                   baseline=data$seed_count[n],
                                   display_name="Predicted Seed Counts",
-                                  main=paste0("Tree ", uniq_trap_ids[tid],
+                                  main=paste0("Trap ", uniq_trap_ids[tid],
                                               ", Year ", data$years[n]))
 }
 
 
-par(mfrow=c(1, 1))
-
+par(mfrow=c(2, 2))
 for (t in 1:data$N_traps) {
   idxs <- trap_start_idxs[t]:trap_end_idxs[t]
   names <- sapply(idxs,
@@ -200,10 +168,17 @@ for (t in 1:data$N_traps) {
                                        xlab="Year",
                                        xticklab=data$years[idxs],
                                        ylab="Seed Counts",
-                                       display_ylim=c(0, 20),
+                                       display_ylim=c(0, max(data$seed_counts[idxs])+5),
                                        main=paste("Tree", uniq_trap_ids[t]))
 }
 
+par(mfrow=c(1, 1))
+util$plot_hist_quantiles(samples, 'seed_count_pred', -0.5, 6.5, 1,
+                         baseline_values=data$seed_counts, xlab='Counts')
 
-
+par(mfrow=c(1, 1))
+names <- sapply(1:data$N, function(n) paste0('seed_count_pred[', n, ']'))
+util$plot_conditional_mean_quantiles(samples, names, data$years,
+                                     min(data$years) -0.5, max(data$years) + 0.5, 1, data$seed_counts,
+                                     xlab="Year")
 
