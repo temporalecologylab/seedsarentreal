@@ -142,17 +142,11 @@ generated quantities {
     matrix[2, N_max_years] omega = rep_matrix(1, 2, N_max_years);
     
     {
-    // Construct baseline transition matrix
-    // matrix[K, K] Gamma;
-    // for (k in 1:K) Gamma[k,] = gamma[k]';
-    
     // Construct transition matrix
     matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
     // Forward algorithm, jumping across any gaps of unobserved
-    // latent states with a heterogeneous transition matrix
-    // array[N_years_tree] vector[2] alpha;
     
     // Build omega with the observed latent states
     for(n in 1:N_years_tree){
@@ -201,9 +195,7 @@ generated quantities {
         seed_counts_pred[global_end_idx] = neg_binomial_alt_rng(lambda2, psi2);
     }
 
-    // Sample latent states while running the backward algorithm,
-    // once again jumping across any gaps of unobserved latent
-    // states with a heterogeneous transition matrix
+    // Sample latent states while running the backward algorithm
     vector[2] beta = ones_vector(2);
 
     for (rn in 2:N_max_years) {
