@@ -33,6 +33,7 @@ data {
   array[N] int<lower=0> seed_counts; // -99 is a missing observation
   
   // 
+  vector[N_trees * N_max_years] springtemp; 
   vector[N_trees * N_max_years] prevsummertemp; 
   
   // Index of observed years for each tree
@@ -42,7 +43,8 @@ data {
 transformed data {
   
   int<lower= N> N_pred = N_trees * N_max_years;
-  real temp0 = 15.0;
+  real springtemp0 = 5.0;
+  real summertemp0 = 15.0;
   
 }
 
@@ -52,6 +54,7 @@ parameters {
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
   real<lower=lambda1> lambda2; // Masting intensity for tree 1
+  real<lower=0> beta_spring; 
   real<lower=0> beta_prsumm; 
   real<lower=0> psi2;          // Masting dispersion for tree 1
 
@@ -64,10 +67,11 @@ model {
   matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                          [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, log(10) / 2.57); 
+  lambda1 ~ normal(0, log(20) / 2.57); 
   psi1 ~ normal(0, 5 / 2.57); 
   lambda2 ~ normal(0, log(500) / 2.57); 
   psi2 ~ normal(0, 1 / 2.57); 
+  beta_spring ~ normal(0, log(1.2) / 2.57); 
   beta_prsumm ~ normal(0, log(1.2) / 2.57); 
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm, and theta1
 
@@ -77,13 +81,15 @@ model {
     
     int start = 1+(t-1)*N_max_years;
     int end = t*N_max_years;
+    vector[N_max_years] springtemp_tree = springtemp[start:end];
     vector[N_max_years] prevsummertemp_tree = prevsummertemp[start:end];
     
     for (n in 1:N_years[t]) {
       
       int y = seed_counts[tree_start_idxs[t] + n - 1];
       int i = observed_years[tree_start_idxs[t] + n - 1];
-      real tempi = prevsummertemp_tree[i];
+      real springtempi = springtemp_tree[i];
+      real summertempi = prevsummertemp_tree[i];
       
       // Non-masting
       if (y == 0){
@@ -93,7 +99,7 @@ model {
         log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | exp(lambda1), psi1);
       }
       
-      real mu2 = exp(lambda2 + beta_prsumm * (tempi-temp0));
+      real mu2 = exp(lambda2 + beta_spring * (springtempi-springtemp0) + beta_prsumm * (summertempi-summertemp0));
       log_omega[2, i] = neg_binomial_alt_lpmf(y | mu2, psi2); // Masting
       
     }
@@ -113,18 +119,20 @@ generated quantities {
                            [tau_m_nm, 1 - tau_m_nm] ];
 
     for (t in 1:N_trees) {
-      
+
       matrix[2, N_max_years] log_omega = rep_matrix(0, 2, N_max_years);
     
       int start = 1+(t-1)*N_max_years;
       int end = t*N_max_years;
+      vector[N_max_years] springtemp_tree = springtemp[start:end];
       vector[N_max_years] prevsummertemp_tree = prevsummertemp[start:end];
-
-      for (n in 1:N_years[t]) {
       
+      for (n in 1:N_years[t]) {
+        
         int y = seed_counts[tree_start_idxs[t] + n - 1];
         int i = observed_years[tree_start_idxs[t] + n - 1];
-        real tempi = prevsummertemp_tree[i];
+        real springtempi = springtemp_tree[i];
+        real summertempi = prevsummertemp_tree[i];
         
         // Non-masting
         if (y == 0){
@@ -134,9 +142,9 @@ generated quantities {
           log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | exp(lambda1), psi1);
         }
         
-        real mu2 = exp(lambda2 + beta_prsumm * (tempi-temp0));
+        real mu2 = exp(lambda2 + beta_spring * (springtempi-springtemp0) + beta_prsumm * (summertempi-summertemp0));
         log_omega[2, i] = neg_binomial_alt_lpmf(y | mu2, psi2); // Masting
-      
+        
       }
 
       array[N_max_years] int tree_idxs_pred
@@ -160,7 +168,7 @@ generated quantities {
           }
 
         } else if(state_pred[idx] == 2) {
-            real mu2 = exp(lambda2 + beta_prsumm * (prevsummertemp_tree[n]-temp0));
+            real mu2 = exp(lambda2 + beta_spring * (prevsummertemp_tree[n]-springtemp0) + beta_prsumm * (prevsummertemp_tree[n]-summertemp0));
             seed_count_pred[idx] = neg_binomial_alt_rng(mu2, psi2);
         }
       }

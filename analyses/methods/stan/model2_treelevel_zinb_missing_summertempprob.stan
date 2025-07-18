@@ -48,25 +48,28 @@ transformed data {
 
 parameters {
   real<lower=0> lambda1; // Non-masting intensity for tree 1
+  real<lower=0> psi1;          // Masting dispersion for tree 1
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
   real<lower=lambda1> lambda2; // Masting intensity for tree 1
-  real beta_prsumm; 
   real<lower=0> psi2;          // Masting dispersion for tree 1
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
-  real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
-  real<lower=0, upper=1> tau_m_nm; // Masting to no-masting probability
+  real<lower=0, upper=1> tau_nm_m0; // No-masting to masting probability
+  real beta_mn_m;
+  real<lower=0, upper=1> tau_m_nm0; // Masting to no-masting probability
+  real beta_m_nm;
 }
 
-model {
-  matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                         [tau_m_nm, 1 - tau_m_nm] ];
 
-  lambda1 ~ normal(0, log(20) / 2.57); 
-  lambda2 ~ normal(0, log(500) / 2.57); 
+model {
+
+  lambda1 ~ normal(0, 20 / 2.57); 
+  psi1 ~ normal(0, 5 / 2.57); 
+  lambda2 ~ normal(0, 500 / 2.57); 
   psi2 ~ normal(0, 5 / 2.57); 
-  beta_prsumm ~ normal(0, log(1.2) / 2.57); 
+  beta_mn_m ~ normal(0, log(1.2) / 2.57); 
+  beta_m_nm ~ normal(0, log(1.2) / 2.57); 
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm, and theta1
 
   for (t in 1:N_trees) {
@@ -81,22 +84,32 @@ model {
       
       int y = seed_counts[tree_start_idxs[t] + n - 1];
       int i = observed_years[tree_start_idxs[t] + n - 1];
-      real tempi = prevsummertemp_tree[i];
       
       // Non-masting
       if (y == 0){
         log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) 
-        + poisson_log_lpmf(y | lambda1));
+        + neg_binomial_alt_lpmf(y | lambda1, psi1));
       }else{
-        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + poisson_log_lpmf(y | lambda1);
+        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
       }
       
-      real mu2 = exp(lambda2 + beta_prsumm * (tempi-temp0));
-      log_omega[2, i] = neg_binomial_alt_lpmf(y | mu2, psi2); // Masting
+      log_omega[2, i] = neg_binomial_alt_lpmf(y | lambda2, psi2); // Masting
       
     }
-
-    target += hmm_marginal(log_omega, Gamma, [1 - rho0, rho0]');
+    
+    for (n in 1:N_max_years) {
+      
+      
+      real tau_nm_m = inv_logit(tau_nm_m0 + beta_mn_m * (prevsummertemp_tree[n]-temp0));
+      real tau_m_nm = inv_logit(tau_m_nm0 + beta_m_nm * (prevsummertemp_tree[n]-temp0));
+      
+      matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
+                         [tau_m_nm, 1 - tau_m_nm] ];
+      
+      matrix[2, 1] log_omega_n = to_matrix(log_omega[,n]);
+      target += hmm_marginal(log_omega_n, Gamma, [1 - rho0, rho0]');
+      
+    }
   }
 }
 

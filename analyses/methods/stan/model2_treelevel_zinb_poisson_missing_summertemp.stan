@@ -48,11 +48,11 @@ transformed data {
 
 parameters {
   real<lower=0> lambda1; // Non-masting intensity for tree 1
+  real<lower=0> psi1;          // Masting dispersion for tree 1
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
   real<lower=lambda1> lambda2; // Masting intensity for tree 1
-  real beta_prsumm; 
-  real<lower=0> psi2;          // Masting dispersion for tree 1
+  real<lower=0> beta_prsumm; 
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m; // No-masting to masting probability
@@ -64,8 +64,8 @@ model {
                          [tau_m_nm, 1 - tau_m_nm] ];
 
   lambda1 ~ normal(0, log(20) / 2.57); 
+  psi1 ~ normal(0, 5 / 2.57); 
   lambda2 ~ normal(0, log(500) / 2.57); 
-  psi2 ~ normal(0, 5 / 2.57); 
   beta_prsumm ~ normal(0, log(1.2) / 2.57); 
   // Implicit uniform prior model over rho, tau_nm_m, tau_m_nm, and theta1
 
@@ -86,13 +86,13 @@ model {
       // Non-masting
       if (y == 0){
         log_omega[1, i] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) 
-        + poisson_log_lpmf(y | lambda1));
+        + neg_binomial_alt_lpmf(y | exp(lambda1), psi1));
       }else{
-        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + poisson_log_lpmf(y | lambda1);
+        log_omega[1, i] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | exp(lambda1), psi1);
       }
       
-      real mu2 = exp(lambda2 + beta_prsumm * (tempi-temp0));
-      log_omega[2, i] = neg_binomial_alt_lpmf(y | mu2, psi2); // Masting
+      real mu2 = lambda2 + beta_prsumm * (tempi-temp0);
+      log_omega[2, i] = poisson_log_lpmf(y | mu2); // Masting
       
     }
 
