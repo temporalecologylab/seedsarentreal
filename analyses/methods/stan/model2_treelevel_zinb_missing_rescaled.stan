@@ -102,18 +102,20 @@ model {
         omega[1] = exp(log_omega[1]);
         omega[2] = exp(log_omega[2]);
         
-        if (n > 1) {
+        
+        if(n == 1){
+          if(years_tree[n] > 1){
+            for(i in 1:years_tree[n]-1)
+              alpha = Gamma' * alpha;
+          }
+          alpha = omega .* alpha;
+        }else{
           int delta = years_tree[n] - years_tree[n - 1];
           for (d in 1:delta)
             alpha = Gamma' * alpha;
           alpha = omega .* alpha;
         }
-        else {
-          for(i in 1:years_tree[1])
-            alpha = Gamma' * alpha;
-          alpha = omega .* alpha;
-        }
-
+        
         norm = max(alpha);
         log_norm += log(norm);
         alpha /= norm;
@@ -130,6 +132,8 @@ model {
 generated quantities {
   array[N_max_years*N_trees] int states_pred;       // Posterior latent states
   array[N_max_years*N_trees] real seed_counts_pred; // Posterior predictive observations
+  
+  matrix[2, N_max_years] log_omega_example = rep_matrix(0, 2, N_max_years);
   
   for (t in 1:N_trees) {
     
@@ -234,6 +238,11 @@ generated quantities {
       
     }
     }
+    
+    if(t==10){
+      log_omega_example = log(omega);
+    }
+    
   }
  
 }

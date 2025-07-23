@@ -95,6 +95,8 @@ generated quantities {
   array[N_pred] int<lower=1, upper=2> state_pred;
   array[N_pred] int<lower=0> seed_count_pred;
   array[N_pred] real p_masting;
+  
+  matrix[2, N_max_years] log_omega_example = rep_matrix(0, 2, N_max_years);
 
   {
     matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
@@ -136,13 +138,11 @@ generated quantities {
         int idx = 1+(t-1)*N_max_years + n - 1;
 
         if(state_pred[idx] == 1) {
-
           if(bernoulli_rng(theta1)){
             seed_count_pred[idx] = 0;
           }else{
             seed_count_pred[idx] = neg_binomial_alt_rng(lambda1, psi1);
           }
-
         } else if(state_pred[idx] == 2) {
           seed_count_pred[idx] = neg_binomial_alt_rng(lambda2, psi2);
         }
@@ -152,6 +152,12 @@ generated quantities {
         = to_array_1d(hmm_hidden_state_prob(log_omega,
                                             Gamma,
                                             [1 - rho0, rho0]')[2,]);
+                                            
+      if(t==10){
+        log_omega_example = log_omega;
+      }                                      
+                                            
+      
     }
   }
 }
