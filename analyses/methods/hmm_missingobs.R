@@ -226,7 +226,7 @@ util$plot_expectand_pushforward(samples[['psi2']], 25,
 
 util$plot_expectand_pushforward(samples[['rho0']], 
                                 22, flim=c(0, 1.1),
-                                display_name="rho0",)
+                                display_name="rho0")
 
 
 util$plot_expectand_pushforward(samples[['tau_nm_m']], 

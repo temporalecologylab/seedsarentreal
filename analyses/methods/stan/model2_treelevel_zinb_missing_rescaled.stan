@@ -105,7 +105,7 @@ model {
         
         if(n == 1){
           if(years_tree[n] > 1){
-            for(i in 1:years_tree[n]-1)
+            for(i in 2:years_tree[n])
               alpha = Gamma' * alpha;
           }
           alpha = omega .* alpha;
@@ -175,7 +175,8 @@ generated quantities {
     array[N_max_years] vector[2] alpha;
     for (n in 1:N_max_years) {
       if(n == 1){
-        alpha[n] = omega[,n] .* (Gamma' * rho);
+        // alpha[n] = omega[,n] .* (Gamma' * rho);
+        alpha[n] = omega[,n] .* rho;
       }
       else{
         alpha[n] = omega[,n] .* (Gamma' * alpha[n - 1]);

@@ -29,6 +29,7 @@ raw_data <- na.omit(raw_data[,c('uniqueID', 'year', 'seeds')])
 uniq_tree_ids <- unique(raw_data$uniqueID)
 N_trees <- length(uniq_tree_ids)
 first_year <- min(raw_data$year)
+last_year <- max(raw_data$year)
 max_years <- first_year:max(raw_data$year)
 N_max_years <- length(max_years)
 
@@ -50,7 +51,6 @@ for (tid in uniq_tree_ids) {
   
   N_years_tree <- length(years_tree)
   N_years <- c(N_years, N_years_tree)
-  
   
   seed_count_tree <- raw_data_tree$seeds
   seed_counts <- c(seed_counts, seed_count_tree)
@@ -83,34 +83,33 @@ base_samples <- util$filter_expectands(samples,
                                          'tau_nm_m', 'tau_m_nm'))
 util$check_all_expectand_diagnostics(base_samples)
 
-# Retrodicive check
+# Retrodictive check
 observed_idxs <- c()
 for (t in 1:data$N_trees){
   idxs <- tree_start_idxs[t]:tree_end_idxs[t]
-  observed_idxs_tree <- N_max_years*(t-1)+observed_years[idxs]
+  observed_idxs_tree <- N_max_years*(t-1)+years[idxs]
   observed_idxs <- c(observed_idxs, observed_idxs_tree)
 }
 
 
 par(mfrow=c(1, 1), mar = c(4,4,2,2))
-names <- sapply(observed_idxs, function(n) paste0('seed_count_pred[',n,']'))
-util$plot_hist_quantiles(samples[names], 'seed_count_pred', 0, 340, 20,
+names <- sapply(observed_idxs, function(n) paste0('seed_counts_pred[',n,']'))
+util$plot_hist_quantiles(samples[names], 'seed_counts_pred', 0, 340, 20,
                          baseline_values=data$seed_counts, 
                          xlab="Seed counts")
 
 par(mfrow=c(1, 1), mar = c(4,4,2,2))
 for (t in 1:data$N_trees) {
   
-  observed_idxs <- tree_start_idxs[t]:tree_end_idxs[t]
+  idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
+  observed_idxs_tree <- observed_idxs[tree_start_idxs[t]:tree_end_idxs[t]]
   
-  idxs <- (1+N_max_years*(t-1)):(N_max_years*(t))
-  
-  names <- sapply(idxs,
-                  function(n) paste0('seed_count_pred[', n, ']'))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('seed_counts_pred[', n, ']'))
   util$plot_disc_pushforward_quantiles(samples, names, 
                                        baseline_values=NULL,
                                        xlab="Year",
-                                       xticklab=max_years,
+                                       xticklab=first_year+idxs_tree-1,
                                        ylab="Seed Counts",
                                        display_ylim=c(0, 400),
                                        main=paste("Tree", uniq_tree_ids[t]))
@@ -126,14 +125,14 @@ for (t in 1:data$N_trees) {
 par(mfrow=c(3, 5), mar = c(4,4,2,2))
 for (t in 1:data$N_trees) {
   
-  observed_idxs <- tree_start_idxs[t]:tree_end_idxs[t]
-  obsflag <- observed_years[observed_idxs]
-  idxs <- (1+N_max_years*(t-1)):(N_max_years*(t))
+  idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
+  observed_idxs_tree <- tree_start_idxs[t]:tree_end_idxs[t]
+  observed_flags <- years[tree_start_idxs[t]:tree_end_idxs[t]]
   
-  names <- sapply(idxs,
-                  function(n) paste0('seed_count_pred[', n, ']'))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('seed_counts_pred[', n, ']'))
   xlab="Year"
-  xticklabs=max_years
+  xticklabs=first_year:last_year
   ylab="Seed Counts"
   display_ylim=c(0, 400)
   main=paste("Tree", uniq_tree_ids[t])
@@ -172,26 +171,26 @@ for (t in 1:data$N_trees) {
     idplot <- c(n*2-1, n*2)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
-            col = ifelse(n%in%obsflag, util$c_light, '#b9d9b9'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_light, '#b9d9b9'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
-            col = ifelse(n%in%obsflag, util$c_light_highlight, '#96c796'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_light_highlight, '#96c796'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
-            col = ifelse(n%in%obsflag, util$c_mid, '#72b472'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_mid, '#72b472'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
-            col = ifelse(n%in%obsflag, util$c_mid_highlight, '#50a250'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_mid_highlight, '#50a250'), border = NA)
     
     lines(plot_xs[idplot], plot_quantiles[5, idplot],
-          col= ifelse(n%in%obsflag,util$c_dark, '#278f27'), lwd=2)
+          col= ifelse(n%in%observed_flags,util$c_dark, '#278f27'), lwd=2)
   }
   
-  for(i in observed_idxs) {
-    lines(c(data$years[i] - 0.5 - min(max_years) +1, data$years[i] + 0.5- min(max_years)+1),
-          rep(data$seed_counts[i], 2),
+  for(i in observed_idxs_tree) {
+    lines(c(years[i] - 0.5, years[i] + 0.5),
+          rep(seed_counts[i], 2),
           col="white", lwd=4)
-    lines(c(data$years[i] - 0.5 - min(max_years) +1, data$years[i] + 0.5- min(max_years)+1),
+    lines(c(years[i] - 0.5, years[i] + 0.5),
           rep(data$seed_counts[i], 2),
           col="black", lwd=2)
   }
@@ -223,7 +222,7 @@ util$plot_expectand_pushforward(samples[['psi2']], 25,
 
 util$plot_expectand_pushforward(samples[['rho0']], 
                                 22, flim=c(0, 1.1),
-                                display_name="rho0",)
+                                display_name="rho0")
 
 
 util$plot_expectand_pushforward(samples[['tau_nm_m']], 

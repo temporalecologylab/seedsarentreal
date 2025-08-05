@@ -105,23 +105,24 @@ model {
         omega[1] = exp(log_omega[1]);
         omega[2] = exp(log_omega[2]);
         
-        if (n > 1) {
+        if(n == 1){
+          if(years_tree[n] > 1){
+            for(i in 2:years_tree[n]){
+              // Construct transition matrix
+              real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[i]-temp0));
+              matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
+                                   [tau_m_nm0, 1 - tau_m_nm0] ];
+              alpha = Gamma' * alpha;
+            }
+          }
+          alpha = omega .* alpha;
+        }else{
           int delta = years_tree[n] - years_tree[n - 1];
           for (d in 1:delta){
             // Construct transition matrix
             real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[years_tree[n-1]+d]-temp0));
             matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                               [tau_m_nm0, 1 - tau_m_nm0] ];
-            alpha = Gamma' * alpha;
-          }
-          alpha = omega .* alpha;
-        }
-        else {
-          for(i in 1:years_tree[1]){
-            // Construct transition matrix
-            real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[i]-temp0));
-            matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                               [tau_m_nm0, 1 - tau_m_nm0] ];
+                                 [tau_m_nm0, 1 - tau_m_nm0] ];
             alpha = Gamma' * alpha;
           }
           alpha = omega .* alpha;
@@ -193,7 +194,7 @@ generated quantities {
       tau_nm_m_pred[global_n] = tau_nm_m;
       
       if(n == 1){
-        alpha[n] = omega[,n] .* (Gamma' * rho);
+        alpha[n] = omega[,n] .* rho;
       }
       else{
         alpha[n] = omega[,n] .* (Gamma' * alpha[n - 1]);
@@ -201,7 +202,7 @@ generated quantities {
       alpha[n] /= max(alpha[n]);
     }
 
-    // Sample final latent state
+    // Sample final latent state (p. 18 in Mike's HMM chapter)
     vector[2] r = alpha[N_max_years];
     vector[2] lambda = r / sum(r);
 
@@ -227,7 +228,7 @@ generated quantities {
 
       vector[2] omega_prev = omega[, n + 1];
       
-      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n]-temp0));
+      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-temp0)); // was prevsummer_temps_tree[n] before
       matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
                            [tau_m_nm0, 1 - tau_m_nm0] ];
 
@@ -251,7 +252,7 @@ generated quantities {
       tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-temp0));
       Gamma = [ [1 - tau_nm_m, tau_nm_m],
               [tau_m_nm0, 1 - tau_m_nm0] ];
-      beta = Gamma * (omega_prev .* beta);
+      beta = Gamma * (omega_prev .* beta); // p. 16 in Mike's HMM chapter
       beta /= max(beta);
       
     }
