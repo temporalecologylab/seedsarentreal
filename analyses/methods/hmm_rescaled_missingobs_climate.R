@@ -82,7 +82,7 @@ data <- mget(c('N', 'N_trees', 'N_max_years',
                'prevsummer_temps', 'spring_temps', 'gdd_lastfrost'))
 
 # Posterior quantification
-fit <- stan(file= file.path(wd, "stan", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp.stan"),
+fit <- stan(file= file.path(wd, "stan", "model2_treelevel_zinb_missing_rescaled_summertempfull_springfrost_springtemp.stan"),
             data=data, seed=5838299, chain = 4, cores = 4,
             warmup=1000, iter=2024, refresh=100)
 
@@ -289,3 +289,26 @@ ggplot() +
   geom_boxplot(aes(x = data$gdd_lastfrost, y = 120), inherit.aes = FALSE, width = 5) +
   theme_classic() +
   labs(y = 'Masting intensity', x = 'GDD until the last frost day (x10degC)')
+
+
+
+
+gdd0 <- 15
+lambda2_df <- data.frame()
+for(gdd_lastfrost in seq(0,35,0.1)){
+  lambda2 <- matrix(nrow = nrow(samples[['lambda20']]), ncol = ncol(samples[['lambda20']]))
+  for(c in 1:nrow(lambda2)){
+    lambda2[c,] <- sapply(1:ncol(lambda2), function(i) exp(log(samples[['lambda20']][c,i]) + (-0.005) *(gdd_lastfrost-gdd0)))
+  }
+  lambda2_df <- rbind(lambda2_df,
+                      data.frame(gdd_lastfrost, t(util$ensemble_mcmc_quantile_est(lambda2, probs = c(0.1,0.5,0.9)))))
+}
+ggplot() +
+  geom_line(data = lambda2_df, aes(x = gdd_lastfrost, y = X10.), color = 'black', linetype = 'dashed') +
+  geom_line(data = lambda2_df,aes(x = gdd_lastfrost, y = X90.), color = 'black', linetype = 'dashed') +
+  geom_line(data = lambda2_df,aes(x = gdd_lastfrost, y = X50.), color = 'black', linewidth = 1.5) +
+  geom_line(data = lambda2_df,aes(x = gdd_lastfrost, y = X50.), color = 'white', linewidth = 0.6) +
+  geom_boxplot(aes(x = data$gdd_lastfrost, y = 120), inherit.aes = FALSE, width = 5) +
+  theme_classic() +
+  labs(y = 'Masting intensity', x = 'GDD until the last frost day (x10degC)')
+

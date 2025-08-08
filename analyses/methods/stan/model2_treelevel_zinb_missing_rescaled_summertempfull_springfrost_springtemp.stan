@@ -55,7 +55,9 @@ parameters {
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m0; // No-masting to masting probability
   real beta_nm_m; // effect of previous summer temp. on transition prob. to masting 
-  real<lower=0, upper=1> tau_m_nm0; // Masting to no-masting probability
+  real<lower=0, upper=1> tau_m_m0; // Masting to masting probability
+  real beta_m_m; // effect of previous summer temp. on prob. staying in masting
+  
 }
 
 transformed parameters {
@@ -75,6 +77,11 @@ model {
   beta_lambda2_spring ~ normal(0, log(1.2) / 2.57); # 20% relative change
   psi2 ~ normal(0, 5 / 2.57); 
   beta_nm_m ~ normal(0, 1 / 2.57); 
+  beta_m_m ~ normal(0, 1 / 2.57); 
+  
+  //theta1 ~ beta(3, 3); 
+  // tau_nm_m0 ~ beta(1, 3); 
+  // tau_m_m0 ~ beta(1, 3); 
   // Implicit uniform prior model over rho0 and theta1
 
   for (t in 1:N_trees) {
@@ -125,8 +132,9 @@ model {
             for(i in 2:years_tree[n]){
               // Construct transition matrix
               real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[i]-summertemp0));
+              real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[i]-summertemp0));
               matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                                   [tau_m_nm0, 1 - tau_m_nm0] ];
+                                   [1 - tau_m_m, tau_m_m] ];
               alpha = Gamma' * alpha;
             }
           }
@@ -136,8 +144,9 @@ model {
           for (d in 1:delta){
             // Construct transition matrix
             real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[years_tree[n-1]+d]-summertemp0));
+            real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[years_tree[n-1]+d]-summertemp0));
             matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                                 [tau_m_nm0, 1 - tau_m_nm0] ];
+                                 [1 - tau_m_m, tau_m_m] ];
             alpha = Gamma' * alpha;
           }
           alpha = omega .* alpha;
