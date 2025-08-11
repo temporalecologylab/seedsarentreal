@@ -6,9 +6,13 @@ functions {
     return neg_binomial_2_lpmf(n | mu, 1 / psi);
   }
 
-  int neg_binomial_2_alt_log_safe_rng(real mu, real psi) {
-    real psihere = 1/psi;
-    real gamma_rate = gamma_rng(psihere, psihere / exp(mu));
+  int neg_binomial_alt_rng(real mu, real psi) {
+    real c = exp(-psi);
+    return neg_binomial_2_rng(mu,  1 / psi);
+  }
+  
+  int neg_binomial_2_log_safe_rng(real mu, real psi) {
+    real gamma_rate = gamma_rng(psi, psi / exp(mu));
     if (gamma_rate > exp(20.7)) gamma_rate = exp(20.7); // max value before overflow
     return poisson_rng(gamma_rate);
   }
@@ -38,36 +42,30 @@ data {
   
   // GDD to last spring frost (in x10 degC)
   array[N_max_years*N_trees] real gdd_lastfrost;
-  
-  // Spring temperature (in degC)
-  array[N_max_years*N_trees] real spring_temps;
+
   
 }
 
 parameters {
-  real<lower=0> lambda1; // Non-masting intensity
-  real<lower=0> psi1; // Non-masting dispersion
+  real<lower=0> lambda1; // Non-masting intensity for tree 1
+  real<lower=0> psi1;          // Masting dispersion for tree 1
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
-  real<lower=lambda1> lambda20; // Masting intensity
-  real<upper=0> beta_lambda2_frost; // Effect of frost risk on masting intensity
-  real<lower=0> beta_lambda2_spring; // Effect of spring temp. on masting intensity
-  real<lower=0> psi2; // Masting dispersion
+  real<lower=lambda1> lambda20; // Masting intensity for tree 1
+  real beta_lambda2_frost; // effect of frost risk on masting intensity
+  real<lower=0> psi2;          // Masting dispersion for tree 1
 
-  real<lower=0, upper=1> rho0; // Initial masting probability
-  real<lower=0, upper=1> tau_nm_m0; // Non-masting to masting probability
-  real<lower=0> beta_nm_m; // Effect of previous summer temp. on transition prob. to masting 
-  real<lower=0, upper=1> tau_m_m0; // Masting to masting probability
-  real<lower=0> beta_m_m; // Effect of previous summer temp. on prob. of staying in masting
-  
+  real<lower=0, upper=1> rho0;  // Initial masting probability
+  real<lower=0, upper=1> tau_nm_m0; // No-masting to masting probability
+  real beta_nm_m; // effect of previous summer temp. on transition prob. to masting 
+  real<lower=0, upper=1> tau_m_nm0; // Masting to no-masting probability
 }
 
 transformed parameters {
   
   simplex[2] rho = [1 - rho0, rho0]';
-  real summertemp0 = 15;
-  real frostgdd0 = 15;
-  real springtemp0 = 7;
+  real temp0 = 15;
+  real gdd0 = 15;
   real nugget = 1e-20;
   
 }
@@ -77,16 +75,10 @@ model {
   lambda1 ~ normal(0, 20 / 2.57); 
   psi1 ~ normal(0, 5 / 2.57); 
   lambda20 ~ normal(0, 500 / 2.57); 
-  beta_lambda2_frost ~ normal(0, log(1.3) / 2.57); # 20% relative change
-  beta_lambda2_spring ~ normal(0, log(1.3) / 2.57); # 20% relative change
+  beta_lambda2_frost ~ normal(0, log(1.2) / 2.57); # 20% relative change, max.
   psi2 ~ normal(0, 5 / 2.57); 
-  beta_nm_m ~ normal(0, 0.6 / 2.57); # ~20% relative change at tau0 = 0.5
-  beta_m_m ~ normal(0, 0.6 / 2.57); # ~20% relative change at tau0 = 0.5
-  
-  theta1 ~ beta(2, 2); 
-  tau_nm_m0 ~ beta(1, 1.5); 
-  tau_m_m0 ~ beta(1, 1.5); 
-  // Implicit uniform prior model over rho0
+  beta_nm_m ~ normal(0, 1 / 2.57); 
+  // Implicit uniform prior model over rho0 and theta1
 
   for (t in 1:N_trees) {
     
@@ -95,7 +87,6 @@ model {
     array[N_years_tree] int years_tree = years[tree_start_idxs[t]:tree_end_idxs[t]];
     array[N_max_years] real prevsummer_temps_tree = prevsummer_temps[(1+N_max_years*(t-1)):(N_max_years*t)];
     array[N_max_years] real gdd_lastfrost_tree = gdd_lastfrost[(1+N_max_years*(t-1)):(N_max_years*t)];
-    array[N_max_years] real spring_temps_tree = spring_temps[(1+N_max_years*(t-1)):(N_max_years*t)];
     
     // Observational model
     {
@@ -117,15 +108,13 @@ model {
         // Non-masting
         if (y == 0){
           log_omega[1] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) 
-          + neg_binomial_alt_lpmf(y | lambda1, psi1));
+          + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1));
         }else{
-          log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
+          log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1);
         }
         // Masting
-        real lambda2 = exp(log(lambda20) 
-        + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-frostgdd0) 
-        + beta_lambda2_spring * (spring_temps_tree[years_tree[n]]-springtemp0));
-        log_omega[2] = neg_binomial_alt_lpmf(y | lambda2, psi2); 
+        real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-gdd0);
+        log_omega[2] = neg_binomial_2_log_lpmf(y | loglambda2, 1/psi2); // neg_binomial_alt_lpmf(y | lambda2, psi2)
         
         vector[2] omega;
         omega[1] = exp(log_omega[1]);
@@ -135,10 +124,9 @@ model {
           if(years_tree[n] > 1){
             for(i in 2:years_tree[n]){
               // Construct transition matrix
-              real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[i]-summertemp0));
-              real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[i]-summertemp0));
+              real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[i]-temp0));
               matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                                   [1 - tau_m_m, tau_m_m] ];
+                                   [tau_m_nm0, 1 - tau_m_nm0] ];
               alpha = Gamma' * alpha;
             }
           }
@@ -147,10 +135,9 @@ model {
           int delta = years_tree[n] - years_tree[n - 1];
           for (d in 1:delta){
             // Construct transition matrix
-            real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[years_tree[n-1]+d]-summertemp0));
-            real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[years_tree[n-1]+d]-summertemp0));
+            real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[years_tree[n-1]+d]-temp0));
             matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                                 [1 - tau_m_m, tau_m_m] ];
+                                 [tau_m_nm0, 1 - tau_m_nm0] ];
             alpha = Gamma' * alpha;
           }
           alpha = omega .* alpha;
@@ -183,11 +170,10 @@ generated quantities {
     int global_end_idx = (N_max_years*t);
     array[N_max_years] real prevsummer_temps_tree = prevsummer_temps[global_start_idx:global_end_idx];
     array[N_max_years] real gdd_lastfrost_tree = gdd_lastfrost[global_start_idx:global_end_idx];
-    array[N_max_years] real spring_temps_tree = spring_temps[global_start_idx:global_end_idx];
 
     matrix[2, N_max_years] omega = rep_matrix(1, 2, N_max_years);
 
-    
+    {
     // Construct transition matrix
     // matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
     //                      [tau_m_nm, 1 - tau_m_nm] ];
@@ -208,10 +194,7 @@ generated quantities {
         log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1);  // neg_binomial_alt_lpmf(y | lambda1, psi1)
       }
       // Masting
-      real loglambda2 = log(lambda20) 
-      + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-frostgdd0) 
-      + beta_lambda2_spring * (spring_temps_tree[years_tree[n]]-springtemp0);
-      
+      real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-gdd0);
       log_omega[2] = neg_binomial_2_log_lpmf(y | loglambda2, 1/psi2); // neg_binomial_alt_lpmf(y | lambda2, psi2)
 
       omega[1,idx] = exp(log_omega[1])+nugget; // modify this, adding a small nugget
@@ -223,10 +206,9 @@ generated quantities {
     for (n in 1:N_max_years) {
       int global_n = global_start_idx + n - 1;
 
-      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n]-summertemp0));
-      real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[n]-summertemp0));
+      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n]-temp0));
       matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                           [1 - tau_m_m, tau_m_m] ];
+                           [tau_m_nm0, 1 - tau_m_nm0] ];
       tau_nm_m_pred[global_n] = tau_nm_m;
 
       if(n == 1){
@@ -251,15 +233,12 @@ generated quantities {
       if(bernoulli_rng(theta1)){
         seed_counts_pred[global_end_idx] = 0;
       }else{
-        seed_counts_pred[global_end_idx] = neg_binomial_2_alt_log_safe_rng(log(lambda1), psi1);  //neg_binomial_alt_rng(lambda1, psi1)
+        seed_counts_pred[global_end_idx] = neg_binomial_2_log_safe_rng(log(lambda1), 1/psi1);  //neg_binomial_alt_rng(lambda1, psi1)
       }
     }
     else if(states_pred[global_end_idx] == 2) {
-      real loglambda2 = log(lambda20) 
-      + beta_lambda2_frost * (gdd_lastfrost_tree[N_max_years]-frostgdd0) 
-      + beta_lambda2_spring * (spring_temps_tree[N_max_years]-springtemp0);
-      
-      seed_counts_pred[global_end_idx] = neg_binomial_2_alt_log_safe_rng(loglambda2, psi2); // neg_binomial_alt_rng(lambda2, psi2) 
+      real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[N_max_years]-gdd0);
+      seed_counts_pred[global_end_idx] = neg_binomial_2_log_safe_rng(loglambda2, 1/psi2); // neg_binomial_alt_rng(lambda2, psi2) 
     }
 
     // Sample latent states while running the backward algorithm
@@ -272,10 +251,9 @@ generated quantities {
 
       vector[2] omega_prev = omega[, n + 1];
 
-      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-summertemp0)); // was prevsummer_temps_tree[n] before
-      real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[n+1]-summertemp0));
+      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-temp0)); // was prevsummer_temps_tree[n] before
       matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
-                           [1 - tau_m_m, tau_m_m] ];
+                           [tau_m_nm0, 1 - tau_m_nm0] ];
 
       r =   beta[states_pred_prev] * omega_prev[states_pred_prev]
           * ( alpha[n] .* Gamma[,states_pred_prev] );
@@ -298,25 +276,22 @@ generated quantities {
         if(bernoulli_rng(theta1)){
           seed_counts_pred[global_n] = 0;
         }else{
-          seed_counts_pred[global_n] = neg_binomial_2_alt_log_safe_rng(log(lambda1), psi1);  //neg_binomial_alt_rng(lambda1, psi1)
+          seed_counts_pred[global_n] = neg_binomial_2_log_safe_rng(log(lambda1), 1/psi1);  //neg_binomial_alt_rng(lambda1, psi1)
         }
       }
       else if(states_pred[global_n] == 2) {
-        real loglambda2 = log(lambda20) 
-        + beta_lambda2_frost * (gdd_lastfrost_tree[n]-frostgdd0) 
-        + beta_lambda2_spring * (spring_temps_tree[n]-springtemp0);
-        
-        seed_counts_pred[global_n] = neg_binomial_2_alt_log_safe_rng(loglambda2, psi2); // neg_binomial_alt_rng(lambda2, psi2)
+        real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[n]-gdd0);
+        seed_counts_pred[global_n] = neg_binomial_2_log_safe_rng(loglambda2, 1/psi2); // neg_binomial_alt_rng(lambda2, psi2)
       }
 
-      tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-summertemp0));
-      tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[n+1]-summertemp0));
+      tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-temp0));
       Gamma = [ [1 - tau_nm_m, tau_nm_m],
-              [1 - tau_m_m, tau_m_m] ];
+              [tau_m_nm0, 1 - tau_m_nm0] ];
       beta = Gamma * (omega_prev .* beta); // p. 16 in Mike's HMM chapter
       beta /= max(beta);
 
-      
+    }
     }
   }
+
 }

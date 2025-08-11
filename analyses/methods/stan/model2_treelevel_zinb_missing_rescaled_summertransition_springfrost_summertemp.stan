@@ -11,6 +11,12 @@ functions {
     return neg_binomial_2_rng(mu,  1 / psi);
   }
   
+  int neg_binomial_2_log_safe_rng(real mu, real psi) {
+    real gamma_rate = gamma_rng(psi, psi / exp(mu));
+    if (gamma_rate > exp(20.7)) gamma_rate = exp(20.7); // max value before overflow
+    return poisson_rng(gamma_rate);
+  }
+  
 }
 
 data {
@@ -46,12 +52,13 @@ parameters {
   real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
   
   real<lower=lambda1> lambda20; // Masting intensity for tree 1
+  real beta_lambda2_summer; // effect of previous summer on masting intensity
   real beta_lambda2_frost; // effect of frost risk on masting intensity
   real<lower=0> psi2;          // Masting dispersion for tree 1
 
   real<lower=0, upper=1> rho0;  // Initial masting probability
   real<lower=0, upper=1> tau_nm_m0; // No-masting to masting probability
-  real beta_nm_m; // effect of previous summer temp. on transition prob. to masting 
+  real<lower=0> beta_nm_m; // effect of previous summer temp. on transition prob. to masting 
   real<lower=0, upper=1> tau_m_nm0; // Masting to no-masting probability
 }
 
@@ -60,6 +67,8 @@ transformed parameters {
   simplex[2] rho = [1 - rho0, rho0]';
   real temp0 = 15;
   real gdd0 = 15;
+  real nugget = 1e-20;
+  
 }
 
 model {
@@ -67,7 +76,8 @@ model {
   lambda1 ~ normal(0, 20 / 2.57); 
   psi1 ~ normal(0, 5 / 2.57); 
   lambda20 ~ normal(0, 500 / 2.57); 
-  beta_lambda2_frost ~ normal(0, 1 / 2.57); 
+  beta_lambda2_frost ~ normal(0, log(1.2) / 2.57); # 20% relative change, max.
+  beta_lambda2_summer ~ normal(0, log(1.2) / 2.57); # 20% relative change, max.
   psi2 ~ normal(0, 5 / 2.57); 
   beta_nm_m ~ normal(0, 1 / 2.57); 
   // Implicit uniform prior model over rho0 and theta1
@@ -100,13 +110,13 @@ model {
         // Non-masting
         if (y == 0){
           log_omega[1] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1) 
-          + neg_binomial_alt_lpmf(y | lambda1, psi1));
+          + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1));
         }else{
-          log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
+          log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1);
         }
         // Masting
-        real lambda2 = exp(log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-gdd0));
-        log_omega[2] = neg_binomial_alt_lpmf(y | lambda2, psi2); 
+        real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-gdd0) + beta_lambda2_summer * (prevsummer_temps_tree[years_tree[n]]-temp0);
+        log_omega[2] = neg_binomial_2_log_lpmf(y | loglambda2, 1/psi2); // neg_binomial_alt_lpmf(y | lambda2, psi2)
         
         vector[2] omega;
         omega[1] = exp(log_omega[1]);
@@ -181,16 +191,16 @@ model {
 //       // Non-masting
 //       if (y == 0){
 //         log_omega[1] = log_sum_exp(bernoulli_lpmf(1 | theta1), bernoulli_lpmf(0 | theta1)
-//         + neg_binomial_alt_lpmf(y | lambda1, psi1));
+//         + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1));
 //       }else{
-//         log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_alt_lpmf(y | lambda1, psi1);
+//         log_omega[1] = bernoulli_lpmf(0 | theta1) + neg_binomial_2_log_lpmf(y | log(lambda1), 1/psi1);  // neg_binomial_alt_lpmf(y | lambda1, psi1)
 //       }
 //       // Masting
-//       real lambda2 = exp(log(lambda20) + beta_lambda2 * (gdd_lastfrost_tree[years_tree[n]]-gdd0));
-//       log_omega[2] = neg_binomial_alt_lpmf(y | lambda2, psi2); 
-//       
-//       omega[1,idx] = exp(log_omega[1]);
-//       omega[2,idx] = exp(log_omega[2]);
+//       real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[years_tree[n]]-gdd0);
+//       log_omega[2] = neg_binomial_2_log_lpmf(y | loglambda2, 1/psi2); // neg_binomial_alt_lpmf(y | lambda2, psi2)
+// 
+//       omega[1,idx] = exp(log_omega[1])+nugget; // modify this, adding a small nugget
+//       omega[2,idx] = exp(log_omega[2])+nugget; // modify this, adding a small nugget
 //     }
 // 
 //     // Loop over all years
@@ -215,18 +225,22 @@ model {
 //     // Sample final latent state (p. 18 in Mike's HMM chapter)
 //     vector[2] r = alpha[N_max_years];
 //     vector[2] lambda = r / sum(r);
+//     // print(r);
+//     // print(sum(r));
+//     // print(lambda);
+//     // print("----------------");
 // 
 //     states_pred[global_end_idx] = categorical_rng(lambda);
 //     if(states_pred[global_end_idx] == 1) {
 //       if(bernoulli_rng(theta1)){
 //         seed_counts_pred[global_end_idx] = 0;
 //       }else{
-//         seed_counts_pred[global_end_idx] = neg_binomial_alt_rng(lambda1, psi1);
+//         seed_counts_pred[global_end_idx] = neg_binomial_2_log_safe_rng(log(lambda1), 1/psi1);  //neg_binomial_alt_rng(lambda1, psi1)
 //       }
 //     }
 //     else if(states_pred[global_end_idx] == 2) {
-//       real lambda2 = exp(log(lambda20) + beta_lambda2 * (gdd_lastfrost_tree[N_max_years]-gdd0));
-//       seed_counts_pred[global_end_idx] = neg_binomial_alt_rng(lambda2, psi2);
+//       real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[N_max_years]-gdd0);
+//       seed_counts_pred[global_end_idx] = neg_binomial_2_log_safe_rng(loglambda2, 1/psi2); // neg_binomial_alt_rng(lambda2, psi2) 
 //     }
 // 
 //     // Sample latent states while running the backward algorithm
@@ -246,6 +260,17 @@ model {
 //       r =   beta[states_pred_prev] * omega_prev[states_pred_prev]
 //           * ( alpha[n] .* Gamma[,states_pred_prev] );
 //       lambda = r / sum(r);
+//       
+//       // print(n);
+//       // print(beta);
+//       // print(omega_prev);
+//       // print(alpha[n]);
+//       // print(Gamma[,states_pred_prev]);
+//       // print("---");
+//       // print(r);
+//       // print(sum(r));
+//       // print(lambda);
+//       // print("----------------");
 // 
 //       states_pred[global_n] = categorical_rng(lambda);
 // 
@@ -253,12 +278,12 @@ model {
 //         if(bernoulli_rng(theta1)){
 //           seed_counts_pred[global_n] = 0;
 //         }else{
-//           seed_counts_pred[global_n] = neg_binomial_alt_rng(lambda1, psi1);
+//           seed_counts_pred[global_n] = neg_binomial_2_log_safe_rng(log(lambda1), 1/psi1);  //neg_binomial_alt_rng(lambda1, psi1)
 //         }
 //       }
 //       else if(states_pred[global_n] == 2) {
-//         real lambda2 = exp(log(lambda20) + beta_lambda2 * (gdd_lastfrost_tree[n]-gdd0));
-//         seed_counts_pred[global_n] = neg_binomial_alt_rng(lambda2, psi2);
+//         real loglambda2 = log(lambda20) + beta_lambda2_frost * (gdd_lastfrost_tree[n]-gdd0);
+//         seed_counts_pred[global_n] = neg_binomial_2_log_safe_rng(loglambda2, 1/psi2); // neg_binomial_alt_rng(lambda2, psi2)
 //       }
 // 
 //       tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n+1]-temp0));

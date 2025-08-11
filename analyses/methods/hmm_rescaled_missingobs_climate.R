@@ -17,7 +17,7 @@ kippenberger <- c("#8B174DFF", "#AE2565FF", "#C1447EFF", "#D06C9BFF", "#DA9FB8FF
 
 
 
-# Data exploration
+# Load data
 raw_data <- read.csv(file.path(wd, 'data',  'ebms', 'Beech_tree-ring_masting_data.csv'))
 clim_data <- readRDS(file.path(wd, 'data',  'ebms', 'era5land_sitesextract.rds'))
 
@@ -94,7 +94,7 @@ base_samples <- util$filter_expectands(samples,
                                        c('lambda1', 'theta1', 'psi1',
                                          'lambda20', 'psi2', 
                                          'beta_lambda2_frost', 'beta_lambda2_spring',
-                                         'rho0', 'beta_nm_m',
+                                         'rho0', 'beta_nm_m', 'beta_m_m',
                                          'tau_nm_m0', 'tau_m_nm0'))
 util$check_all_expectand_diagnostics(base_samples)
 
@@ -160,19 +160,19 @@ for (t in 1:data$N_trees) {
     idplot <- c(n*2-1, n*2)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
-            col = ifelse(n%in%observed_flags, util$c_light, '#b9d9b9'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_light, 'grey90'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
-            col = ifelse(n%in%observed_flags, util$c_light_highlight, '#96c796'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_light_highlight, 'grey80'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
-            col = ifelse(n%in%observed_flags, util$c_mid, '#72b472'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_mid, 'grey70'), border = NA)
     polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
             c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
-            col = ifelse(n%in%observed_flags, util$c_mid_highlight, '#50a250'), border = NA)
+            col = ifelse(n%in%observed_flags, util$c_mid_highlight, 'grey60'), border = NA)
     
     lines(plot_xs[idplot], plot_quantiles[5, idplot],
-          col= ifelse(n%in%observed_flags,util$c_dark, '#278f27'), lwd=2)
+          col= ifelse(n%in%observed_flags,util$c_dark, 'grey50'), lwd=2)
   }
   
   for(i in observed_idxs_tree) {
