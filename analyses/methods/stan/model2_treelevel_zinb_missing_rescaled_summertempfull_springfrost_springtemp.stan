@@ -44,6 +44,10 @@ data {
   
 }
 
+transformed data{
+  int N_newtrees = 100;
+}
+
 parameters {
   real<lower=0> lambda1; // Non-masting intensity
   real<lower=0> psi1; // Non-masting dispersion
@@ -214,8 +218,8 @@ generated quantities {
       
       log_omega[2] = neg_binomial_2_log_lpmf(y | loglambda2, 1/psi2); // neg_binomial_alt_lpmf(y | lambda2, psi2)
 
-      omega[1,idx] = exp(log_omega[1])+nugget; // modify this, adding a small nugget
-      omega[2,idx] = exp(log_omega[2])+nugget; // modify this, adding a small nugget
+      omega[1,idx] = exp(log_omega[1])+nugget; // modified this, adding a small nugget
+      omega[2,idx] = exp(log_omega[2])+nugget; // modified this, adding a small nugget
     }
 
     // Loop over all years
@@ -317,6 +321,66 @@ generated quantities {
       beta /= max(beta);
 
       
+    }
+  }
+  
+  // Predict for new trees, in the same site as tree 1
+  array[N_max_years*N_newtrees] int states_new;
+  array[N_max_years*N_newtrees] int seed_counts_new;
+  
+  array[N_max_years] int states_new_plot = rep_array(0, N_max_years);
+  array[N_max_years] int seed_counts_new_plot = rep_array(0, N_max_years);
+  
+  int global_start_idx = 1;
+  int global_end_idx = N_max_years;
+  array[N_max_years] real prevsummer_temps_tree = prevsummer_temps[global_start_idx:global_end_idx];
+  array[N_max_years] real gdd_lastfrost_tree = gdd_lastfrost[global_start_idx:global_end_idx];
+  array[N_max_years] real spring_temps_tree = spring_temps[global_start_idx:global_end_idx];
+  
+  
+  for(newt in 1:N_newtrees){
+    
+    matrix[2, N_max_years] omega = rep_matrix(1, 2, N_max_years);
+    
+    array[N_max_years] vector[2] alpha;
+    
+    for (n in 1:N_max_years) {
+      
+      int global_idx = n + (N_max_years)*(newt-1);
+      real tau_nm_m = inv_logit(logit(tau_nm_m0) + beta_nm_m * (prevsummer_temps_tree[n]-summertemp0));
+      real tau_m_m = inv_logit(logit(tau_m_m0) + beta_m_m * (prevsummer_temps_tree[n]-summertemp0));
+      matrix[2, 2] Gamma = [ [1 - tau_nm_m, tau_nm_m],
+                           [1 - tau_m_m, tau_m_m] ];
+
+      if(n == 1){
+        alpha[n] = omega[,n] .* rho;
+      }
+      else{
+        alpha[n] = omega[,n] .* (Gamma' * alpha[n - 1]);
+      }
+      alpha[n] /= max(alpha[n]);
+      
+      vector[2] lambda = alpha[n] / sum(alpha[n]);
+      states_new[global_idx] = categorical_rng(lambda);
+      
+      states_new_plot[n] += states_new[global_idx]-1;
+      
+      if(states_new[global_idx] == 1) {
+        if(bernoulli_rng(theta1)){
+          seed_counts_new[global_idx] = 0;
+        }else{
+          seed_counts_new[global_idx] = neg_binomial_2_alt_log_safe_rng(log(lambda1), psi1);  //neg_binomial_alt_rng(lambda1, psi1)
+        }
+      }
+      else if(states_new[global_idx] == 2) {
+        real loglambda2 = log(lambda20) 
+        + beta_lambda2_frost * (gdd_lastfrost_tree[n]-frostgdd0) 
+        + beta_lambda2_spring * (spring_temps_tree[n]-springtemp0);
+      
+        seed_counts_new[global_idx] = neg_binomial_2_alt_log_safe_rng(loglambda2, psi2); // neg_binomial_alt_rng(lambda2, psi2) 
+      }
+      
+      seed_counts_new_plot[n] += seed_counts_new[global_idx];
     }
   }
 }
