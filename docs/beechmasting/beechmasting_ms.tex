@@ -2,12 +2,17 @@
 \usepackage[top=1.00in, bottom=1.0in, left=1in, right=1in]{geometry}
 \renewcommand{\baselinestretch}{1.1}
 \usepackage{graphicx}
-\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
 \usepackage{amsmath}
 \usepackage{hyperref}
 
+\bibliographystyle{unsrtnat}
+
 \begin{document}
-\renewcommand{\refname}{\CHead{}}
+
+
+
 
 \title{Climatic drivers and intrisic biological processes shape masting dynamics...} 
 \date{\today}
@@ -23,8 +28,9 @@
 %\item Widespread meltdown fears\\
 %$\rightarrow$ maybe mention invasion, homogeneization, pest outbreaks...\\
 %$\rightarrow$ regeneration shifts... masting!
-
-The acceleration of climate change is predicted to have abrupt ecological effects worldwide. Rapid shifts to novel climate conditions with more extreme events have the potential to disrupt key ecological processes. Feedback mechanisms could break down resilience and potentially drive ecosystems toward critical transitions. In particular, many forest ecosystems are show sign of increased sensitivity to biotic and abiotic disturbances. Forests could adapt if they can rely on their regeneration capacity, which promotes post-disturbance recolonization and the establishment of individuals better adapted to new conditions. 
+The acceleration of climate change is predicted to have abrupt ecological effects worldwide \citep{Trisos2020}. Rapid shifts to novel climate conditions with more extreme events could disrupt key ecological processes -- and potentially drive ecosystems toward critical transitions \citep{Wernberg2016}. % Feedback mechanisms could break down resilience
+In particular, many forest ecosystems are showing sign of increased sensitivity to biotic and abiotic disturbances \citep{Albrich2020, Forzieri2022}. Forests have the potential to adapt only if they can rely on their regeneration capacity, which promotes post-disturbance recolonization % and the establishment of 
+with individuals better adapted to new conditions \citep{Stevens‐Rumann2017, Turner2023}.
 
 % \item Meltdown and masting
 % \begin{itemize}
@@ -32,14 +38,15 @@ The acceleration of climate change is predicted to have abrupt ecological effect
 % \item ...
 % \item end paragraph on masting being hypothesized as critical to regeneratino via seed predator overwhelmed... or pollen etc. and this could have big effects!
 % \end{itemize}
-Regeneration in many temperate and tropical forests depends on tree species that have a high variability in reproduction across years, with most individuals of a population reproducing synchrounously. These two characterisics---variability and synchronicty---define masting, which is hypothesized to have strong fitness benefits, mostly because it could allow a higher proportion of seeds to escape predation. Masting could also favor greater pollen exchange and genetic outcrossing across individuals, favoring the production of seedlings that may be better adapted to new climatic conditions. However, disruption of this reproductive timing by climate change could trigger cascading effects on forest resilience.
+Regeneration in many temperate and tropical forests depends on tree species that have a high reproductive variability across years, and where most individuals of a population reproduce synchrounously. These two characterisics---variability and synchronicity---define masting. Masting is hypothesized to have strong fitness benefits, mostly because high seed production could overwhelm seed predators---i.e. a higher proportion of seeds and seedlings could escape predation and establish. Masting could also favor greater pollen exchange and genetic outcrossing across individuals, favoring the production of seedlings that may be better adapted to new climatic conditions.
 
 % \item How does masting work? Synchrony
 % \begin{itemize}
 % \item individual trees need to be synchronized within certain distance (but maybe not further...)
 % \item population-level characteristics! So how do individual treews do it together?
 % \end{itemize}
-... Population-level masting arises from the reproductive behavior of individual trees.
+% ... Population-level masting arises 
+Disruption of this reproductive timing by climate change could trigger cascading effects on forest resilience. Masting is a population-level characteristic that require individual trees to respond similarly to environmental cues in order to reproduce together within a certain distance---which should match with predator foraging range. Tree species that mast have likely evolved under colder climates, and warmer conditions could modify the reproductive cues that allowed for both variability and synchrony within the population.
 
 % \item How do individual trees cue to mast?
 % \begin{itemize}
@@ -48,6 +55,8 @@ Regeneration in many temperate and tropical forests depends on tree species that
 % \item however, most trees take 2 years to make buds, and have alternate bearing
 % \item (Conceptual figure)
 % \end{itemize}
+ Understanding the reproductive behavior that arises at the population level requires to study individual trees' responses to cues. Reproductive success requires that an individual tree experienced good environmental conditions---and in particular no late spring frosts and sufficiently warm temperatures during the growing season.
+
 
 
 % \item Combo of cues + constraints\\
@@ -128,6 +137,9 @@ $rightarrow$ which scale depends on which evolutionnary model you consider, but 
 
 
 \end{enumerate}
+
+
+\bibliography{beechmasting}
 
 \end{document}
 
