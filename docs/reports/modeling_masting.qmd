@@ -1,0 +1,155 @@
+---
+title: "Modeling masting"
+subtitle: "From individual tree behavior to population-level synchrony"
+toc: false
+number-sections: true
+highlight: pygments
+pdf-engine: pdflatex
+format:
+  html:
+    html-math-method: katex
+    theme:
+      - lux
+      - custom.scss
+    standalone: true
+    embed-resources: true
+    code-overflow: wrap
+    linkcolor: "#B97C7C"
+    fontsize: '11pt'
+    code-block-border-left: "#8F2727"
+    code-block-bg: "#f8f8f8"
+    highlight-style: github
+  pdf:
+    keep-tex: true
+    code-overflow: wrap
+    monofont: 'Latin Modern Mono'
+    monofontoptions:
+      - Scale=0.9
+    include-in-header:
+      - text: |
+          \usepackage{bm}
+          \usepackage{xcolor}
+          \definecolor{mid}{HTML}{B97C7C}
+          \definecolor{light_teal}{HTML}{6B8E8E}
+          \usepackage{amsmath}
+format-links: false
+knitr:
+  opts_chunk:
+    comment: ''
+    cache.lazy: FALSE
+  opts_knit:
+    global.par: TRUE
+geometry:
+  - top=20mm
+  - left=20mm
+  - bottom=20mm
+  - right=20mm
+---
+
+```{css, echo=FALSE}
+.cell-output { border-left: #B97C7C 2px solid; border-radius: 0px;}
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+wd <- "~/projects/seedsarentreal/analyses/methods"
+setwd(wd)
+util <- new.env()
+source('mcmc_analysis_tools_rstan.R', local=util)
+source('mcmc_visualization_tools.R', local=util)
+
+library(tikzDevice)
+options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\definecolor{mid}{HTML}{B97C7C}"))
+options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\definecolor{light_teal}{HTML}{6B8E8E}"))
+options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\usepackage{amsmath}"))
+options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\usepackage{bm}"))
+```
+
+# The motivations behind the project
+
+::: {.callout-tip}
+## The ecological motivation
+
+Understanding the reproductive behavior that arises at the population level requires to study individual trees' responses. We believe that integrating reproductive biology (i.e. biological **constraints**) and environmental **cues** at the _individual_ level can help us investigating the drivers of the variability and synchronicity of reproduction at the _population_ scale. Our final goal is to understand to what extent climate change could really disrupt forest regeneration---and provide better forecasts!
+:::
+
+\
+
+::: {.callout-tip}
+## The technical motivation
+
+Bayesian magic! Our approach models the (latent) reproductive states of each _individual_ tree, and the consequent amount of seed production. The states explicitly encode the **constraints** that shape tree reproduction -- in particular, the fact that most trees need at least two years between flower bud differentiation and fruit maturation. We do not standardize away the complexities of individual-level reproduction (e.g. with normalized stand-level indices between 0 and 1...). On the contrary, modeling tree-level reproduction allows us to obtain _population_ estimates -- and thus direct inferences on the population-level variability and synchronicity! And the cherry on top: we incorporate climatic **cues** at different key moments of the reproductive cycle.
+:::
+
+\newpage
+
+# The model
+
+## Previous models and limitations
+
+The observations we have---whether for an individual tree or a seed trap---are a time series of yearly seed counts $y_i$.
+
+```{r, fig.height=3, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+par(family="serif", las=1, bty="l",
+    cex.axis=0.8, cex.lab=0.85, cex.main=0.85,
+    xaxs="i", yaxs="i", mar = c(5, 4, 3, 1))
+
+
+x <- seq(1,10,2)
+y <- rep(0.5, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,1))
+
+arrows(0, 0.1, 10, 0.1, col = 'grey20', lwd=1.2, length = 0.1)
+text(5, -0.05, labels = 'Time')
+
+# Add circles: inches=F specifies radius in plot coordinates
+symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
+# arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
+
+```
+
+The following quote illustrates the current approach of statistical model of masting:
+
+> ``We fitted a zero-inflated, negative binomial mixed model to the annual number of initiated seeds in each tree, with fixed factors that included summer temperatures in 1 and 2 years before seedfall, [...] and seed production in the previous year to account for possible resource depletion. [...] We included [...] a first-order temporal autocorrelation structure.''
+
+If we ignore the zero-inflated part, we could write this model as something like:
+
+$$y_i \sim NegBin(\mu_i, \phi)$$
+
+$$\mu_i = \alpha + \beta^\text{summer}_{n-1}.X^\text{summer}_{n-1} + \beta^\text{summer}_{n-2}.X^\text{summer}_{n-2} + \beta^\text{seed}_{n-1}.y_{i-1}+ \rho.\epsilon_{i-1}+\epsilon_i$$
+$$\epsilon_i \sim \mathcal{N}(0,1)$$
+```{r, fig.height=3, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+par(family="serif", las=1, bty="l",
+    cex.axis=0.8, cex.lab=0.85, cex.main=0.85,
+    xaxs="i", yaxs="i", mar = c(5, 4, 3, 1))
+
+
+x <- seq(1,10,2)
+y <- rep(0.5, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,1))
+
+# Add circles: inches=F specifies radius in plot coordinates
+symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
+arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
+
+```
+
+The inclusion of both a lagged response of $y_{n-1}$ and an first-order autocorrelation structure in the residuals seems... quite dangerous. \
+But more importantly, this approach do not try to model the reproductive state of the tree. In other words, the effect of summer temperature does not directly depends on the previous on reproductive state in the previous year. If $\beta^\text{summer}_{n-1} > 0$, a tree that experiences increasing warm summers would be predicted to have an increasing seed production---regardless of the previous reproductive state.
+
+
