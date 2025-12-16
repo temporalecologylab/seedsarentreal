@@ -64,29 +64,30 @@ for(s in unique(clim_data$site.ID)){
   # summer temperature
   intercept <- summary(lm(meantmax_ja ~ year, data = clim_s))$coefficients['(Intercept)','Estimate']
   trend <- summary(lm(meantmax_ja ~ year, data = clim_s))$coefficients['year','Estimate']
-  newtrend <- 0.02
+  newtrend <- 0.04
   delta2025 <- trend * (2025-1978)
   newclim_s <- clim_s
   newclim_s$year <- newclim_s$year + (2025-1978)
   newclim_s$meantmax_ja <- newclim_s$meantmax_ja + delta2025 + newtrend * (newclim_s$year-(2025-1978))
   
-  delta2025 <- trend * (2025-1978)
-  newclim_s_2 <- newclim_s
-  newclim_s_2$year <- newclim_s_2$year + (2025-1978)
-  newclim_s_2$meantmax_ja <- newclim_s_2$meantmax_ja + delta2025 + newtrend * (newclim_s$year-(2025-1978))
-  
+  delta2072 <- delta2025 + (trend+newtrend) * (2072-2025)
+  # newtrend <- 0.12
+  newtrend <- 0.04
+  newclim_s_2 <- clim_s
+  newclim_s_2$year <- newclim_s_2$year + (2072-1978)
+  newclim_s_2$meantmax_ja <-  newclim_s_2$meantmax_ja + delta2072 + newtrend * (newclim_s_2$year-(2072-1978))
   
   newclim_data <- rbind(newclim_data, rbind(clim_s, newclim_s, newclim_s_2))
 }
 newclim_data$year <- newclim_data$year + 1978
-ggplot(data = newclim_data, ) +
-  facet_wrap(~site.ID, ncol = 2) +
+ggplot(data = newclim_data) +
+  facet_wrap(~site.ID, ncol = 3) +
   geom_point(aes(x = year-1978, y = meantmax_ja), col = '#ADBE7CFF', size = 0.4) +
-  geom_smooth(aes(x = year-1978, y = meantmax_ja, linetype = year > 2024), method = 'lm', se = FALSE, col = '#D06C9BFF') +
-  stat_regline_equation(aes(x = year-1978, y = meantmax_ja),
-                        label.x = -1, label.y = 26.5, hjust = 0, col = '#D06C9BFF') +  
+  geom_smooth(aes(x = year-1978, y = meantmax_ja, linetype = year > 2024, group = ifelse(year <= 2024, 1, ifelse(year <= 2071, 2, 3))), # 
+              method = 'lm', se = FALSE, col = '#D06C9BFF') +
+  # stat_regline_equation(aes(x = year-1978, y = meantmax_ja),
+  #                       label.x = -1, label.y = 26.5, hjust = 0, col = '#D06C9BFF') +  
   scale_x_continuous(breaks = seq(2,122,30), labels = 1978+seq(2,122,30)) +
   labs(x = '') + 
   theme_classic() +
   theme(legend.position = 'none')
-

@@ -1,0 +1,1049 @@
+---
+title: "HMM and masting"
+toc: true
+number-sections: true
+highlight: pygments
+pdf-engine: lualatex
+format:
+  html:
+    html-math-method: katex
+    theme:
+      - lux
+      - custom.scss
+    standalone: true
+    embed-resources: true
+    code-overflow: wrap
+    linkcolor: "#B97C7C"
+    fontsize: '11pt'
+    code-block-border-left: "#8F2727"
+    code-block-bg: "#f8f8f8"
+    highlight-style: github
+    fig-width: 6.5
+    fig-height: 4
+  pdf:
+    keep-tex: true
+    fig-width: 4
+    fig-height: 4
+    code-overflow: wrap
+    monofont: 'Latin Modern Mono'
+    monofontoptions:
+      - Scale=0.5
+format-links: false
+knitr:
+  opts_chunk:
+    comment: ''
+    cache.lazy: FALSE
+  opts_knit:
+    global.par: TRUE
+geometry:
+  - top=20mm
+  - left=20mm
+  - bottom=20mm
+  - right=20mm
+---
+
+```{css, echo=FALSE}
+.cell-output { border-left: #B97C7C 2px solid; border-radius: 0px;}
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Setup
+rm(list = ls())
+options(stringsAsFactors = FALSE)
+library(rstan)
+library(ggplot2)
+library(patchwork)
+rstan_options(auto_write = TRUE)            # Cache compiled Stan programs
+options(mc.cores = parallel::detectCores()) # Parallelize chains
+
+wd <- "~/projects/seedsarentreal/analyses/methods"
+setwd(wd)
+util <- new.env()
+source(file.path(wd, "mcmc_analysis_tools_rstan.R"), local=util) 
+source(file.path(wd, "mcmc_visualization_tools.R"), local=util) 
+
+kippenberger <- c("#8B174DFF", "#AE2565FF", "#C1447EFF", "#D06C9BFF", "#DA9FB8FF", 
+                  "#ADBE7CFF", "#8BA749FF", "#6E8537FF", "#4F5F28FF", "#343D1FFF")
+```
+
+# Load data
+
+```{r}
+raw_data <- read.csv(file.path(wd, 'data',  'ebms', 'Beech_tree-ring_masting_data.csv'))
+clim_data <- readRDS(file.path(wd, 'data',  'ebms', 'era5land_sitesextract.rds'))
+
+raw_data$uniqueID <- paste0(raw_data$site.ID, "_", raw_data$tree.ID)
+raw_data <- na.omit(raw_data[,c('site.ID', 'uniqueID', 'year', 'seeds')])
+
+uniq_tree_ids <- unique(raw_data$uniqueID)
+N_trees <- length(uniq_tree_ids)
+N_sites <- length(unique(raw_data$site.ID))
+first_year <- min(raw_data$year)
+last_year <- max(raw_data$year)
+max_years <- first_year:max(raw_data$year)
+N_max_years <- length(max_years)
+```
+
+We have `{r} N_trees` trees on `{r} N_sites` sites. Observations were collected from `{r} first_year` to `{r} last_year`.
+
+# Format data
+
+```{r}
+seed_counts <- c()
+years <- c()
+prevsummer_temps <-c()
+spring_temps <-c()
+gdd_lastfrost <-c()
+N_years <- c()
+idx <- 1
+tree_start_idxs <- c()
+tree_end_idxs <- c()
+for (tid in uniq_tree_ids) {
+  
+  raw_data_tree <- raw_data[raw_data$uniqueID == tid,]
+  
+  years_tree <- raw_data_tree$year-first_year+1
+  years <- c(years, years_tree)
+  
+  N_years_tree <- length(years_tree)
+  N_years <- c(N_years, N_years_tree)
+  
+  seed_count_tree <- raw_data_tree$seeds
+  seed_counts <- c(seed_counts, seed_count_tree)
+  
+  prevsummer_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'meantmax_ja'] # all years, even those unobserved
+  prevsummer_temps <- c(prevsummer_temps, prevsummer_temps_tree)
+  
+  spring_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'meantmean_am'] # all years, even those unobserved
+  spring_temps <- c(spring_temps, spring_temps_tree)
+  
+  gdd_lastfrost_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'gdd_b5_tolastfrost']/10 # all years, even those unobserved, in *10degC
+  gdd_lastfrost <- c(gdd_lastfrost, gdd_lastfrost_tree)
+  
+  tree_start_idxs <- c(tree_start_idxs, idx)
+  idx <- idx + N_years_tree
+  tree_end_idxs <- c(tree_end_idxs, idx - 1)
+  
+}
+```
+
+# Create some future climates
+
+We can create some false future summer conditions, based on a pessimistic increase of 5°C in one century.
+
+```{r}
+#| echo: false
+  
+years_to_predict <- (1980:2100)
+
+## summer temperature
+clim_df <- clim_data[clim_data$site.ID == 'Benwell',]
+baseline_2000 <- mean(clim_df[clim_df$year %in% c(1980:2000), 'meantmax_ja']) # average summer temp. from 1980-2000 in Benwell
+clim_df$year <- clim_df$year - 1978
+trend <- 0.05 # 5degC warming in 100 years
+summertemp <- baseline_2000 + trend * (years_to_predict-2000)
+ggplot() +
+  geom_point(data = clim_df, aes(x = year + 1978, y = meantmax_ja), color = util$c_light) +
+  geom_hline(yintercept = baseline_2000, color = util$c_light_highlight, linetype = 'dashed') +
+  geom_line(data = data.frame(years_to_predict, summertemp), aes(x = years_to_predict, y = summertemp), color = util$c_dark) +
+  theme_classic() +
+  coord_cartesian(xlim = c(1975, 2100), ylim = c(16,24), expand = FALSE) +
+  theme(plot.margin = margin(r = 10, t = 5)) +
+  labs(y = "Average daily max. temperature\n(July-August, °C)", x = '') +
+  annotate('text', x = 2060, y = baseline_2000+0.3, label = 'Baseline (1980-2000)', col= util$c_light_highlight) +
+  annotate('text', x = 2055, y = baseline_2000 + trend * (2055 - 2000) + 0.3, label = 'Projections (5°C of warming in one century)', col= util$c_dark, angle = atan(0.05*9.5) * 180 / pi)
+```
+
+For spring frost risk and spring temperature, we may simply apply the observed trends.
+
+```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 2.5
+
+simplelm <- lm(gdd_b5_tolastfrost ~ year, data = clim_df)
+intercept <- summary(simplelm)$coefficients['(Intercept)','Estimate']
+trend <- summary(simplelm)$coefficients['year','Estimate']
+baseline_2000 <- intercept + (2000-1978)*trend
+frostgdd <- baseline_2000 + trend * (years_to_predict-2000)
+frostgdd <- rnorm(length(years_to_predict), mean = predict(simplelm, newdata = data.frame(year = years_to_predict-1978)), sd = 0)
+
+frost <- ggplot() +
+  geom_point(data = clim_df, aes(x = year + 1978, y = gdd_b5_tolastfrost), color = util$c_light) +
+  geom_hline(yintercept = baseline_2000, color = util$c_light_highlight, linetype = 'dashed') +
+  geom_line(data = data.frame(years_to_predict, frostgdd), aes(x = years_to_predict, y = frostgdd), color = util$c_dark) +
+  theme_classic() +
+  coord_cartesian(xlim = c(1975, 2100), ylim = c(0,250), expand = FALSE) +
+  theme(plot.margin = margin(r = 10, t = 5)) +
+  labs(y = "GDD until last frost (°C)", x = '') +
+  annotate('text', x = 2065, y = baseline_2000 + trend * (2065 - 2000) + 20, label = 'Observed trend, extrapolated', 
+           size = 3.5, col= util$c_dark, angle = atan(0.05*4) * 180 / pi)
+
+simplelm <- lm(meantmean_am ~ year, data = clim_df)
+intercept <- summary(simplelm)$coefficients['(Intercept)','Estimate']
+trend <- summary(simplelm)$coefficients['year','Estimate']
+baseline_2000 <- intercept + (2000-1978)*trend
+springtemp <- baseline_2000 + trend * (years_to_predict-2000)
+springtemp <- rnorm(length(years_to_predict), mean = predict(simplelm, newdata = data.frame(year = years_to_predict-1978)), sd = 0)
+
+spring <- ggplot() +
+  geom_point(data = clim_df, aes(x = year + 1978, y = meantmean_am), color = util$c_light) +
+  geom_hline(yintercept = baseline_2000, color = util$c_light_highlight, linetype = 'dashed') +
+  geom_line(data = data.frame(years_to_predict, springtemp), aes(x = years_to_predict, y = springtemp), color = util$c_dark) +
+  theme_classic() +
+  coord_cartesian(xlim = c(1975, 2100), ylim = c(4,12), expand = FALSE) +
+  theme(plot.margin = margin(r = 10, t = 5)) +
+  labs(y = "GDD until last frost (°C)", x = '') +
+  annotate('text', x = 2065, y = baseline_2000 + trend * (2065 - 2000) + 0.7, label = 'Observed trend, extrapolated', 
+           size = 3.5, col= util$c_dark, angle = atan(0.05*5.5) * 180 / pi)
+
+frost + plot_spacer() + spring + plot_layout(width = c(1,0.05,1))
+
+```
+
+# Create new trees to predict
+
+```{r}
+
+trees_per_stand <- 100
+unique_stands <- "Benwell"
+newtree_stand_idxs <- rep(which(unique_stands==unique_stands), each = trees_per_stand)
+N_newtrees <- length(newtree_stand_idxs)
+N_max_newyears <- length(years_to_predict)
+first_newyear <- min(years_to_predict)
+newyears <- c()
+newprevsummer_temps <-c()
+newspring_temps <-c()
+newgdd_lastfrost <-c()
+N_newyears <- c()
+idx <- 1
+newtree_start_idxs <- c()
+newtree_end_idxs <- c()
+for (i in 1:N_newtrees) {
+  
+  newyears_tree <- years_to_predict-first_newyear+1
+  newyears <- c(newyears, newyears_tree)
+  
+  N_newyears_tree <- length(newyears_tree)
+  N_newyears <- c(N_newyears, N_newyears_tree)
+  
+  newprevsummer_temps_tree <- summertemp
+  newprevsummer_temps <- c(newprevsummer_temps, newprevsummer_temps_tree)
+  
+  newspring_temps_tree <- springtemp
+  newspring_temps <- c(newspring_temps, newspring_temps_tree)
+
+  newgdd_lastfrost_tree <- frostgdd/10
+  newgdd_lastfrost <- c(newgdd_lastfrost, newgdd_lastfrost_tree)
+  
+  newtree_start_idxs <- c(newtree_start_idxs, idx)
+  idx <- idx + N_newyears_tree
+  newtree_end_idxs <- c(newtree_end_idxs, idx - 1)
+}
+
+```
+
+# Posterior quantification
+
+```{r}
+
+N <- length(years)
+Nnew <- length(newyears)
+data <- mget(c('N', 'N_trees', 'N_max_years',
+               'N_years', 'tree_start_idxs', 'tree_end_idxs',
+               'seed_counts', 'years', 
+               'prevsummer_temps', 'spring_temps', 'gdd_lastfrost',
+               # for predictions
+               'Nnew', 'N_newtrees', 'N_max_newyears', 'newtree_stand_idxs',
+               'N_newyears', 'newtree_start_idxs', 'newtree_end_idxs','newyears', 
+               'newprevsummer_temps', 'newgdd_lastfrost', 'newspring_temps'
+))
+
+# Posterior quantification
+if(FALSE){
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertempfull_springfrost_springtemp_constrainedslopes_wpred_breakdownpred_standlevel.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_25sept2025_fullmodel_constrainedslopes.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring',  
+                                           'rho0', 'beta_nm_m', 'beta_m_m',
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+  
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp_constrainedslopes_wpred.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_25sept2025_biologymodel_constrainedslopes.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring', 
+                                           'rho0', 'beta_nm_m', 
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+  
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp_wpred_standlevel.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_25sept2025_biologymodel.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring', 
+                                           'rho0', 'beta_nm_m', 
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+}else{
+  fit_full_const <- readRDS(file.path(wd, 'output', 'fit_25sept2025_fullmodel_constrainedslopes.rds'))
+  fit_biol_const <- readRDS(file = file.path(wd, 'output', 'fit_25sept2025_biologymodel_constrainedslopes.rds'))
+  fit_biol <- readRDS(file = file.path(wd, 'output', 'fit_25sept2025_biologymodel.rds'))
+}
+
+
+```
+
+# Retrodictive check
+
+## Across all trees
+
+```{r}
+samples <- util$extract_expectand_vals(fit_biol)
+
+
+# Retrodictive check
+observed_idxs <- c()
+for (t in 1:data$N_trees){
+  idxs <- tree_start_idxs[t]:tree_end_idxs[t]
+  observed_idxs_tree <- N_max_years*(t-1)+years[idxs]
+  observed_idxs <- c(observed_idxs, observed_idxs_tree)
+}
+par(mfrow=c(1, 1), mar = c(4,4,2,2))
+names <- sapply(observed_idxs, function(n) paste0('seed_counts_pred[',n,']'))
+util$plot_hist_quantiles(samples[names], 'seed_counts_pred', 0, 340, 20,
+                         baseline_values=data$seed_counts, 
+                         xlab="Seed counts")
+```
+
+## For some individual trees
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+set.seed(123456)
+par(mfrow=c(3, 3), mar = c(4,4,2,2))
+for (t in sample(1:data$N_trees,9)) {
+  
+  idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
+  observed_idxs_tree <- tree_start_idxs[t]:tree_end_idxs[t]
+  observed_flags <- years[tree_start_idxs[t]:tree_end_idxs[t]]
+  
+  names <- sapply(idxs_tree,
+                  function(n) paste0('seed_counts_pred[', n, ']'))
+  xlab="Year"
+  xticklabs=first_year:last_year
+  ylab="Seed Counts"
+  display_ylim=c(0, 400)
+  main=paste("Tree", uniq_tree_ids[t])
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]], probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  display_ylim[1] <- display_ylim[1] - delta
+  display_ylim[2] <- display_ylim[2] + delta      
+  
+  plot(1, type="n", main=main,
+       xlim=c(bin_min, bin_max), xlab=xlab, xaxt="n",
+       ylim=display_ylim, ylab=ylab)
+  axis(1, at=1:N, labels=xticklabs)    
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_light_highlight, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_mid, 'grey70'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_mid_highlight, 'grey60'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(n%in%observed_flags,util$c_dark, 'grey50'), lwd=2)
+  }
+  
+  for(i in observed_idxs_tree) {
+    lines(c(years[i] - 0.5, years[i] + 0.5),
+          rep(seed_counts[i], 2),
+          col="white", lwd=4)
+    lines(c(years[i] - 0.5, years[i] + 0.5),
+          rep(data$seed_counts[i], 2),
+          col="black", lwd=2)
+  }
+  
+}
+```
+
+# Posterior inferences
+
+First let's look at the transition matrix parameters!\
+$\rho_0$ is the initial masting probability, $\tau_0^{\text{M} \rightarrow \text{M}}$ is the probability of staying in a masting state, $\tau_0^{\text{NM} \rightarrow \text{M}}$ is the probability of transition from non-masting to masting (at 15°C, a cold summer), modified by summer temperature with the slope $\beta_\text{summer}^{\text{NM} \rightarrow \text{M}}$.
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 3
+
+par(mfrow=c(1, 4), cex.lab = 1.5)
+# real<lower=0, upper=1> rho0; // Initial masting probability
+#   real<lower=0, upper=1> tau_nm_m0; // Non-masting to masting probability
+#   real<lower=0> beta_nm_m; // Effect of previous summer temp. on transition prob. to masting 
+#   real<lower=0, upper=1> tau_m_m0; // Masting to masting probability
+#   real<lower=0> beta_m_m; // Effect of previous summer temp. on prob. of staying in masting
+
+util$plot_expectand_pushforward(samples[['rho0']], 
+                                24, flim=c(0, 1.1),
+                                display_name=expression(rho[0]),)
+
+util$plot_expectand_pushforward(samples[['tau_m_m0']], 
+                                25, flim=c(0, 1),
+                                display_name=expression(tau[0]^{M %->% M}))
+
+util$plot_expectand_pushforward(samples[['tau_nm_m0']], 
+                                25, flim=c(0, 1),
+                                display_name=expression(tau[0]^{NM %->% M}))
+
+util$plot_expectand_pushforward(samples[['beta_nm_m']], 25,
+                                display_name=expression(beta[summer]^{NM %->% M}))
+
+
+```
+
+Then look at the seed production parameters!\
+$\lambda_\text{NM}$ is the mean production of seeds in a non-masting state, with an overdispersion (inverse of precision) $\psi_\text{NM}$. $\theta_\text{NM}$ is the probability to observe a zero in a non-masting state (zero-inflation). $\lambda_\text{NM}$ is the mean production of seeds in a masting state (at some baseline conditions...), increase or decrease by spring frost risk with $\beta_\text{frost}^\text{M}$ and spring temperature with $\beta_\text{spring}^\text{M}$. $\psi_\text{M}$ is the overdispersion parameter for masting.
+
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+
+  # real<lower=0> lambda1; // Non-masting intensity
+  # real<lower=0> psi1; // Non-masting dispersion
+  # real<lower=0, upper=1> theta1; // probability of drawing a zero (zero-inflation)
+  # 
+  # real<lower=lambda1> lambda20; // Masting intensity
+  # real<upper=0> beta_lambda2_frost; // Effect of frost risk on masting intensity
+  # real<upper=0> beta_lambda2_spring; // Effect of spring temp. on masting intensity
+  # real<lower=0> psi2; // Masting dispersion
+
+par(mfrow=c(2, 4))
+
+util$plot_expectand_pushforward(samples[['lambda1']], 25,
+                                display_name=expression(lambda[NM]))
+
+util$plot_expectand_pushforward(samples[['psi1']], 25,
+                                display_name=expression(psi[NM]))
+
+util$plot_expectand_pushforward(samples[['theta1']], 25,
+                                display_name=expression(theta[NM]))
+plot.new()
+
+
+util$plot_expectand_pushforward(samples[['lambda20']], 25,
+                                display_name=expression(lambda[M]))
+
+util$plot_expectand_pushforward(samples[['beta_lambda2_frost']], 25,
+                                display_name=expression(beta[frost]^{M}))
+
+util$plot_expectand_pushforward(samples[['beta_lambda2_spring']], 25,
+                                display_name=expression(beta[spring]^{M}))
+
+util$plot_expectand_pushforward(samples[['psi2']], 25,
+                                display_name=expression(psi[M]))
+
+
+```
+
+# Synchrony
+
+## Across all trees
+
+```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 4
+
+trees_s <- which(grepl( paste(unique(raw_data$site.ID),collapse="|"), uniq_tree_ids))
+idxs_tree <-(1+N_max_years*(min(trees_s)-1)):(N_max_years*max(trees_s))
+
+# which predictions correspond to observations (we will not show missing observations here)
+observed_flags <- unlist(sapply(1:N_trees, function(t){
+  idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
+  observed_flags_tree <- years[tree_start_idxs[t]:tree_end_idxs[t]]
+  return(idxs_tree[observed_flags_tree])
+}))
+
+# prepare data for Mike's function
+sum_states <- list()
+for(y in 1:N_max_years){
+  
+  idxs_tree <- (y+N_max_years*(trees_s-1))
+  idxs_tree_observed <- idxs_tree[idxs_tree %in% observed_flags]
+  names <- sapply(idxs_tree_observed,
+                  function(n) paste0('states_pred[', n, ']'))
+  
+  sum_states_y <- Reduce("+", samples[names])
+  
+  sum_states[[y]] <- (sum_states_y - length(idxs_tree_observed))/length(idxs_tree_observed)
+  
+  
+}
+names(sum_states) <- paste0('sum_states[', 1:N_max_years, ']')
+
+layout(matrix(c(1,2), ncol = 1), height = c(1,1))
+par(mfrow=c(1, 1), mar=c(2,5,0.5,0.5), cex.lab = 1)
+util$plot_conditional_median_quantiles(sum_states, names(sum_states), obs_xs = first_year:last_year,
+                                       bin_min = first_year-0.5, bin_max = last_year+0.5, bin_delta = 1,
+                                       ylab = 'Proportion of masting trees (observed only)', main = '')
+
+```
+
+## Stand-level state, by year
+
+### Number of masting trees
+
+While the previous plot only showed observed tree predictions, these plots summed across all predictions for the trees present on a stand (observed or not). Grey indicates when **none** of the trees were observed on the stand .
+
+```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 2.8
+
+sites <- stringr::str_split_i(uniq_tree_ids, '_', 1)
+uniq_sites <- unique(sites)
+
+par(mfrow=c(1, 2), mar=c(4,4, 1,1), cex.lab = 1, cex.axis = 0.75)
+for(y in 1980:2022){
+  
+  ## Look at all trees within one year
+  
+  year <- y-1980+1
+
+  ylab= paste0("# masting trees in ", y)
+  display_ylim=c(0, 11.2)
+
+  idxs_tree <- (year+N_max_years*(trees_s-1))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('states_pred[', n, ']'))
+  
+  for(s in 1:length(uniq_sites)){
+    name <- paste0('states_pred_site[', s, ']')
+    samples[[name]] <- 0
+  }
+  
+  obstrees_persite <- rep(0, length(uniq_sites))
+  trees_persite <- rep(0, length(uniq_sites))
+  for(t in 1:data$N_trees){
+    name <- paste0('states_pred_site[', which(uniq_sites == sites[t]), ']')
+    samples[[name]] <- samples[[name]] + (samples[[names[t]]]-1)
+    
+    obstrees_persite[which(uniq_sites == sites[t])] <- 
+      obstrees_persite[which(uniq_sites == sites[t])] +
+      ifelse(idxs_tree[t]%in%observed_flags,1, 0)
+    trees_persite[which(uniq_sites == sites[t])] <-
+      trees_persite[which(uniq_sites == sites[t])] + 1
+  }
+  
+  names <- sapply(1:length(uniq_sites),
+                  function(n) paste0('states_pred_site[', n, ']'))
+  
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]], probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  # delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  # display_ylim[1] <- display_ylim[1] - delta
+  # display_ylim[2] <- display_ylim[2] + delta   
+  
+  
+  xticklabs = sapply(1:length(uniq_sites), function(n) paste0(uniq_sites[n], '\n(n=',obstrees_persite[n],'/',trees_persite[n],')'))
+  
+  plot(1, type="n", main='',
+       xlim=c(bin_min, bin_max), xlab='', xaxt="n",
+       ylim=display_ylim, ylab=ylab, xaxs = 'i', yaxt="n",)
+  axis(1, at=1:N, labels=xticklabs[1:N], las = 2)    
+  axis(2, at=seq(0,10,2), labels = seq(0,10,2))   
+  
+  
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_light_highlight, 'grey85'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_mid, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_mid_highlight, 'grey75'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(obstrees_persite[n] > 0,util$c_dark, 'grey40'), lwd=2)
+    
+    
+    
+  }
+  
+  # abline(v=as.numeric(cumsum(table(sites)))+0.5, col="black")
+  # text(y = 1.2, x = cumsum(table(sites))-table(sites)/2+0.5, label = uniq_sites, cex = 0.75, adj = 0.5)
+  # text(y = 1.1, x = cumsum(table(sites))-table(sites)/2+0.5, label = paste0('(n=', obstrees_persite,')'), cex = 0.65, adj = 0.5)
+
+}
+
+```
+
+
+### Proportion of masting trees
+
+We can do the same plots with proportion of the trees that mast:
+
+```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 2.8
+
+sites <- stringr::str_split_i(uniq_tree_ids, '_', 1)
+uniq_sites <- unique(sites)
+
+par(mfrow=c(1, 2), mar=c(4,4, 1,1), cex.lab = 1, cex.axis = 0.75)
+for(y in 1980:2022){
+  
+  ## Look at all trees within one year
+  
+  year <- y-1980+1
+
+  ylab= paste0("% masting trees in ", y)
+  display_ylim=c(0, 1.02)
+
+  idxs_tree <- (year+N_max_years*(trees_s-1))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('states_pred[', n, ']'))
+  
+  for(s in 1:length(uniq_sites)){
+    name <- paste0('states_pred_site[', s, ']')
+    samples[[name]] <- 0
+  }
+  
+  obstrees_persite <- rep(0, length(uniq_sites))
+  trees_persite <- rep(0, length(uniq_sites))
+  for(t in 1:data$N_trees){
+    name <- paste0('states_pred_site[', which(uniq_sites == sites[t]), ']')
+    samples[[name]] <- samples[[name]] + (samples[[names[t]]]-1)
+    
+    obstrees_persite[which(uniq_sites == sites[t])] <- 
+      obstrees_persite[which(uniq_sites == sites[t])] +
+      ifelse(idxs_tree[t]%in%observed_flags,1, 0)
+    trees_persite[which(uniq_sites == sites[t])] <-
+      trees_persite[which(uniq_sites == sites[t])] + 1
+  }
+  
+  names <- sapply(1:length(uniq_sites),
+                  function(n) paste0('states_pred_site[', n, ']'))
+  
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]]/trees_persite[n], probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  # delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  # display_ylim[1] <- display_ylim[1] - delta
+  # display_ylim[2] <- display_ylim[2] + delta   
+  
+  
+  xticklabs = sapply(1:length(uniq_sites), function(n) paste0(uniq_sites[n], '\n(n=',obstrees_persite[n],'/',trees_persite[n],')'))
+  
+  plot(1, type="n", main='',
+       xlim=c(bin_min, bin_max), xlab='', xaxt="n",
+       ylim=display_ylim, ylab=ylab, xaxs = 'i', yaxt="n",)
+  axis(1, at=1:N, labels=xticklabs[1:N], las = 2)    
+  axis(2, at=seq(0,1,0.2), labels = seq(0,1,0.2))   
+  
+  
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_light_highlight, 'grey85'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_mid, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(obstrees_persite[n] > 0, util$c_mid_highlight, 'grey75'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(obstrees_persite[n] > 0,util$c_dark, 'grey40'), lwd=2)
+    
+    
+    
+  }
+  
+  # abline(v=as.numeric(cumsum(table(sites)))+0.5, col="black")
+  # text(y = 1.2, x = cumsum(table(sites))-table(sites)/2+0.5, label = uniq_sites, cex = 0.75, adj = 0.5)
+  # text(y = 1.1, x = cumsum(table(sites))-table(sites)/2+0.5, label = paste0('(n=', obstrees_persite,')'), cex = 0.65, adj = 0.5)
+
+}
+
+```
+
+## Tree-level state, by year
+
+```{r}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 2.5
+
+
+for(y in 1980:2022){
+  
+  ## Look at all trees within one year
+  par(mfrow=c(1, 1), mar=c(2,4, 1,1), cex.lab = 1, cex.axis = 0.75)
+  year <- y-1980+1
+
+  xlab="Tree"
+  xticklabs=1:data$N_trees
+  ylab= paste0("Tree-level state in ", y)
+  display_ylim=c(0, 1.2)
+  main=paste("Tree", uniq_tree_ids[t])  
+
+  idxs_tree <- (year+N_max_years*(trees_s-1))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('states_pred[', n, ']'))
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]]-1, probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  display_ylim[1] <- display_ylim[1] - delta
+  display_ylim[2] <- display_ylim[2] + delta      
+  
+  plot(1, type="n", main='',
+       xlim=c(bin_min, bin_max), xlab=xlab, xaxt="n",
+       ylim=display_ylim, ylab=ylab, xaxs = 'i', yaxt="n",)
+  axis(1, at=1:N, labels=xticklabs[1:N])    
+  axis(2, at=c(0,1), labels=c('Non-mast', 'Mast'))   
+  
+  obstrees_persite <- rep(0, length(uniq_sites))
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_light_highlight, 'grey85'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_mid, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_mid_highlight, 'grey75'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(idxs_tree[n]%in%observed_flags,util$c_dark, 'grey40'), lwd=2)
+    
+    obstrees_persite[which(uniq_sites == sites[n])] <- 
+      obstrees_persite[which(uniq_sites == sites[n])] +
+      ifelse(idxs_tree[n]%in%observed_flags,1, 0)
+    
+  }
+  
+  abline(v=as.numeric(cumsum(table(sites)))+0.5, col="black")
+  text(y = 1.2, x = cumsum(table(sites))-table(sites)/2+0.5, label = uniq_sites, cex = 0.75, adj = 0.5)
+  text(y = 1.1, x = cumsum(table(sites))-table(sites)/2+0.5, label = paste0('(n=', obstrees_persite,')'), cex = 0.65, adj = 0.5)
+
+}
+
+```
+
+## 2017 to 2019
+
+Here I focus on `Benwell` and `Nettlebed`, two sites where we have a good number of trees and that seem to behave differently over these 3 years.
+
+```{r}
+#| echo: false
+#| fig-width: 5
+#| fig-height: 2.5
+
+uniq_subset_sites <- c("Benwell", "Nettlebed")
+trees_s <- which(grepl( paste(uniq_subset_sites,collapse="|"), uniq_tree_ids))
+subset_sites <- sites[sites%in% uniq_subset_sites]
+
+for(y in 2017:2019){
+  
+  ## Look at all trees within one year
+  par(mfrow=c(1, 1), mar=c(2,4, 1,1), cex.lab = 1, cex.axis = 0.75)
+  year <- y-1980+1
+
+  xlab="Tree"
+  xticklabs=1:data$N_trees
+  ylab= paste0("Tree-level state in ", y)
+  display_ylim=c(0, 1.2)
+  main=paste("Tree", uniq_tree_ids[t])  
+
+  idxs_tree <- (year+N_max_years*(trees_s-1))
+  names <- sapply(idxs_tree,
+                  function(n) paste0('states_pred[', n, ']'))
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]]-1, probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  display_ylim[1] <- display_ylim[1] - delta
+  display_ylim[2] <- display_ylim[2] + delta      
+  
+  plot(1, type="n", main='',
+       xlim=c(bin_min, bin_max), xlab=xlab, xaxt="n",
+       ylim=display_ylim, ylab=ylab, xaxs = 'i', yaxt="n",)
+  axis(1, at=1:N, labels=xticklabs[1:N])    
+  axis(2, at=c(0,1), labels=c('Non-mast', 'Mast'))   
+  
+  obstrees_persite <- rep(0, length(uniq_subset_sites))
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_light_highlight, 'grey85'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_mid, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(idxs_tree[n]%in%observed_flags, util$c_mid_highlight, 'grey75'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(idxs_tree[n]%in%observed_flags,util$c_dark, 'grey40'), lwd=2)
+    
+    obstrees_persite[which(uniq_subset_sites == subset_sites[n])] <- 
+      obstrees_persite[which(uniq_subset_sites == subset_sites[n])] +
+      ifelse(idxs_tree[n]%in%observed_flags,1, 0)
+    
+  }
+  
+  abline(v=as.numeric(cumsum(table(subset_sites)))+0.5, col="black")
+  text(y = 1.2, x = cumsum(table(subset_sites))-table(subset_sites)/2+0.5, label = uniq_subset_sites, cex = 0.75, adj = 0.5)
+  text(y = 1.1, x = cumsum(table(subset_sites))-table(subset_sites)/2+0.5, label = paste0('(n=', obstrees_persite,')'), cex = 0.65, adj = 0.5)
+
+}
+
+```
+
+Let's look at the first tree in both stands. Both have the same state in 2017 and 2018, but differ in 2019.
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 10
+
+set.seed(123456)
+par(mfrow=c(2, 1), mar = c(4,4,2,2))
+for (t in c(1,32)) {
+  
+  idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
+  observed_idxs_tree <- tree_start_idxs[t]:tree_end_idxs[t]
+  observed_flags <- years[tree_start_idxs[t]:tree_end_idxs[t]]
+  
+  names <- sapply(idxs_tree,
+                  function(n) paste0('seed_counts_pred[', n, ']'))
+  xlab="Year"
+  xticklabs=first_year:last_year
+  ylab="Seed Counts"
+  display_ylim=c(0, 400)
+  main=""
+  
+  # Construct bins
+  N <- length(names)
+  bin_min <- 0.5
+  bin_max <- N + 0.5
+  bin_delta <- 1
+  breaks <- seq(bin_min, bin_max, bin_delta)
+  
+  plot_config <- util$configure_bin_plotting(breaks)
+  plot_idxs <- plot_config[[1]]
+  plot_xs <- plot_config[[2]]
+  
+  # Construct marginal quantiles
+  probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+  calc <- function(n) {
+    util$ensemble_mcmc_quantile_est(samples[[names[n]]], probs)
+  }
+  quantiles <- sapply(1:N, calc)
+  plot_quantiles <- do.call(cbind, lapply(plot_idxs,
+                                          function(n) quantiles[1:9, n]))
+  
+  delta <- 0.05 * (display_ylim[2] - display_ylim[1])
+  display_ylim[1] <- display_ylim[1] - delta
+  display_ylim[2] <- display_ylim[2] + delta      
+  
+  plot(1, type="n", main=main,
+       xlim=c(bin_min + 20 , bin_max), xlab=xlab, xaxt="n",
+       ylim=display_ylim, ylab=ylab)
+  axis(1, at=1:N, labels=xticklabs)    
+  
+  for(n in 1:N){
+    
+    idplot <- c(n*2-1, n*2)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_light, 'grey90'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_light_highlight, 'grey80'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_mid, 'grey70'), border = NA)
+    polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+            c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+            col = ifelse(n%in%observed_flags, util$c_mid_highlight, 'grey60'), border = NA)
+    
+    lines(plot_xs[idplot], plot_quantiles[5, idplot],
+          col= ifelse(n%in%observed_flags,util$c_dark, 'grey50'), lwd=2)
+  }
+  
+  for(i in observed_idxs_tree) {
+    lines(c(years[i] - 0.5, years[i] + 0.5),
+          rep(seed_counts[i], 2),
+          col="white", lwd=4)
+    lines(c(years[i] - 0.5, years[i] + 0.5),
+          rep(data$seed_counts[i], 2),
+          col="black", lwd=2)
+  }
+  
+  abline(v=c(38-0.5,40+0.5), lwd = 1.2)
+  
+}
+```

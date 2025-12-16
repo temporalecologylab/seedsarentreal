@@ -119,21 +119,17 @@ text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey3
 
 The following quote illustrates the current approach of statistical model of masting:
 
-> ``We fitted a zero-inflated, negative binomial mixed model to the annual number of initiated seeds in each tree, with fixed factors that included summer temperatures in 1 and 2 years before seedfall, [...] and seed production in the previous year to account for possible resource depletion. [...] We included [...] a first-order temporal autocorrelation structure.''
+> ``We fitted a zero-inflated, negative binomial mixed model to the annual number of initiated seeds in each tree, with fixed factors that included summer temperatures in 1 and 2 years before seedfall, [...] and seed production in the previous year to account for possible resource depletion. [...] We included [...] a first-order temporal autocorrelation structure."
 
 If we ignore the zero-inflated part, we could write this model as something like:
 
-$$y_i \sim NegBin(\mu_i, \phi)$$
-
-$$\mu_i = \alpha + \beta^\text{summer}_{n-1}.X^\text{summer}_{n-1} + \beta^\text{summer}_{n-2}.X^\text{summer}_{n-2} + \beta^\text{seed}_{n-1}.y_{i-1}+ \rho.\epsilon_{i-1}+\epsilon_i$$
+$$y_i \sim \text{NegBin}(\mu_i, \phi)$$
+$$\mu_i = \alpha + \beta^\text{summer}_{n-1}.X^\text{summer}_{i-1} + \beta^\text{summer}_{n-2}.X^\text{summer}_{i-2} + \beta^\text{seed}_{n-1}.y_{i-1}+ \rho.\epsilon_{i-1}+\epsilon_i$$
 $$\epsilon_i \sim \mathcal{N}(0,1)$$
+The idea is to introduce some dependency between the seed counts:
+
 ```{r, fig.height=3, fig.width=7, fig.align="center", dev = 'tikz'}
 #| echo: false
-
-par(family="serif", las=1, bty="l",
-    cex.axis=0.8, cex.lab=0.85, cex.main=0.85,
-    xaxs="i", yaxs="i", mar = c(5, 4, 3, 1))
-
 
 x <- seq(1,10,2)
 y <- rep(0.5, 5)
@@ -145,11 +141,125 @@ plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
 # Add circles: inches=F specifies radius in plot coordinates
 symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
 arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+arrows(x[5]+0.5, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
+
+
+```
+
+The inclusion of both a lagged response of $\beta^\text{seed}_{n-1}.y_{i-1}$ and a first-order autocorrelation structure on the residuals $\rho.\epsilon_{i-1}$ seems... quite tricky.
+
+But more importantly, the effect of summer temperature does not directly depends on the previous state. In other words, whatever the value of $\beta^\text{seed}_{n-1}.y_{i-1}$, a tree that experiences a warm summers would be predicted to have an increasing seed production---regardless of the previous reproductive state. 
+
+```{r, fig.height=6, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+x <- seq(1,10,2)
+y <- rep(0.5, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,2))
+
+# Add circles: inches=F specifies radius in plot coordinates
+symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
+text(x, rep(0.83, 5), labels = c('$\\beta^\\text{summer}_{n-1}.X^\\text{summer}_{0}$', '...', '$\\beta^\\text{summer}_{n-1}.X^\\text{summer}_{i-1}$', '$\\beta^\\text{summer}_{n-1}.X^\\text{summer}_{i}$', '...'), col = 'grey30', cex = 0.85)
+arrows(x, 0.77, x, 0.65, col = 'grey40', lwd=1, length = 0.07)
+arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+arrows(x[5]+0.5, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
 text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
 
 ```
 
-The inclusion of both a lagged response of $y_{n-1}$ and an first-order autocorrelation structure in the residuals seems... quite dangerous. \
-But more importantly, this approach do not try to model the reproductive state of the tree. In other words, the effect of summer temperature does not directly depends on the previous on reproductive state in the previous year. If $\beta^\text{summer}_{n-1} > 0$, a tree that experiences increasing warm summers would be predicted to have an increasing seed production---regardless of the previous reproductive state.
+This issue arises because we does not explicitly simulate the reproductive state of an individual tree. The model does not allow to differentiate effects of climate during a non-masting year or a masting year. \
+Moreover, without modeling individual-level states, it is not possible to infer reproductive behavior at the population scale---including the degree of potential synchrony.
 
+## A new approach grounded in biology
 
+Researchers have worked on the reproductive biology of trees for decades---and in particular fruit trees. In parallel, people working on masting have defined characteristics of masting and developed clear hypotheses about the evolutionary mechanisms that could cause masting. \ 
+There is thus a great opportunity to develop more generative models, that explicitly incorporate biological knowledge of flower and fruit development in order to better understand how masting works. 
+
+To understand the reproductive behavior that arises at the population level, we need to model individual trees' reproduction. At the tree level, floral buds are initiated the year before flowering---in the same time as fruits of the current year start developing. During a large crop year (an "on"-year), the presence of many fruits depress flower initiation because of hormonal inhibition and resource trade-off. Thus, the next year will likely be an "off"-year. This behavior is called **alternate bearing**. It is not always a 2-year cycle, as an "on"-year can be followed by several "off"-years. This clearly defines two states for a tree.
+
+```{r, fig.height=3, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+x <- seq(1,10,2)
+y <- rep(0.5, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,1))
+
+# Add circles: inches=F specifies radius in plot coordinates
+# arrows(x[1]-1, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+# arrows(x[1]-0.55, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+symbols(1, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(1, 0.6, labels = '$z_{1}=$', col = util$c_dark)
+text(1, 0.45, labels = 'on-year', col = util$c_dark)
+symbols(3, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(3, 0.5, labels = '...', col = util$c_dark_teal)
+symbols(5, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(5, 0.6, labels = '$z_i=$', col = util$c_dark_teal)
+text(5, 0.45, labels = 'off-year', col = util$c_dark_teal)
+symbols(7, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(7, 0.6, labels = '$z_{i+1}=$', col = util$c_dark)
+text(7, 0.45, labels = 'on-year', col = util$c_dark)
+symbols(9, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(9, 0.5, labels = '...', col = util$c_dark_teal)
+arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+arrows(x[5]+0.5, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+
+```
+
+Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$.\
+So, with some parameters $\theta$, the probability of observing some sequences of the two first states is:
+$$p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)$$
+And then, adding the next state:
+$$p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)$$
+And so on...
+
+Each observed seed count at each step arises from the state of the tree. 
+
+```{r, fig.height=5, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+x <- seq(1,10,2)
+y <- rep(0.9, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,1.5))
+
+# Add circles: inches=F specifies radius in plot coordinates
+# arrows(x[1]-1, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+# arrows(x[1]-0.55, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+symbols(1, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(1, 0.5, labels = '$z_{1}$', col = util$c_dark)
+symbols(3, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(3, 0.5, labels = '...', col = util$c_dark_teal)
+symbols(5, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(5, 0.5, labels = '$z_i$', col = util$c_dark_teal)
+symbols(7, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(7, 0.5, labels = '$z_{i+1}$', col = util$c_dark)
+symbols(9, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(9, 0.5, labels = '...', col = util$c_dark_teal)
+arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+arrows(x[5]+0.5, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+
+symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
+text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
+arrows(x, 0.65, x, 0.75, col = 'grey40', lwd=1, length = 0.07)
+
+```
+
+This would give us this likelihood for the two first seed counts:
+
+$$p(y_1, y_2, z_1, z_2 ~ | ~\theta) = p(z_1) \, p(y_1 ~ | ~ z_1,\theta) \, p(z_2 ~ | ~ z_1,\theta) \, p(y_2 ~ | ~ z_2,\theta)$$
+And for all observations until $i+1$:
+
+$$ p(z_{1}) \, p(y_{1} ~ | ~ z_{1}, \theta) \prod_{k = 2}^{i+1} p(z_{k} ~ | ~ z_{k - 1}, \theta) \, p(y_{k} ~ | ~ z_{k}, \theta).$$

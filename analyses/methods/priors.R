@@ -24,7 +24,7 @@ theta <- rbeta(1e6, 2,2)
 hist(theta, prob = TRUE,
      main='', xlab = 'theta')
 
-tau0 <- rbeta(1e6, 1,4)
+tau0 <- rbeta(1e6, 1,1.5)
 hist(tau0, prob = TRUE,
      main='', xlab = 'tau_nm_m0 or tau_m_m0')
 

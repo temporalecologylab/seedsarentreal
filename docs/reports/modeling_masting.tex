@@ -193,7 +193,7 @@
 \section{The motivations behind the
 project}\label{the-motivations-behind-the-project}
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, colbacktitle=quarto-callout-tip-color!10!white, leftrule=.75mm, toprule=.15mm, bottomrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, colback=white, left=2mm, coltitle=black, toptitle=1mm, arc=.35mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, rightrule=.15mm, titlerule=0mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, breakable, opacityback=0, colback=white, bottomrule=.15mm, rightrule=.15mm, left=2mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, toptitle=1mm, toprule=.15mm, titlerule=0mm, arc=.35mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 Understanding the reproductive behavior that arises at the population
 level requires to study individual trees' responses. We believe that
@@ -208,7 +208,7 @@ regeneration---and provide better forecasts!
 
 \hfill\break
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, colbacktitle=quarto-callout-tip-color!10!white, leftrule=.75mm, toprule=.15mm, bottomrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, colback=white, left=2mm, coltitle=black, toptitle=1mm, arc=.35mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, rightrule=.15mm, titlerule=0mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, breakable, opacityback=0, colback=white, bottomrule=.15mm, rightrule=.15mm, left=2mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, toptitle=1mm, toprule=.15mm, titlerule=0mm, arc=.35mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 Bayesian magic! Our approach models the (latent) reproductive states of
 each \emph{individual} tree, and the consequent amount of seed
@@ -248,31 +248,88 @@ number of initiated seeds in each tree, with fixed factors that included
 summer temperatures in 1 and 2 years before seedfall, {[}\ldots{]} and
 seed production in the previous year to account for possible resource
 depletion. {[}\ldots{]} We included {[}\ldots{]} a first-order temporal
-autocorrelation structure.'\,'
+autocorrelation structure.''
 \end{quote}
 
 If we ignore the zero-inflated part, we could write this model as
 something like:
 
-\[y_i \sim NegBin(\mu_i, \phi)\]
-
-\[\mu_i = \alpha + \beta^\text{summer}_{n-1}.X^\text{summer}_{n-1} + \beta^\text{summer}_{n-2}.X^\text{summer}_{n-2} + \beta^\text{seed}_{n-1}.y_{i-1}+ \rho.\epsilon_{i-1}+\epsilon_i\]
-\[\epsilon_i \sim \mathcal{N}(0,1)\]
+\[y_i \sim \text{NegBin}(\mu_i, \phi)\]
+\[\mu_i = \alpha + \beta^\text{summer}_{n-1}.X^\text{summer}_{i-1} + \beta^\text{summer}_{n-2}.X^\text{summer}_{i-2} + \beta^\text{seed}_{n-1}.y_{i-1}+ \rho.\epsilon_{i-1}+\epsilon_i\]
+\[\epsilon_i \sim \mathcal{N}(0,1)\] The idea is to introduce some
+dependency between the seed counts:
 
 \begin{center}
 \includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-4-1.pdf}
 \end{center}
 
-The inclusion of both a lagged response of \(y_{n-1}\) and an
-first-order autocorrelation structure in the residuals seems\ldots{}
-quite dangerous.\\
-But more importantly, this approach do not try to model the reproductive
-state of the tree. In other words, the effect of summer temperature does
-not directly depends on the previous on reproductive state in the
-previous year. If \(\beta^\text{summer}_{n-1} > 0\), a tree that
-experiences increasing warm summers would be predicted to have an
-increasing seed production---regardless of the previous reproductive
-state.
+The inclusion of both a lagged response of
+\(\beta^\text{seed}_{n-1}.y_{i-1}\) and a first-order autocorrelation
+structure on the residuals \(\rho.\epsilon_{i-1}\) seems\ldots{} quite
+tricky.
+
+But more importantly, the effect of summer temperature does not directly
+depends on the previous state. In other words, whatever the value of
+\(\beta^\text{seed}_{n-1}.y_{i-1}\), a tree that experiences a warm
+summers would be predicted to have an increasing seed
+production---regardless of the previous reproductive state.
+
+\begin{center}
+\includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-5-1.pdf}
+\end{center}
+
+This issue arises because we does not explicitly simulate the
+reproductive state of an individual tree. The model does not allow to
+differentiate effects of climate during a non-masting year or a masting
+year.\\
+Moreover, without modeling individual-level states, it is not possible
+to infer reproductive behavior at the population scale---including the
+degree of potential synchrony.
+
+\subsection{A new approach grounded in
+biology}\label{a-new-approach-grounded-in-biology}
+
+Researchers have worked on the reproductive biology of trees for
+decades---and in particular fruit trees. In parallel, people working on
+masting have defined characteristics of masting and developed clear
+hypotheses about the evolutionary mechanisms that could cause masting. ~
+There is thus a great opportunity to develop more generative models,
+that explicitly incorporate biological knowledge of flower and fruit
+development in order to better understand how masting works.
+
+To understand the reproductive behavior that arises at the population
+level, we need to model individual trees' reproduction. At the tree
+level, floral buds are initiated the year before flowering---in the same
+time as fruits of the current year start developing. During a large crop
+year (an ``on''-year), the presence of many fruits depress flower
+initiation because of hormonal inhibition and resource trade-off. Thus,
+the next year will likely be an ``off''-year. This behavior is called
+\textbf{alternate bearing}. It is not always a 2-year cycle, as an
+``on''-year can be followed by several ``off''-years. This clearly
+defines two states for a tree.
+
+\begin{center}
+\includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-6-1.pdf}
+\end{center}
+
+Each state \(z_{i+1}\) is dependent \textbf{only on the preceding state}
+\(z_{i}\).\\
+So, with some parameters \(\theta\), the probability of observing some
+sequences of the two first states is:
+\[p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)\] And
+then, adding the next state:
+\[p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)\]
+And so on\ldots{}
+
+Each observed seed count at each step arises from the state of the tree.
+
+\begin{center}
+\includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-7-1.pdf}
+\end{center}
+
+This would give us this likelihood for the two first seed counts:
+
+\[p(y_1, y_2, z_1, z_2 ~ | ~\theta) = p(z_1) \times p(y_1 ~ | ~ z_1,\theta) \times p(z_2 ~ | ~ z_1,\theta) \times p(y_2 ~ | ~ z_2,\theta)\]
 
 
 

@@ -74,29 +74,118 @@ for (tid in uniq_tree_ids) {
   
 }
 
+# Make some predictions!
+source(file.path(wd, 'climatic_trends.R'))
+years_to_predict <- first_year:2100
+trees_per_stand <- 5
+unique_stands <- unique(clim_data$site.ID)
+newtree_stand_idxs <- rep(which(unique_stands==unique_stands), each = trees_per_stand)
+N_newtrees <- length(newtree_stand_idxs)
+N_max_newyears <- length(years_to_predict)
+first_newyear <- first_year
+
+newyears <- c()
+newprevsummer_temps <-c()
+newspring_temps <-c()
+newgdd_lastfrost <-c()
+N_newyears <- c()
+
+idx <- 1
+newtree_start_idxs <- c()
+newtree_end_idxs <- c()
+
+for (i in 1:N_newtrees) {
+  
+  newyears_tree <- years_to_predict-first_newyear+1
+  newyears <- c(newyears, newyears_tree)
+  
+  N_newyears_tree <- length(newyears_tree)
+  N_newyears <- c(N_newyears, N_newyears_tree)
+  
+  newprevsummer_temps_tree <- newclim_data[newclim_data$site.ID == unique_stands[newtree_stand_idxs[i]] & newclim_data$year %in% years_to_predict, 'meantmax_ja'] 
+  newprevsummer_temps <- c(newprevsummer_temps, newprevsummer_temps_tree)
+  
+  newspring_temps_tree <- newclim_data[newclim_data$site.ID == unique_stands[newtree_stand_idxs[i]] & newclim_data$year %in% years_to_predict, 'meantmean_am'] 
+  newspring_temps <- c(newspring_temps, newspring_temps_tree)
+  
+  newgdd_lastfrost_tree <- newclim_data[newclim_data$site.ID == unique_stands[newtree_stand_idxs[i]] & newclim_data$year %in% years_to_predict, 'gdd_b5_tolastfrost']/10 
+  newgdd_lastfrost <- c(newgdd_lastfrost, newgdd_lastfrost_tree)
+  
+  newtree_start_idxs <- c(newtree_start_idxs, idx)
+  idx <- idx + N_newyears_tree
+  newtree_end_idxs <- c(newtree_end_idxs, idx - 1)
+  
+}
+
+
 # Format data
 N <- length(years)
+Nnew <- length(newyears)
 data <- mget(c('N', 'N_trees', 'N_max_years',
                'N_years', 'tree_start_idxs', 'tree_end_idxs',
                'seed_counts', 'years', 
-               'prevsummer_temps', 'spring_temps', 'gdd_lastfrost'))
+               'prevsummer_temps', 'spring_temps', 'gdd_lastfrost',
+               # for predictions
+               'Nnew', 'N_newtrees', 'N_max_newyears', 'newtree_stand_idxs',
+               'N_newyears', 'newtree_start_idxs', 'newtree_end_idxs','newyears', 
+               'newprevsummer_temps', 'newgdd_lastfrost', 'newspring_temps'
+               ))
 
 # Posterior quantification
-fit <- stan(file= file.path(wd, "stan", "model2_treelevel_zinb_missing_rescaled_summertempfull_springfrost_springtemp.stan"),
-            data=data, seed=5838299, chain = 4, cores = 4,
-            warmup=1000, iter=2024, refresh=100)
+if(FALSE){
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertempfull_springfrost_springtemp_constrainedslopes_wpred_breakdownpred.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_24sept2025_fullmodel_constrainedslopes.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring',  
+                                           'rho0', 'beta_nm_m', 'beta_m_m',
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+  
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp_constrainedslopes_wpred.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_15sept2025_biologymodel_constrainedslopes.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring', 
+                                           'rho0', 'beta_nm_m', 
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+  
+  fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp_wpred.stan"),
+              data=data, seed=5838299, chain = 4, cores = 4,
+              warmup=1000, iter=2024, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_15sept2025_biologymodel.rds'))
+  diagnostics <- util$extract_hmc_diagnostics(fit)
+  util$check_all_hmc_diagnostics(diagnostics)
+  samples <- util$extract_expectand_vals(fit)
+  base_samples <- util$filter_expectands(samples,
+                                         c('lambda1', 'theta1', 'psi1',
+                                           'lambda20', 'psi2', 
+                                           'beta_lambda2_frost', 'beta_lambda2_spring', 
+                                           'rho0', 'beta_nm_m', 
+                                           'tau_nm_m0', 'tau_m_m0'))
+  util$check_all_expectand_diagnostics(base_samples)
+}
+{
+  fit_full_const <- readRDS(file.path(wd, 'output', 'fit_24sept2025_fullmodel_constrainedslopes.rds'))
+  fit_biol_const <- readRDS(file = file.path(wd, 'output', 'fit_15sept2025_biologymodel_constrainedslopes.rds'))
+  fit_biol <- readRDS(file = file.path(wd, 'output', 'fit_15sept2025_biologymodel.rds'))
+}
 
-diagnostics <- util$extract_hmc_diagnostics(fit)
-util$check_all_hmc_diagnostics(diagnostics)
+samples <- util$extract_expectand_vals(fit_biol)
 
-samples <- util$extract_expectand_vals(fit)
-base_samples <- util$filter_expectands(samples,
-                                       c('lambda1', 'theta1', 'psi1',
-                                         'lambda20', 'psi2', 
-                                         'beta_lambda2_frost', 'beta_lambda2_spring',
-                                         'rho0', 'beta_nm_m', 'beta_m_m',
-                                         'tau_nm_m0', 'tau_m_nm0'))
-util$check_all_expectand_diagnostics(base_samples)
 
 # Retrodictive check
 observed_idxs <- c()

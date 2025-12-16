@@ -42,11 +42,13 @@ data {
   // Spring temperature (in degC)
   array[N_max_years*N_trees] real spring_temps;
   
+  int N_newtrees;
+  
 }
 
-transformed data{
-  int N_newtrees = 100;
-}
+// transformed data{
+//   int N_newtrees = 100;
+// }
 
 parameters {
   real<lower=0> lambda1; // Non-masting intensity
