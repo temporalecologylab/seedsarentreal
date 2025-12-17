@@ -96,8 +96,8 @@
 
 \usepackage{bm}
 \usepackage{xcolor}
-\definecolor{mid}{HTML}{B97C7C}
-\definecolor{light_teal}{HTML}{6B8E8E}
+\definecolor{mid}{HTML}{8F2727}
+\definecolor{teal}{HTML}{1D4F4F}
 \usepackage{amsmath}
 \KOMAoption{captions}{tableheading}
 \makeatletter
@@ -193,7 +193,7 @@
 \section{The motivations behind the
 project}\label{the-motivations-behind-the-project}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, breakable, opacityback=0, colback=white, bottomrule=.15mm, rightrule=.15mm, left=2mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, toptitle=1mm, toprule=.15mm, titlerule=0mm, arc=.35mm, leftrule=.75mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, left=2mm, bottomrule=.15mm, breakable, colframe=quarto-callout-tip-color-frame, colback=white, opacityback=0, opacitybacktitle=0.6, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, coltitle=black, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, leftrule=.75mm]
 
 Understanding the reproductive behavior that arises at the population
 level requires to study individual trees' responses. We believe that
@@ -208,7 +208,7 @@ regeneration---and provide better forecasts!
 
 \hfill\break
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, breakable, opacityback=0, colback=white, bottomrule=.15mm, rightrule=.15mm, left=2mm, bottomtitle=1mm, colframe=quarto-callout-tip-color-frame, toptitle=1mm, toprule=.15mm, titlerule=0mm, arc=.35mm, leftrule=.75mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, left=2mm, bottomrule=.15mm, breakable, colframe=quarto-callout-tip-color-frame, colback=white, opacityback=0, opacitybacktitle=0.6, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, coltitle=black, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, leftrule=.75mm]
 
 Bayesian magic! Our approach models the (latent) reproductive states of
 each \emph{individual} tree, and the consequent amount of seed
@@ -313,23 +313,77 @@ defines two states for a tree.
 \end{center}
 
 Each state \(z_{i+1}\) is dependent \textbf{only on the preceding state}
-\(z_{i}\).\\
-So, with some parameters \(\theta\), the probability of observing some
+\(z_{i}\) (which is called the Markovian assumption). These states are
+latent, because we observe only the seed counts.\\
+With some parameters \(\theta\), the probability of observing some
 sequences of the two first states is:
 \[p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)\] And
 then, adding the next state:
 \[p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)\]
-And so on\ldots{}
-
+And so on \(\ldots\)\\
 Each observed seed count at each step arises from the state of the tree.
 
 \begin{center}
 \includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-7-1.pdf}
 \end{center}
 
-This would give us this likelihood for the two first seed counts:
+This gives us this likelihood for the two first seed counts:
+\[p(y_1, y_2, z_1, z_2 ~ | ~\theta) = p(z_1) \, p(y_1 ~ | ~ z_1,\theta) \, p(z_2 ~ | ~ z_1,\theta) \, p(y_2 ~ | ~ z_2,\theta)\]
 
-\[p(y_1, y_2, z_1, z_2 ~ | ~\theta) = p(z_1) \times p(y_1 ~ | ~ z_1,\theta) \times p(z_2 ~ | ~ z_1,\theta) \times p(y_2 ~ | ~ z_2,\theta)\]
+And for all observations until \(i+1\):
+\[ p(y_1, \ldots, y_{i+1}, z_1, \ldots, z_{i+1} ~ | ~\theta) = p(z_{1}) \, p(y_{1} ~ | ~ z_{1}, \theta) \prod_{k = 2}^{i+1} p(z_{k} ~ | ~ z_{k - 1}, \theta) \, p(y_{k} ~ | ~ z_{k}, \theta).\]
+So, what parameters do wo have to estimate?
+
+\paragraph{Transition between states}\label{transition-between-states}
+
+Let's look at the part which concerns the latent states.\\
+First, we need to infer the initial state probability \(p(z_{1})\),
+i.e.~the probability that the first year is an \textcolor{mid}{on-year}
+or an \textcolor{teal}{off-year}. Because we have only two states,
+\(p(z_{1} = \text{\textcolor{mid}{on}}) = 1-p(z_{1} = \text{\textcolor{teal}{off}})\)---i.e.~we
+have only one parameter to estimate.\\
+We also have to infer the probabilities of transition
+\(p(z_{k} ~ | ~ z_{k - 1}, \theta)\). With two states, this corresponds
+to this transition matrix:
+
+\[
+M =
+\begin{bmatrix}
+\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{teal}{off}}} \\
+\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{teal}{off}}}
+\end{bmatrix}
+\] The probability \(p(z_{2})\) is then obtain with the product:
+
+\[
+\begin{bmatrix}
+p(z_{2} = \text{\textcolor{mid}{on}}) & p(z_{2} = \text{\textcolor{teal}{off}}) 
+\end{bmatrix} = 
+\begin{bmatrix}
+p(z_{1} = \text{\textcolor{mid}{on}}) & p(z_{1} = \text{\textcolor{teal}{off}}) 
+\end{bmatrix} \cdot M
+\]
+
+Again, the transition matrix corresponds to only two parameters, for
+example: \[
+M =
+\begin{bmatrix}
+\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & 1-\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} \\
+\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}} & 1- \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}
+\end{bmatrix}
+\]
+
+In summary, we have 3 parameters to infer: the initial probability of
+masting \(\tau_0= p(z_{1}=\text{\textcolor{mid}{on}})\), the probability
+of transitioning from an \textcolor{teal}{off-year} to an
+\textcolor{teal}{on-year}
+\(\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}\),
+and the probability of staying into an \textcolor{teal}{on-year} state
+\(\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}}\).
+
+\paragraph{Seed production parameters}\label{seed-production-parameters}
+
+Now, what about the parameters of the observational model that links the
+latent state to the observed seed count?\\
 
 
 

@@ -29,8 +29,8 @@ format:
       - text: |
           \usepackage{bm}
           \usepackage{xcolor}
-          \definecolor{mid}{HTML}{B97C7C}
-          \definecolor{light_teal}{HTML}{6B8E8E}
+          \definecolor{mid}{HTML}{8F2727}
+          \definecolor{teal}{HTML}{1D4F4F}
           \usepackage{amsmath}
 format-links: false
 knitr:
@@ -215,13 +215,12 @@ arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 
 
 ```
 
-Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$.\
-So, with some parameters $\theta$, the probability of observing some sequences of the two first states is:
+Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$ (which is called the Markovian assumption). These states are latent, because we observe only the seed counts.\
+With some parameters $\theta$, the probability of observing some sequences of the two first states is:
 $$p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)$$
 And then, adding the next state:
 $$p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)$$
-And so on...
-
+And so on $\ldots$ \
 Each observed seed count at each step arises from the state of the tree. 
 
 ```{r, fig.height=5, fig.width=7, fig.align="center", dev = 'tikz'}
@@ -257,9 +256,49 @@ arrows(x, 0.65, x, 0.75, col = 'grey40', lwd=1, length = 0.07)
 
 ```
 
-This would give us this likelihood for the two first seed counts:
-
+This gives us this likelihood for the two first seed counts:
 $$p(y_1, y_2, z_1, z_2 ~ | ~\theta) = p(z_1) \, p(y_1 ~ | ~ z_1,\theta) \, p(z_2 ~ | ~ z_1,\theta) \, p(y_2 ~ | ~ z_2,\theta)$$
-And for all observations until $i+1$:
 
-$$ p(z_{1}) \, p(y_{1} ~ | ~ z_{1}, \theta) \prod_{k = 2}^{i+1} p(z_{k} ~ | ~ z_{k - 1}, \theta) \, p(y_{k} ~ | ~ z_{k}, \theta).$$
+And for all observations until $i+1$:
+$$ p(y_1, \ldots, y_{i+1}, z_1, \ldots, z_{i+1} ~ | ~\theta) = p(z_{1}) \, p(y_{1} ~ | ~ z_{1}, \theta) \prod_{k = 2}^{i+1} p(z_{k} ~ | ~ z_{k - 1}, \theta) \, p(y_{k} ~ | ~ z_{k}, \theta).$$
+So, what parameters do wo have to estimate? 
+
+### Transition between states
+
+Let's look at the part which concerns the latent states. \
+First, we need to infer the initial state probability $p(z_{1})$, i.e. the probability that the first year is an \textcolor{mid}{on-year} or an \textcolor{teal}{off-year}. Because we have only two states, $p(z_{1} = \text{\textcolor{mid}{on}}) = 1-p(z_{1} = \text{\textcolor{teal}{off}})$---i.e. we have only one parameter to estimate. \
+We also have to infer the probabilities of transition $p(z_{k} ~ | ~ z_{k - 1}, \theta)$. With two states, this corresponds to this transition matrix:
+
+$$
+M =
+\begin{bmatrix}
+\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{teal}{off}}} \\
+\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{teal}{off}}}
+\end{bmatrix}
+$$
+The probability $p(z_{2})$ is then obtain with the product:
+
+$$
+\begin{bmatrix}
+p(z_{2} = \text{\textcolor{mid}{on}}) & p(z_{2} = \text{\textcolor{teal}{off}}) 
+\end{bmatrix} = 
+\begin{bmatrix}
+p(z_{1} = \text{\textcolor{mid}{on}}) & p(z_{1} = \text{\textcolor{teal}{off}}) 
+\end{bmatrix} \cdot M
+$$
+
+Again, the transition matrix corresponds to only two parameters, for example:
+$$
+M =
+\begin{bmatrix}
+\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & 1-\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} \\
+\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}} & 1- \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}
+\end{bmatrix}
+$$
+
+In summary, we have 3 parameters to infer: the initial probability of masting $\tau_0= p(z_{1}=\text{\textcolor{mid}{on}})$, the probability of transitioning from an \textcolor{teal}{off-year} to an \textcolor{teal}{on-year} $\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}$, and the probability of staying into an \textcolor{teal}{on-year} state $\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}}$. 
+
+### Seed production parameters
+
+Now, what about the parameters of the observational model that links the latent state to the observed seed count?\
+
