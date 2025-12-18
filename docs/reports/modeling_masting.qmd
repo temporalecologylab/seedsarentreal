@@ -66,6 +66,14 @@ options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\definecolor{mid
 options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\definecolor{light_teal}{HTML}{6B8E8E}"))
 options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\usepackage{amsmath}"))
 options(tikzLatexPackages = c(getOption("tikzLatexPackages"), "\\usepackage{bm}"))
+
+logit <- function(p){
+  return(log(p/(1-p)))
+}
+
+invlogit <- function(r){
+  return(1/(1+exp(-r)))
+}
 ```
 
 # The motivations behind the project
@@ -81,14 +89,14 @@ Understanding the reproductive behavior that arises at the population level requ
 ::: {.callout-tip}
 ## The technical motivation
 
-Bayesian magic! Our approach models the (latent) reproductive states of each _individual_ tree, and the consequent amount of seed production. The states explicitly encode the **constraints** that shape tree reproduction -- in particular, the fact that most trees need at least two years between flower bud differentiation and fruit maturation. We do not standardize away the complexities of individual-level reproduction (e.g. with normalized stand-level indices between 0 and 1...). On the contrary, modeling tree-level reproduction allows us to obtain _population_ estimates -- and thus direct inferences on the population-level variability and synchronicity! And the cherry on top: we incorporate climatic **cues** at different key moments of the reproductive cycle.
+Bayesian magic! Our approach models the (latent) reproductive states of each _individual_ tree, and the consequent amount of seed production. The states explicitly encode the **constraints** that shape tree reproduction -- in particular, the fact that most trees need at least two years between flower bud differentiation and fruit maturation. We do not standardize away the complexities of individual-level reproduction (e.g. with normalized stand-level indices between 0 and 1...). On the contrary, modeling tree-level reproduction allows us to obtain _population_ estimates --- and thus direct inferences on the population-level variability and synchronicity! And the cherry on top: we incorporate climatic **cues** at different key moments of the reproductive cycle.
 :::
 
 \newpage
 
-# The model
+# A generative model for masting
 
-## Previous models and limitations
+## Previous approaches and limitations
 
 The observations we have---whether for an individual tree or a seed trap---are a time series of yearly seed counts $y_i$.
 
@@ -215,7 +223,7 @@ arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 
 
 ```
 
-Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$ (which is called the Markovian assumption). These states are latent, because we observe only the seed counts.\
+Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$ (which is called the _Markovian_ assumption). These states are latent, because we observe only the seed counts. The model I will describe briefly in the next section is thus called a Hidden Markov Model (HMM): _hidden_ because the states are latent, and _Markov_ because of the Markovian assumption. \
 With some parameters $\theta$, the probability of observing some sequences of the two first states is:
 $$p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)$$
 And then, adding the next state:
@@ -272,11 +280,20 @@ We also have to infer the probabilities of transition $p(z_{k} ~ | ~ z_{k - 1}, 
 $$
 M =
 \begin{bmatrix}
+p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{mid}{on}}, \theta) & p(z_{k} = \text{\textcolor{teal}{off}} ~ | ~ z_{k - 1} = \text{\textcolor{mid}{on}}, \theta)  \\
+p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta)  & p(z_{k} = \text{\textcolor{teal}{off}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta) 
+\end{bmatrix}
+$$
+
+$$
+M =
+\begin{bmatrix}
 \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{teal}{off}}} \\
 \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{teal}{off}}}
 \end{bmatrix}
 $$
-The probability $p(z_{2})$ is then obtain with the product:
+
+The probability of assignment of $z_2$ to one of the two states is then obtain with the product:
 
 $$
 \begin{bmatrix}
@@ -287,7 +304,7 @@ p(z_{1} = \text{\textcolor{mid}{on}}) & p(z_{1} = \text{\textcolor{teal}{off}})
 \end{bmatrix} \cdot M
 $$
 
-Again, the transition matrix corresponds to only two parameters, for example:
+Again, because we have only two states, the transition matrix corresponds to only two parameters, for example:
 $$
 M =
 \begin{bmatrix}
@@ -296,9 +313,120 @@ M =
 \end{bmatrix}
 $$
 
-In summary, we have 3 parameters to infer: the initial probability of masting $\tau_0= p(z_{1}=\text{\textcolor{mid}{on}})$, the probability of transitioning from an \textcolor{teal}{off-year} to an \textcolor{teal}{on-year} $\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}$, and the probability of staying into an \textcolor{teal}{on-year} state $\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}}$. 
+In summary, we have 3 parameters to infer: the initial probability of masting $\tau_0= p(z_{1}=\text{\textcolor{mid}{on}})$, the probability of transitioning from an \textcolor{teal}{off-year} to an \textcolor{mid}{on-year} $\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}$, and the probability of staying into an \textcolor{teal}{on-year} state $\tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}}$. 
 
 ### Seed production parameters
 
-Now, what about the parameters of the observational model that links the latent state to the observed seed count?\
+Now, what about the parameters of the observational model that links the latent state to the observed seed count? 
+The seed production depends on the state of the tree. Basically, it's a mixture model between two probability distributions.
 
+If the tree is in an \textcolor{teal}{off-year}, then we model the (likely low) seed count with a zero-inflated negative binomial distribution:
+$$
+y_i
+\left\{
+\begin{array}{rl}
+= 0, & \text{with probability} ~ \theta\\
+\sim \text{NegBin}(\mu_\text{\textcolor{teal}{off}}, \phi_\text{\textcolor{teal}{off}}), & \text{with probability} ~ 1-\theta
+\end{array}
+\right. .
+$$
+
+If the tree is in an \textcolor{mid}{on-year}, then we model the seed count with a negative binomial distribution:
+$$y_i \sim \text{NegBin}(\mu_\text{\textcolor{mid}{on}}, \phi_\text{\textcolor{mid}{on}})$$
+
+This mixture of two probability distributions would look like this:
+```{r, fig.height=3, fig.width=5, fig.align="center", dev = 'tikz'}
+#| echo: false
+#| eval: true
+
+set.seed(12345)
+par(mar = c(4,4,1,1))
+
+theta <- 0.4
+nonmasting <- sapply(1:10000, function(x){
+  ifelse(rbinom(1, 1, theta) == 1, 0, MASS::rnegbin(1000, 25, 5))
+})
+hist(nonmasting, breaks=seq(0,650,l=40), col = '#48757560', border = "white", xlab = 'Number of seeds', main = '', prob = TRUE)
+masting <- MASS::rnegbin(10000, 160, 2)
+hist(masting[masting < 650], breaks=seq(0,650,l=40), col = "#B97C7C60", border = "white", xlab = 'Number of seeds', main = '', add = TRUE, prob = TRUE)
+text(x = 70, y = 0.02, labels = 'off-year', col = util$c_mid_teal, font = 1)
+text(x = 200, y = 0.005, labels = 'on-year', col = util$c_mid, font = 1)
+
+
+
+```
+
+### Adding climate!
+
+Explicitly modeling reproductive states and the subsequent seed production allows to think more deeply where the different climatic cues should impact the individual reproductive cycles and the population-level masting behavior. 
+
+The states explicitly encode the developmental constraints, i.e. the temporal overlap between floral bud initiation and fruit development, that explain the alternate bearing at the individual level. The transition between the states are controlled by the matrix transition. If the transition matrix stays constant across time, we would have an **homogeneous** HMM. But what if climate controls the transition between the states? \
+It's quite easy to include some variations in the transition matrix $M$, to have an **heterogeneous** HMM. For example, rather than having a constant probability $\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}$, this probability could vary with the local climate:
+
+$$\text{logit}(~\tau_{\text{\textcolor{teal}{off}} \rightarrow \text{\textcolor{mid}{on}}}\{t\}~) = \text{logit}(\tau_0) + \beta ~ \cdot ~ X_\text{climate}\{t\}$$
+\newpage
+This would give us this kind of functional form, here with $\beta>0$:
+```{r, fig.height=2.5, fig.width=4, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+tau0 <- 0.2
+beta = 0.3
+
+xclim <- seq(-10,20,0.5)
+
+tau <- invlogit(logit(tau0) + beta*xclim)
+  
+plot(tau ~ xclim, frame = FALSE, type = 'l', col = util$c_light_highlight, lwd = 2,
+     ylab = '$\\tau_{\\text{\\textcolor{teal}{off}} \\rightarrow \\text{\\textcolor{mid}{on}}}$', xlab = '$X_\\text{climate}$',
+     ylim = c(-0.01, 1.01))
+
+```
+
+Once the tree is assigned to a state, climate may also impact seed production. The number of seeds in a \textcolor{teal}{off-year} could be seen as a ``background noise", and we would thus prioritize adding some climatic predictors on the seed production of an \textcolor{mid}{on-year}. A simple approach would be to modify the location parameter $\mu_\text{\textcolor{mid}{on}}$ of the negative binomial like:
+
+$$\mu_\text{\textcolor{mid}{on}}\{t\} = \mu_0 + \beta ~ \cdot ~ X_\text{climate}\{t\}$$
+
+Obviously, the covariates $X_\text{climate}$ could be different for the transition probabilities and the seed production.
+
+In summary, we could schematize the model as follow:
+
+```{r, fig.height=5, fig.width=7, fig.align="center", dev = 'tikz'}
+#| echo: false
+
+x <- seq(1,10,2)
+y <- rep(0.9, 5)
+radii <- rep(0.5, 5)
+
+plot(1, type="n", axes = FALSE, xlab = "", ylab = "",
+     xlim=c(0,10), ylim= c(-0.2,1.5))
+
+# Add circles: inches=F specifies radius in plot coordinates
+# arrows(x[1]-1, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+# arrows(x[1]-0.55, 0.5, x[1]-0.5, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+symbols(1, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(1, 0.5, labels = '$z_{1}$', col = util$c_dark)
+symbols(3, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(3, 0.5, labels = '...', col = util$c_dark_teal)
+symbols(5, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(5, 0.5, labels = '$z_i$', col = util$c_dark_teal)
+symbols(7, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = util$c_light, fg = util$c_mid)
+text(7, 0.5, labels = '$z_{i+1}$', col = util$c_dark)
+symbols(9, 0.5, circles = 0.5, add = TRUE, inches = FALSE, bg = '#B3C6C6', fg = util$c_mid_teal)
+text(9, 0.5, labels = '...', col = util$c_dark_teal)
+arrows(x[1:4]+0.5, 0.5, x[2:5]-0.5, 0.5, col = 'grey40', lwd=1, length = 0.1)
+arrows(x[5]+0.5, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 3)
+arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 1)
+
+symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = 'grey40')
+text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
+arrows(x, 0.65, x, 0.75, col = 'grey40', lwd=1, length = 0.07)
+
+text(x, rep(1.33, 5), labels = c('$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...'), col = 'grey30', cex = 0.85)
+arrows(x, 1.27, x, 1.05, col = 'grey40', lwd=1, length = 0.07, lty = 2)
+
+text(x[1:4]+1, rep(0.1, 4), labels = c('$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '$\\beta \\cdot X_\\text{climate}\\{t\\}$'), col = 'grey30', cex = 0.85)
+arrows(x[1:4]+1, 0.2, x[1:4]+1, 0.5, col = 'grey40', lwd=1, length = 0.07, lty = 2)
+
+```
+
+# The case of beech masting dynamics
