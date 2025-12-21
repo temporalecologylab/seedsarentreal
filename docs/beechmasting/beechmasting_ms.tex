@@ -47,7 +47,7 @@ Regeneration in many temperate and tropical forests depends on tree species that
 % \item population-level characteristics! So how do individual treews do it together?
 % \end{itemize}
 % ... Population-level masting arises 
-Disruption of masting timing by climate change could trigger cascading effects on forest resilience \citep{Bogdziewicz2023, Foest2024}. Masting is a population-level characteristic that require individual trees to respond similarly to environmental cues in order to reproduce together within a certain distance---which should match with predator foraging range. Tree species that mast have likely evolved under colder climates, and global warming could modify the cues that allowed for both reproductive variability and synchrony across a population.
+Abrupt disruption of masting timing by climate change could trigger cascading effects on forest resilience \citep{Bogdziewicz2023, Foest2024}. Masting is a population-level characteristic that require individual trees to respond similarly to environmental cues in order to reproduce together within a certain distance---which should match with predator foraging range. Tree species that mast have likely evolved under colder climates, and global warming could modify the cues that allowed for both reproductive variability and synchrony across a population.
 
 % \item How do individual trees cue to mast?
 % \begin{itemize}
@@ -89,7 +89,7 @@ We developed a model in which individual trees may alternate between two latent 
 % \item some level of synchrony within stands
 % \item say how often they transition in average conditions...
 % \end{itemize}
-The model separated out two distinct modalities of seed production in beech forests in England, supporting the existence of two reproductive states at the tree level. Alternance between these states at the tree level generated high variability in seed production at the population scale. Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability X of transitioning from a low-reproduction to a high-reproduction state---and a low probability of Y of remaining in that state in the following year.
+The model separates out two distinct modalities of seed production in beech forests in England, supporting the existence of two reproductive states at the tree level. Alternance between these states at the tree level generates high variability in seed production at the population scale. Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability X of transitioning from a low-reproduction to a high-reproduction state, and a low probability of Y of remaining in that state in the following year.
 
 % \item Climate impacts on masting (figure of climate effects)
 % \begin{itemize}
@@ -97,34 +97,43 @@ The model separated out two distinct modalities of seed production in beech fore
 % \item frost decrease number of seeds 
 % \item no efect of spring (supp mat)
 % \end{itemize}
-Climate impacted both transitions between states and seed production. In a warm summer (XdegC), trees in a low-reproduction state were X times more likely to transition to a high-reproduction state than during cold summers (XdegC). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---could decrease seed production by X\%. However, warmer spring conditions had no effects on seed production. 
+Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees in a low-reproduction state are X times more likely to transition to a high-reproduction state than during cold summers (XdegC). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---can decrease seed production by X\%. However, warmer spring conditions have no effects on seed production. 
 
+% \item Our projections vs current studies
+% \begin{itemize}
+% \item current studies: ACC leads to more seeds, disrupt masting
+% \item but even if you drive warming way upp you still get a plateau
+% \item this even happens with summer temp effect on M to M (figure proj)
+% \item To actually ahve a breakdown, we would nee the parameter valeu on M to M to be at least as important as NM to M
+% \end{itemize}
+Increasing summer temperatures with climate change have been predicted to disrupt masting by reducing variability and synchrony---a phenomenon previously called breakdown [cite]. Trees are expected to be more frequently in a high-reproduction state, and years with low seed production to become rarer---potentially at the cost of individual tree growth []. However, by modeling explicit latent states and transitions, we found that trees cannot get stuck indefinitely in a highly reproductive state. Even in a much warmer world (+XdegC, figure), a high-reproduction year would be often followed by a low-reproduction year. 
+
+Since our initial model allowed summer temperatures to affect only transitions from low- to high-reproduction year, we additionally tested whether warm summer influences the probability of persistence in a high-reproduction state, and found a weak effect (). On the contrary, a breakdown because of climate change would require summer warming to have a similar impact on both transition and persistence into a high-reproduction year --- an hypothesis not supported by the data we used here.
+
+% \item How constraints prevent breakdown!
+% \begin{itemize}
+% \item ...
+% \end{itemize}
+Endogenous constraints inherently prevent individuals from producing a high number of seeds every year. Climate impacts on reproduction are not independent of the reproductive state of trees. Warm summer temperatures can improve floral bud initiation, but they do not suppress the trade-off imposed by a large fruit load. Because masting behavior arise from tree-level reproductive cycles, individual constraints cannot be ignored when forecasting population-scale dynamics. 
+
+% \item But synchrony does appear to go down
+% \begin{itemize}
+% \item Review previous results and overall figure
+% \item these years look less synchrone\dots
+% \item but here, it could be driven both by within and between asynchrony
+% \item (what level of between-stand synchrony predict..?)
+% \item evolutionary benefits of mating depends on scale of synchrony \\
+% $rightarrow$ which scale depends on which evolutionnary model you consider, but for seed predators... should be quite small (foraging distance = X km)
+% \end{itemize}
+Across beech populations in England, synchrony still appears to go down in the last two decades. The year 2006 was previously identified as a year of abrupt change, marked by a reproductive desynchronization. However, a lower degree of synchrony may mask distinct processes, and could be caused either from a desynchronization among trees within population or from desynchronization between populations. These two components matter for masting, because the evolutionary benefits of masting depend on the spatial scale at which trees reproduce synchronously --- and this scale in turn depends on the evolutionary hypothesis that we consider. o overwhelm seed predators,
 
 
 \begin{itemize}
 
-\item Our projections vs current studies
-\begin{itemize}
-\item current studies: ACC leads to more seeds via more masting
-\item but even if you drive warming way upp you still get a plateau
-\item this even happens with summer temp effect on M to M (figure proj)
-\item To actually ahve a breakdown, we would nee the parameter valeu on M to M to be at least as important as NM to M
-\end{itemize}
 
-\item How constraints prevent breakdown!
-\begin{itemize}
-\item ...
-\end{itemize}
 
-\item But synchrony does appear to go down
-\begin{itemize}
-\item Review previous results and overall figure
-\item these years look less synchrone\dots
-\item but here, it could be driven both by within and between asynchrony
-\item (what level of between-stand synchrony predict..?)
-\item evolutionary benefits of mating depends on scale of synchrony \\
-$rightarrow$ which scale depends on which evolutionnary model you consider, but for seed predators... should be quite small (foraging distance = X km)
-\end{itemize}
+
+
 
 \item Asynchrony indeed driven by multiple factors
 \begin{itemize}
