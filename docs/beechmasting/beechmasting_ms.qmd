@@ -122,7 +122,7 @@ The model separates out two distinct modalities of seed production in beech fore
 <!-- % \item frost decrease number of seeds  -->
 <!-- % \item no efect of spring (supp mat) -->
 <!-- % \end{itemize} -->
-Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees in a low-reproduction state are X times more likely to transition to a high-reproduction state than during cold summers (XdegC). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---can decrease seed production by X\%. However, warmer spring conditions have no effects on seed production. 
+Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees in a low-reproduction state are X times more likely to transition to a high-reproduction state than during cold summers (XdegC, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---can decrease seed production by X\% (Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production. 
 
 <!-- % \item Our projections vs current studies -->
 <!-- % \begin{itemize} -->
@@ -150,15 +150,24 @@ Climate impacts on reproduction are not independent of the reproductive state of
 <!-- % \item evolutionary benefits of mating depends on scale of synchrony \\ -->
 <!-- % $rightarrow$ which scale depends on which evolutionnary model you consider, but for seed predators... should be quite small (foraging distance = X km) -->
 <!-- % \end{itemize} -->
-Despite these constraints, synchrony across populations still appears to go down in the last two decades. The year 2006 was previously identified as a year of abrupt change, marked by a desynchronization across England \citep{Bogdziewicz2021}. A lower synchrony may mask different processes operating at different scales: it could be caused either by a desynchronization among trees within populations or by a desynchronization between populations. % Disentangling these two scales is critical for understanding masting. 
+Despite these constraints, synchrony across populations still appears to go down in the last two decades (Fig. \ref{fig:overview}D). The year 2006 was previously identified as a year of abrupt change, marked by a desynchronization across England \citep{Bogdziewicz2021}. A lower synchrony may mask different processes operating at different scales: it could be caused either by a desynchronization among trees within populations or by a desynchronization between populations. <!-- % Disentangling these two scales is critical for understanding masting. -->
 The evolutionary benefits of masting depend on the spatial scale at which trees reproduce synchronously, and this scale in turn depends on the evolutionary hypothesis that we consider \citep{Davies2024}. To overwhelm seed predators, synchrony scale should be on the order of predators foraging ranges (typically X km), making synchrony within a forest more relevant than synchrony across distant populations.
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.1\linewidth]{figures/synchrony.pdf}
+  \caption{Effects of climate.}
+  \label{fig:synchrony}
+\end{figure}
+```
 
 <!-- % \item Asynchrony indeed driven by multiple factors -->
 <!-- % \begin{itemize} -->
 <!-- % \item within between -->
 <!-- % \item discuss results... maybe figure with \%? -->
 <!-- % \end{itemize} -->
-The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations. Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized. 
+The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations (Fig. \ref{fig:synchrony}A). Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized. 
 
 Synchronization depends not only on climate but also on previous reproductive states. This provides a simple physiological explanation for previous results that found that temperature difference between the two previous summers mattered for masting ($\Delta T$ model; \citealp{Kelly2012}). This mechanism likely does not rely on complex molecular pathways such as `epigenetic summer memory' \citep{Samarth2020}: rather, a cold summer followed by a warm summer generates synchrony simply because cold temperatures leave most trees in a low-reproduction state, allowing them to respond consistently to following warm temperatures that promote floral induction.
 
