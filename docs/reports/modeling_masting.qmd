@@ -76,12 +76,14 @@ invlogit <- function(r){
 }
 ```
 
+This document focuses on a project Lizzie and I have been working on as a way to model masting for individual trees for one species across sites and we think could be extended with Eléonore's help to work well for stand-level seed trap data across species and sites. I start by outlining the background and approach for this particular model, then get into the math! (The math may look complicated if it's been a few years since your last math class, but it will definitely come back with more immersion in it in January)
+
 # The motivations behind the project
 
 ::: {.callout-tip}
 ## The ecological motivation
 
-Understanding the reproductive behavior that arises at the population level requires to study individual trees' responses. We believe that integrating reproductive biology (i.e. biological **constraints**) and environmental **cues** at the _individual_ level can help us investigating the drivers of the variability and synchronicity of reproduction at the _population_ scale. Our final goal is to understand to what extent climate change could really disrupt forest regeneration---and provide better forecasts!
+Population level patterns such as masting emerge from individual trees' responses. Seed production results from each individual tree's reproductive biology (i.e. biological \textbf{constraints}) and response to the environment (**cues** and `vetos'). Working at the individual-level may allow us to better understand the drivers of the variability and synchronicity of reproduction at the \emph{population} scale. Our final goal is to understand to what extent climate change could really disrupt forest regeneration---and provide better forecasts!
 :::
 
 \
@@ -125,7 +127,7 @@ text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey3
 
 ```
 
-The following quote illustrates the current approach of statistical model of masting:
+The following quote illustrates one approach of statistical model of masting:
 
 > ``We fitted a zero-inflated, negative binomial mixed model to the annual number of initiated seeds in each tree, with fixed factors that included summer temperatures in 1 and 2 years before seedfall, [...] and seed production in the previous year to account for possible resource depletion. [...] We included [...] a first-order temporal autocorrelation structure."
 
@@ -181,8 +183,8 @@ text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey3
 
 ```
 
-This issue arises because we does not explicitly simulate the reproductive state of an individual tree. The model does not allow to differentiate effects of climate during a non-masting year or a masting year. \
-Moreover, without modeling individual-level states, it is not possible to infer reproductive behavior at the population scale---including the degree of potential synchrony.
+It's hard to include the effect of the previous summer temperature depending on a tree's previous state because each individual tree could be in a different reproductive state, but the model treats all years for all trees as the same. The model does not allow to differentiate effects of climate during a non-masting year or a masting year. We may be able to address this, however, if we start with a model at the individual tree level. \
+From there, we can infer reproductive behavior at the population scale---including the degree of potential synchrony.
 
 ## A new approach grounded in biology
 
@@ -224,7 +226,7 @@ arrows(x[5]+0.95, 0.5, x[5]+1, 0.5, col = 'grey60', lwd=1, length = 0.05, lty = 
 ```
 
 Each state $z_{i+1}$ is dependent **only on the preceding state** $z_{i}$ (which is called the _Markovian_ assumption). These states are latent, because we observe only the seed counts. The model I will describe briefly in the next section is thus called a Hidden Markov Model (HMM): _hidden_ because the states are latent, and _Markov_ because of the Markovian assumption. \
-With some parameters $\theta$, the probability of observing some sequences of the two first states is:
+With some parameters $\theta$ (parameters are things like the slope and intercept in your model, here $\theta$ stands in for one or more of them and effectively represents---with just one Greek letter---a lot of the rest of your model), the probability of observing some sequences of the two first states is:
 $$p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)$$
 And then, adding the next state:
 $$p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)$$
@@ -284,7 +286,7 @@ p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{mid}{on}
 p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta)  & p(z_{k} = \text{\textcolor{teal}{off}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta) 
 \end{bmatrix}
 $$
-
+That we could write as:
 $$
 M =
 \begin{bmatrix}
@@ -421,12 +423,14 @@ symbols(x, y, circles = radii, add = TRUE, inches = FALSE, bg = 'grey90', fg = '
 text(x, y, labels = c('$y_1$', '...', '$y_i$', '$y_{i+1}$', '...'), col = 'grey30')
 arrows(x, 0.65, x, 0.75, col = 'grey40', lwd=1, length = 0.07)
 
-text(x, rep(1.33, 5), labels = c('$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...'), col = 'grey30', cex = 0.85)
-arrows(x, 1.27, x, 1.05, col = 'grey40', lwd=1, length = 0.07, lty = 2)
+text(x[c(1,4)], rep(1.33, 2), labels = c('$\\beta \\cdot X_\\text{climate}\\{t\\}$', '$\\beta \\cdot X_\\text{climate}\\{t\\}$'), col = 'grey30', cex = 0.85)
+arrows(x[c(1,4)], 1.27, x[c(1,4)], 1.05, col = 'grey40', lwd=1, length = 0.07, lty = 2)
 
 text(x[1:4]+1, rep(0.1, 4), labels = c('$\\beta \\cdot X_\\text{climate}\\{t\\}$', '...', '$\\beta \\cdot X_\\text{climate}\\{t\\}$', '$\\beta \\cdot X_\\text{climate}\\{t\\}$'), col = 'grey30', cex = 0.85)
 arrows(x[1:4]+1, 0.2, x[1:4]+1, 0.5, col = 'grey40', lwd=1, length = 0.07, lty = 2)
 
 ```
+
+\newpage
 
 # The case of beech masting dynamics

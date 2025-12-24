@@ -190,25 +190,34 @@
 \maketitle
 
 
+This document focuses on a project Lizzie and I have been working on as
+a way to model masting for individual trees for one species across sites
+and we think could be extended with Eléonore's help to work well for
+stand-level seed trap data across species and sites. I start by
+outlining the background and approach for this particular model, then
+get into the math! (The math may look complicated if it's been a few
+years since your last math class, but it will definitely come back with
+more immersion in it in January)
+
 \section{The motivations behind the
 project}\label{the-motivations-behind-the-project}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, toprule=.15mm, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, colback=white, rightrule=.15mm, bottomrule=.15mm, breakable, toptitle=1mm, leftrule=.75mm, left=2mm, titlerule=0mm, arc=.35mm, opacityback=0, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, arc=.35mm, coltitle=black, breakable, bottomtitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, rightrule=.15mm, toptitle=1mm, opacityback=0]
 
-Understanding the reproductive behavior that arises at the population
-level requires to study individual trees' responses. We believe that
-integrating reproductive biology (i.e.~biological \textbf{constraints})
-and environmental \textbf{cues} at the \emph{individual} level can help
-us investigating the drivers of the variability and synchronicity of
-reproduction at the \emph{population} scale. Our final goal is to
-understand to what extent climate change could really disrupt forest
-regeneration---and provide better forecasts!
+Population level patterns such as masting emerge from individual trees'
+responses. Seed production results from each individual tree's
+reproductive biology (i.e.~biological \textbf{constraints}) and response
+to the environment (\textbf{cues} and `vetos'). Working at the
+individual-level may allow us to better understand the drivers of the
+variability and synchronicity of reproduction at the \emph{population}
+scale. Our final goal is to understand to what extent climate change
+could really disrupt forest regeneration---and provide better forecasts!
 
 \end{tcolorbox}
 
 \hfill\break
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, toprule=.15mm, coltitle=black, colbacktitle=quarto-callout-tip-color!10!white, colback=white, rightrule=.15mm, bottomrule=.15mm, breakable, toptitle=1mm, leftrule=.75mm, left=2mm, titlerule=0mm, arc=.35mm, opacityback=0, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, arc=.35mm, coltitle=black, breakable, bottomtitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, rightrule=.15mm, toptitle=1mm, opacityback=0]
 
 Bayesian magic! Our approach models the (latent) reproductive states of
 each \emph{individual} tree, and the consequent amount of seed
@@ -240,8 +249,8 @@ trap---are a time series of yearly seed counts \(y_i\).
 \includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-3-1.pdf}
 \end{center}
 
-The following quote illustrates the current approach of statistical
-model of masting:
+The following quote illustrates one approach of statistical model of
+masting:
 
 \begin{quote}
 ``We fitted a zero-inflated, negative binomial mixed model to the annual
@@ -279,13 +288,15 @@ production---regardless of the previous reproductive state.
 \includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-5-1.pdf}
 \end{center}
 
-This issue arises because we does not explicitly simulate the
-reproductive state of an individual tree. The model does not allow to
-differentiate effects of climate during a non-masting year or a masting
-year.\\
-Moreover, without modeling individual-level states, it is not possible
-to infer reproductive behavior at the population scale---including the
-degree of potential synchrony.
+It's hard to include the effect of the previous summer temperature
+depending on a tree's previous state because each individual tree could
+be in a different reproductive state, but the model treats all years for
+all trees as the same. The model does not allow to differentiate effects
+of climate during a non-masting year or a masting year. We may be able
+to address this, however, if we start with a model at the individual
+tree level.\\
+From there, we can infer reproductive behavior at the population
+scale---including the degree of potential synchrony.
 
 \subsection{A new approach grounded in
 biology}\label{a-new-approach-grounded-in-biology}
@@ -319,8 +330,11 @@ states are latent, because we observe only the seed counts. The model I
 will describe briefly in the next section is thus called a Hidden Markov
 Model (HMM): \emph{hidden} because the states are latent, and
 \emph{Markov} because of the Markovian assumption.\\
-With some parameters \(\theta\), the probability of observing some
-sequences of the two first states is:
+With some parameters \(\theta\) (parameters are things like the slope
+and intercept in your model, here \(\theta\) stands in for one or more
+of them and effectively represents---with just one Greek letter---a lot
+of the rest of your model), the probability of observing some sequences
+of the two first states is:
 \[p(z_1, z_2 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta)\] And
 then, adding the next state:
 \[p(z_1, z_2, z_3 ~ | ~\theta) = p(z_1) \times p(z_2 ~ | ~ z_1,\theta) \times p(z_3 ~ | ~ z_2, \theta)\]
@@ -357,9 +371,7 @@ M =
 p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{mid}{on}}, \theta) & p(z_{k} = \text{\textcolor{teal}{off}} ~ | ~ z_{k - 1} = \text{\textcolor{mid}{on}}, \theta)  \\
 p(z_{k} = \text{\textcolor{mid}{on}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta)  & p(z_{k} = \text{\textcolor{teal}{off}} ~ | ~ z_{k - 1} = \text{\textcolor{teal}{off}}, \theta) 
 \end{bmatrix}
-\]
-
-\[
+\] That we could write as: \[
 M =
 \begin{bmatrix}
 \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{mid}{on}}} & \tau_{\text{\textcolor{mid}{on}} \rightarrow \text{\textcolor{teal}{off}}} \\
@@ -472,6 +484,8 @@ In summary, we could schematize the model as follow:
 \begin{center}
 \includegraphics{modeling_masting_files/figure-pdf/unnamed-chunk-10-1.pdf}
 \end{center}
+
+\newpage
 
 \section{The case of beech masting
 dynamics}\label{the-case-of-beech-masting-dynamics}

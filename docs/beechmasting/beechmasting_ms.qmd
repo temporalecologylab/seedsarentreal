@@ -93,7 +93,7 @@ We developed a model in which individual trees may alternate between two latent 
 ```{=latex}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/model_overview.pdf}
+  \includegraphics[width=1.1\linewidth]{figures/model_overview.pdf}
   \caption{Distinct tree reproductive states generates variability at the population level.}
   \label{fig:overview}
 \end{figure}
@@ -110,9 +110,9 @@ The model separates out two distinct modalities of seed production in beech fore
 ```{=latex}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/model_overview.pdf}
-  \caption{Distinct tree reproductive states generates variability at the population level.}
-  \label{fig:overview}
+  \includegraphics[width=1.1\linewidth]{figures/climate_predictors.pdf}
+  \caption{Effects of climate.}
+  \label{fig:climate}
 \end{figure}
 ```
 
