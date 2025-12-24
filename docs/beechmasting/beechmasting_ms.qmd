@@ -1,0 +1,173 @@
+---
+title: "Climatic drivers and endogeneous biological constraints shape masting dynamics"
+author: "Victor Van der Meersch, Mike Betancourt, E.M. Wolkovich"
+format: 
+  pdf:
+    cite-method: natbib
+    classoption: numbers
+    biblio-style: unsrtnat
+bibliography: beechmasting.bib
+figpath: /home/victor/projects/seedsarentreal/analyses/methods/paper_code/figures
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Setup
+rm(list = ls())
+options(stringsAsFactors = FALSE)
+library(rstan)
+library(ggplot2)
+library(patchwork)
+rstan_options(auto_write = TRUE)            # Cache compiled Stan programs
+options(mc.cores = parallel::detectCores()) # Parallelize chains
+
+wd <- "~/projects/seedsarentreal/analyses/methods"
+figpath <- "~/projects/seedsarentreal/docs/beechmasting/figures"
+setwd(wd)
+util <- new.env()
+source(file.path(wd, "mcmc_analysis_tools_rstan.R"), local=util) 
+source(file.path(wd, "mcmc_visualization_tools.R"), local=util) 
+```
+
+\section*{Introduction}
+
+<!-- %\item Widespread meltdown fears\\ -->
+<!-- %$\rightarrow$ maybe mention invasion, homogeneization, pest outbreaks...\\ -->
+<!-- %$\rightarrow$ regeneration shifts... masting! -->
+The acceleration of climate change is predicted to have abrupt ecological effects worldwide \citep{Trisos2020}. Rapid shifts to novel climate conditions, with more extreme events, could disrupt key ecological processes --- and potentially drive ecosystems toward critical transitions \citep{Wernberg2016}.
+In particular, many forest ecosystems are showing sign of increased sensitivity to biotic and abiotic disturbances \citep{Albrich2020, Forzieri2022}. Forests could adapt only if they can rely on their regeneration capacity, which promotes post-disturbance recolonization with individuals that may be better adapted to new conditions \citep{StevensRumann2017, Turner2023}.
+
+<!-- % \item Meltdown and masting -->
+<!-- % \begin{itemize} -->
+<!-- % \item simple definition of masting -->
+<!-- % \item ... -->
+<!-- % \item end paragraph on masting being hypothesized as critical to regeneratino via seed predator overwhelmed... or pollen etc. and this could have big effects! -->
+<!-- % \end{itemize} -->
+Regeneration in many temperate and tropical forests depends on tree species that have a high reproductive variability across years, and where most individuals of a population reproduce synchrounously \citep{Janzen1978}. These two characterisics---variability and synchrony---define masting \citep{Kelly1994}. Masting is hypothesized to have strong fitness benefits, mostly because high seed production could overwhelm seed predators---i.e. a higher proportion of seeds and seedlings could escape predation and establish \citep{Janzen1971, Kelly1994}. Masting could also increase greater pollen exchange and genetic outcrossing across individuals, potentially favoring adaptive evolution via the production of new phenotypes more suitable in novel climates \citep{Carlson2014, Bontrager2019}.
+
+<!-- % \item How does masting work? Synchrony -->
+<!-- % \begin{itemize} -->
+<!-- % \item individual trees need to be synchronized within certain distance (but maybe not further...) -->
+<!-- % \item population-level characteristics! So how do individual treews do it together? -->
+<!-- % \end{itemize} -->
+<!-- % ... Population-level masting arises  -->
+Abrupt disruption of masting timing by climate change could trigger cascading effects on forest resilience \citep{Bogdziewicz2023, Foest2024}. Masting is a population-level characteristic that require individual trees to respond similarly to environmental cues in order to reproduce together within a certain distance---which should match with predator foraging range. Tree species that mast have likely evolved under colder climates, and global warming could modify the cues that allowed for both reproductive variability and synchrony across a population.
+
+<!-- % \item How do individual trees cue to mast? -->
+<!-- % \begin{itemize} -->
+<!-- % \item what is a good year environmentally... warm summer, no frost -->
+<!-- % \item but that doesn't cause synchrony! No cues can cause 2-year cycles or other cycles... -->
+<!-- % \item however, most trees take 2 years to make buds, and have alternate bearing -->
+<!-- % \item (Conceptual figure) -->
+<!-- % \end{itemize} -->
+Understanding the reproductive behavior that arises at the population level requires to study individual trees' responses to their environment. Reproductive success requires that a tree experienced favorable environmental conditions---and in particular no late spring frosts and sufficiently warm temperatures during the growing season. Yet, the alternation between favorable and unfavorable years is not invariant and cannot explain the regular intervals at which masting can occur \citep{Janzen1978}. 
+
+At the individual level, the alternating reproductive cycle may mainly arise from endogeneous factors. In many tree species, floral buds are initiated the year before flowering, simultaneously as fruits of the current year start developing \citep{Geber1997}. During a large crop year, the presence of many fruits could  depress floral initiation because of hormonal inhibition and resource "competition" for photosynthetic assimilates \citep{Monselise1982, Milyaev2022}. These physiological constraints on flower and fruit development could explain while trees often show alternate bearing---with a large crop year ('on-year') often followed by one or several 'off-years'. 
+<!-- % "the competitive overlap of flower bud formation for the subsequent season and fruit development during the current season" -->
+
+<!-- % \item Combo of cues + constraints\\ -->
+<!-- % $\rightarrow$ could explain what we see? -->
+<!-- % \begin{itemize} -->
+<!-- % \item year before need warm summer... -->
+<!-- % \end{itemize} -->
+The combination of endogeneous constraints and local climatic conditions could explain how individual-level intrinsic alternation leads to masting behavior at the population scale \citep{Matthews1955, Monselise1982}. Floral bud initiation requires warm summer temperatures \citep{Vacchiano2017}.  Unfavorable or favorable summer conditions could act as a  hinge point to synchronize individual reproductive cycles within a population, and this synchrony may then persist over several years.
+
+<!-- % \item So ACC could really screw this up -->
+<!-- % $\rightarrow$ but to know this, we need to model the individuals! -->
+Anthropogenic climate change could alter the climatic cues that synchronize individual reproductive cycles. Without any constraints, novel climatic conditions could disrupt masting and its evolutionary benefits. However, endogenous constraints linked to reproductive biology could buffer the effects of climate change. Reliable forecasts of long-term population-level synchrony thus require to model how individual endogeneous constraints and climate act together. 
+
+\section*{Results and discussion}
+
+<!-- % \item We built a model that matches conceptual figure -->
+<!-- % \begin{itemize} -->
+<!-- % \item alternate states (latent) -->
+<!-- % \item states encode constraints  -->
+<!-- % \item tree level estimates lead to stand estimates! -->
+<!-- % \item and we added climate -->
+<!-- % \end{itemize} -->
+We developed a model in which individual trees may alternate between two latent reproductive states. These states explicitly encode endogenous constraints, i.e. the alternate bearing because of the temporal overlap between floral bud initiation and fruit development. For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with endogenous constraints to impact masting. 
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/model_overview.pdf}
+  \caption{Distinct tree reproductive states generates variability at the population level.}
+  \label{fig:overview}
+\end{figure}
+```
+
+<!-- % \item Model identifies 2 states (here, figure with the two distributions) -->
+<!-- % \begin{itemize} -->
+<!-- % \item masting is real! Mirror the intro -->
+<!-- % \item some level of synchrony within stands -->
+<!-- % \item say how often they transition in average conditions... -->
+<!-- % \end{itemize} -->
+The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability of X of transitioning from a low-reproduction to a high-reproduction state, and a low probability of Y of remaining in that state in the following year (Fig. \ref{fig:overview}C).
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/model_overview.pdf}
+  \caption{Distinct tree reproductive states generates variability at the population level.}
+  \label{fig:overview}
+\end{figure}
+```
+
+<!-- % \item Climate impacts on masting (figure of climate effects) -->
+<!-- % \begin{itemize} -->
+<!-- % \item warm summer increase transition -->
+<!-- % \item frost decrease number of seeds  -->
+<!-- % \item no efect of spring (supp mat) -->
+<!-- % \end{itemize} -->
+Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees in a low-reproduction state are X times more likely to transition to a high-reproduction state than during cold summers (XdegC). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---can decrease seed production by X\%. However, warmer spring conditions have no effects on seed production. 
+
+<!-- % \item Our projections vs current studies -->
+<!-- % \begin{itemize} -->
+<!-- % \item current studies: ACC leads to more seeds, disrupt masting -->
+<!-- % \item but even if you drive warming way upp you still get a plateau -->
+<!-- % \item this even happens with summer temp effect on M to M (figure proj) -->
+<!-- % \item To actually ahve a breakdown, we would nee the parameter valeu on M to M to be at least as important as NM to M -->
+<!-- % \end{itemize} -->
+Increasing summer temperatures with climate change have been predicted to disrupt masting by reducing variability and synchrony---a phenomenon previously called breakdown \citep{Bogdziewicz2021, Foest2024}. Trees are expected to be more frequently in a high-reproduction state, and years with low seed production to become rarer \citep{Foest2024}, potentially at the cost of individual tree growth \citep{Koenig1998, HacketPain2025}. However, by modeling explicit latent states and transitions, we found that trees cannot get stuck indefinitely in a highly reproductive state. Even in a much warmer world (+XdegC, figure), a high-reproduction year would be often followed by a low-reproduction year. 
+
+Since our initial model allowed summer temperatures to affect only transitions from low- to high-reproduction year, we additionally tested whether warm summer influences the probability of persistence in a high-reproduction state, and found a weak effect (). On the contrary, a breakdown because of climate change would require summer warming to have a similar impact on both transition and persistence into a high-reproduction year --- an hypothesis not supported by the data we used here.
+
+<!-- % \item How constraints prevent breakdown! -->
+<!-- % \begin{itemize} -->
+<!-- % \item ... -->
+<!-- % \end{itemize} -->
+Climate impacts on reproduction are not independent of the reproductive state of trees. Endogenous constraints intrinsically prevent individuals from producing a high number of seeds every year. Warm summer temperatures can improve floral bud initiation, but do not suppress the trade-off imposed by a large fruit load. Because masting behavior arise from tree-level reproductive cycles, these constraints cannot be ignored when forecasting population-scale dynamics. The biological processes underlying tree reproduction could slow down the increase of reproduction sensitivity to climate change, potentially preventing unlimited amplification of climate effects and an abrupt collapse of masting.
+
+<!-- % \item But synchrony does appear to go down -->
+<!-- % \begin{itemize} -->
+<!-- % \item Review previous results and overall figure -->
+<!-- % \item these years look less synchrone\dots -->
+<!-- % \item but here, it could be driven both by within and between asynchrony -->
+<!-- % \item (what level of between-stand synchrony predict..?) -->
+<!-- % \item evolutionary benefits of mating depends on scale of synchrony \\ -->
+<!-- % $rightarrow$ which scale depends on which evolutionnary model you consider, but for seed predators... should be quite small (foraging distance = X km) -->
+<!-- % \end{itemize} -->
+Despite these constraints, synchrony across populations still appears to go down in the last two decades. The year 2006 was previously identified as a year of abrupt change, marked by a desynchronization across England \citep{Bogdziewicz2021}. A lower synchrony may mask different processes operating at different scales: it could be caused either by a desynchronization among trees within populations or by a desynchronization between populations. % Disentangling these two scales is critical for understanding masting. 
+The evolutionary benefits of masting depend on the spatial scale at which trees reproduce synchronously, and this scale in turn depends on the evolutionary hypothesis that we consider \citep{Davies2024}. To overwhelm seed predators, synchrony scale should be on the order of predators foraging ranges (typically X km), making synchrony within a forest more relevant than synchrony across distant populations.
+
+<!-- % \item Asynchrony indeed driven by multiple factors -->
+<!-- % \begin{itemize} -->
+<!-- % \item within between -->
+<!-- % \item discuss results... maybe figure with \%? -->
+<!-- % \end{itemize} -->
+The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations. Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized. 
+
+Synchronization depends not only on climate but also on previous reproductive states. This provides a simple physiological explanation for previous results that found that temperature difference between the two previous summers mattered for masting ($\Delta T$ model; \citealp{Kelly2012}). This mechanism likely does not rely on complex molecular pathways such as `epigenetic summer memory' \citep{Samarth2020}: rather, a cold summer followed by a warm summer generates synchrony simply because cold temperatures leave most trees in a low-reproduction state, allowing them to respond consistently to following warm temperatures that promote floral induction.
+
+<!-- % \item What drives synchrony?  -->
+<!-- % \begin{itemize} -->
+<!-- % \item bad years could act as precise cue, and with biol. constraints it would explain the following synchrony  -->
+<!-- % \item how ACC could change those dynamics, and on which scale? -->
+<!-- % \item (Unclear how breakdown at tree and then at stand level?) -->
+<!-- % \item basically, we need to figure out the biology useful for predictions with ACC -->
+<!-- % \end{itemize} -->
+Masting is driven by the interaction of endogenous constraints at the individual level and climatic factors acting at a broader spatial scale. Constraints prevent endless amplification of individual reproduction with warming summers, but alone do not allow for synchrony between trees. [How synchrony arises... coordination of individual cycles] Anthropogenic climate change could change those dynamics, and potentially disrupt benefits of masting. Determining which biological processes are relevant for prediction---and at which spatial scale synchrony is important---is critical to anticipate these effects and understand how forests will regenerate under climate change. 
+
