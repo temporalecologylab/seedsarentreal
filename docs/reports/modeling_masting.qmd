@@ -346,10 +346,10 @@ par(mar = c(4,4,1,1))
 
 theta <- 0.4
 nonmasting <- sapply(1:10000, function(x){
-  ifelse(rbinom(1, 1, theta) == 1, 0, MASS::rnegbin(1000, 25, 5))
+  ifelse(rbinom(1, 1, theta) == 1, 0, MASS::rnegbin(1000, 10, 5))
 })
 hist(nonmasting, breaks=seq(0,650,l=40), col = '#48757560', border = "white", xlab = 'Number of seeds', main = '', prob = TRUE)
-masting <- MASS::rnegbin(10000, 160, 2)
+masting <- MASS::rnegbin(10000, 100, 2)
 hist(masting[masting < 650], breaks=seq(0,650,l=40), col = "#B97C7C60", border = "white", xlab = 'Number of seeds', main = '', add = TRUE, prob = TRUE)
 text(x = 70, y = 0.02, labels = 'off-year', col = util$c_mid_teal, font = 1)
 text(x = 200, y = 0.005, labels = 'on-year', col = util$c_mid, font = 1)
@@ -434,3 +434,43 @@ arrows(x[1:4]+1, 0.2, x[1:4]+1, 0.5, col = 'grey40', lwd=1, length = 0.07, lty =
 \newpage
 
 # The case of beech masting dynamics
+
+We applied our model to data collected in England. We have annual seed production time series for 57 trees across 7 sites. The maximum duration is 43 years, but most series are shorter (and contained some missing values). For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with biological constraints to impact masting. 
+
+The diagram below illustrates how to interpret the following plots. The red bars correspond to the model predictions.
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\linewidth]{external_figures/quantiles.pdf}
+\end{figure}
+```
+
+First, we can check for any inconsistencies between the observed data and the behavior of the posterior predictive distribution (what we call "retrodictive checks"). The histogram below compares the distribution of all observations (black line) to the posterior predictive distribution (the predictions by the model, in red).
+
+```{=latex}
+\begin{figure}[hb]
+  \centering
+  \includegraphics[width=0.65\linewidth]{external_figures/retrodictive_check.pdf}
+\end{figure}
+```
+
+Everything looks consistent. Next we can explore how consistent the observations and the posterior predictions are for some random trees. 
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{external_figures/tree_checks.pdf}
+\end{figure}
+```
+
+The grey bars indicate years with missing observations. A strength of the model is that it still allows to estimate the reproductive state and seed production during those years with missing data.
+
+We can also look at the latent states that are estimated by the model. Remember: these are _latent_, so we don't have observations (no black lines).
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{external_figures/tree_states.pdf}
+\end{figure}
+```

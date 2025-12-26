@@ -202,7 +202,7 @@ more immersion in it in January)
 \section{The motivations behind the
 project}\label{the-motivations-behind-the-project}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}, arc=.35mm, coltitle=black, breakable, bottomtitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, rightrule=.15mm, toptitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, leftrule=.75mm, opacityback=0, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colback=white, toprule=.15mm, colframe=quarto-callout-tip-color-frame, breakable, opacitybacktitle=0.6, bottomtitle=1mm, coltitle=black, toptitle=1mm, rightrule=.15mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The ecological motivation}]
 
 Population level patterns such as masting emerge from individual trees'
 responses. Seed production results from each individual tree's
@@ -217,7 +217,7 @@ could really disrupt forest regeneration---and provide better forecasts!
 
 \hfill\break
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colframe=quarto-callout-tip-color-frame, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}, arc=.35mm, coltitle=black, breakable, bottomtitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, colback=white, titlerule=0mm, toprule=.15mm, left=2mm, rightrule=.15mm, toptitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, leftrule=.75mm, opacityback=0, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-tip-color!10!white, bottomrule=.15mm, colback=white, toprule=.15mm, colframe=quarto-callout-tip-color-frame, breakable, opacitybacktitle=0.6, bottomtitle=1mm, coltitle=black, toptitle=1mm, rightrule=.15mm, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{The technical motivation}]
 
 Bayesian magic! Our approach models the (latent) reproductive states of
 each \emph{individual} tree, and the consequent amount of seed
@@ -489,6 +489,57 @@ In summary, we could schematize the model as follow:
 
 \section{The case of beech masting
 dynamics}\label{the-case-of-beech-masting-dynamics}
+
+We applied our model to data collected in England. We have annual seed
+production time series for 57 trees across 7 sites. The maximum duration
+is 43 years, but most series are shorter (and contained some missing
+values). For each observed tree and each year, the model estimates the
+reproductive state---given the previous state---and the subsequent seed
+production. Climate is included as an explicit driver of both state
+transitions (probability matrix), and seed production (number of seeds).
+From these individual reproductive dynamics, the model allows to scale
+up to population-level behavior and investigate how climate interacts
+with biological constraints to impact masting.
+
+The diagram below illustrates how to interpret the following plots. The
+red bars correspond to the model predictions.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\linewidth]{external_figures/quantiles.pdf}
+\end{figure}
+
+First, we can check for any inconsistencies between the observed data
+and the behavior of the posterior predictive distribution (what we call
+``retrodictive checks''). The histogram below compares the distribution
+of all observations (black line) to the posterior predictive
+distribution (the predictions by the model, in red).
+
+\begin{figure}[hb]
+  \centering
+  \includegraphics[width=0.65\linewidth]{external_figures/retrodictive_check.pdf}
+\end{figure}
+
+Everything looks consistent. Next we can explore how consistent the
+observations and the posterior predictions are for some random trees.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{external_figures/tree_checks.pdf}
+\end{figure}
+
+The grey bars indicate years with missing observations. A strength of
+the model is that it still allows to estimate the reproductive state and
+seed production during those years with missing data.
+
+We can also look at the latent states that are estimated by the model.
+Remember: these are \emph{latent}, so we don't have observations (no
+black lines).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{external_figures/tree_states.pdf}
+\end{figure}
 
 
 
