@@ -8,7 +8,7 @@ invlogit <- function(r){
 }
 
 pdf(file = file.path(figpath, 'climate_predictors.pdf'),
-    width = 11, height = 4)
+    width = 10, height = 3.3)
 layout( matrix(c(1,2), ncol=2, byrow = T))
 
 temp0 <- 15
@@ -30,18 +30,19 @@ plot(1, type="n", main=main,
 usr <- par("usr")
 axis(1, at=seq(10,30,5), labels=seq(10,30,5), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))
-title(xlab = 'Previous summer temperature (°C)', line = 2.6)
+     cex.axis = 0.85, mgp = c(2, 0.7, 0))
+title(xlab = 'Previous summer temperature (°C)', line = 2.4, cex.lab = 0.85)
 
 axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))  
-title(ylab = 'Probability of transition from\nlow- to high-reproduction state', line = 2.5)
+     cex.axis = 0.85, mgp = c(2, 0.7, 0))  
+title(ylab = 'Probability of transition from\nlow- to high-reproduction state', line = 2.5, cex.lab = 0.85)
 
 lines(tau_nm_m_df$X50. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lwd = 2)
 lines(tau_nm_m_df$X10. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
 lines(tau_nm_m_df$X90. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
-mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
+
+mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.2, cex = 1.2, font = 2, col = 'grey30')
 
 gdd0 <- 15
 lambda2_df <- data.frame()
@@ -63,18 +64,18 @@ plot(1, type="n", main=main,
 usr <- par("usr")
 axis(1, at=seq(0,350,50), labels=seq(0,350,50), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))
-title(xlab = 'GDD until the last frost day (°C)', line = 2.6)
+     cex.axis = 0.85, mgp = c(2, 0.7, 0))
+title(xlab = 'GDD until the last frost day (°C)', line = 2.4, cex.lab = 0.85)
 
 axis(2, at=seq(120,220,20), seq(120,220,20), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))  
-title(ylab = 'Seed production in\nhigh-reproduction state', line = 2.5)
+     cex.axis = 0.85, mgp = c(2, 0.7, 0))  
+title(ylab = 'Average seed production in\na high-reproduction state', line = 2.5, cex.lab = 0.85)
 
 lines(lambda2_df$X50. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lwd = 2)
 lines(lambda2_df$X10. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
 lines(lambda2_df$X90. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
 
-mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.2, cex = 1.2, font = 2, col = 'grey30')
 
 dev.off()

@@ -4,7 +4,7 @@ par(mfrow=c(1, 1), mar = c(4,4,2,2))
 nsamples <- length(samples[['theta1']])
 
 pdf(file = file.path(figpath, 'model_overview.pdf'),
-    width = 9, height = 5)
+    width = 10, height = 6)
 layout( matrix(c(1,2,3,4), ncol=2, byrow = T))
 par(mar = c(3,2,2,2))
 
@@ -24,7 +24,7 @@ hist(nonmasting, breaks=seq(0,800,l=80), col = '#48757560', border = 'white',
      xlab = '', main = '', prob = TRUE, yaxt = "n", ylab = '', xaxt = 'n', xlim = c(0,500))
 
 usr <- par("usr")
-segments(x0 = 1,  x1 = 500, y0 = usr[3], y1 = usr[3])
+segments(x0 = 1,  x1 = 500, y0 = usr[3], y1 = usr[3], lwd = 1.5)
 axis(1, at=seq(0, 500,100), labels=seq(0, 500,100), 
      lwd = 0, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))   
@@ -83,7 +83,7 @@ plot(1, type="n", main=main,
      ylim=display_ylim, ylab='', yaxt="n",, frame = FALSE)
 
 usr <- par("usr")
-segments(x0 = 1,  x1 = 43, y0 = usr[3], y1 = usr[3])
+segments(x0 = 1,  x1 = 43, y0 = usr[3], y1 = usr[3], lwd = 1.5)
 axis(1, at=seq(1,N,10), labels=seq(1980,2020,10), 
      lwd = 0, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))    
@@ -148,7 +148,7 @@ names(sum_states) <- paste0('sum_states[', 1:N_max_years, ']')
 names <- names(sum_states)
 
 ylab="Masting trees (%)"
-display_ylim=c(0, 1)
+display_ylim=c(0, 100)
 main=''
 
 # Construct bins
@@ -165,7 +165,7 @@ plot_xs <- plot_config[[2]]
 # Construct marginal quantiles
 probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 calc <- function(n) {
-  util$ensemble_mcmc_quantile_est(sum_states[[names[n]]], probs)
+  util$ensemble_mcmc_quantile_est(sum_states[[names[n]]]*100, probs)
 }
 quantiles <- sapply(1:N, calc)
 plot_quantiles <- do.call(cbind, lapply(plot_idxs,
@@ -180,12 +180,12 @@ plot(1, type="n", main=main,
      ylim=display_ylim, ylab='', frame = FALSE)
 
 usr <- par("usr")
-segments(x0 = 1,  x1 = 43, y0 = usr[3], y1 = usr[3])
+segments(x0 = 1,  x1 = 43, y0 = usr[3], y1 = usr[3], lwd = 1.5)
 axis(1, at=seq(1,N,10), labels=seq(1980,2020,10), 
      lwd = 0, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))    
 
-axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
+axis(2, at=seq(0,100,25), seq(0,100,25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))  
 title(ylab = ylab, line = 2.5)

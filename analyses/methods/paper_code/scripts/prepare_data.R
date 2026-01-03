@@ -1,4 +1,5 @@
 
+
 # Load data
 raw_data <- read.csv(file.path(wd, 'data',  'ebms', 'Beech_tree-ring_masting_data.csv'))
 clim_data <- readRDS(file.path(wd, 'data',  'ebms', 'era5land_sitesextract.rds'))
@@ -53,30 +54,19 @@ for (tid in uniq_tree_ids) {
 }
 
 # Create hypothetical future climates
-years_to_predict <- (1980:2100)
+years_to_predict <- (2000:2100)
 ## summer temperature
 clim_df <- clim_data[clim_data$site.ID == 'Benwell',]
 baseline_2000 <- mean(clim_df[clim_df$year %in% c(1980:2000), 'meantmax_ja']) # average summer temp. from 1980-2000 in Benwell
-clim_df$year <- clim_df$year - 1978
-trend <- 0.05 # 5degC warming in 100 years
+trend <- 0.07 # 7degC warming in 100 years
 summertemp <- baseline_2000 + trend * (years_to_predict-2000)
 ## frost GDD
-simplelm <- lm(gdd_b5_tolastfrost ~ year, data = clim_df)
-intercept <- summary(simplelm)$coefficients['(Intercept)','Estimate']
-trend <- summary(simplelm)$coefficients['year','Estimate']
-baseline_2000 <- intercept + (2000-1978)*trend
-frostgdd <- baseline_2000 + trend * (years_to_predict-2000)
-frostgdd <- rnorm(length(years_to_predict), mean = predict(simplelm, newdata = data.frame(year = years_to_predict-1978)), sd = 0)
+frostgdd <-rep(mean(clim_df[clim_df$year %in% c(1980:2000), 'gdd_b5_tolastfrost']), length(summertemp)) 
 ## spring temperature
-simplelm <- lm(meantmean_am ~ year, data = clim_df)
-intercept <- summary(simplelm)$coefficients['(Intercept)','Estimate']
-trend <- summary(simplelm)$coefficients['year','Estimate']
-baseline_2000 <- intercept + (2000-1978)*trend
-springtemp <- baseline_2000 + trend * (years_to_predict-2000)
-springtemp <- rnorm(length(years_to_predict), mean = predict(simplelm, newdata = data.frame(year = years_to_predict-1978)), sd = 0)
+springtemp <- rep(mean(clim_df[clim_df$year %in% c(1980:2000), 'meantmean_am']), length(summertemp)) 
 
 # Create hypotehtical trees to predict
-trees_per_stand <- 100
+trees_per_stand <- 50
 unique_stands <- "Benwell"
 newtree_stand_idxs <- rep(which(unique_stands==unique_stands), each = trees_per_stand)
 N_newtrees <- length(newtree_stand_idxs)
