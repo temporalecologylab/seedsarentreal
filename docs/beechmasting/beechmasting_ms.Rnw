@@ -34,6 +34,13 @@
 % $^{6}$Vassal-Montpellier Grapevine Biological Resources Center, INRAE, Marseillan-Plage, France \\
 % $^{7}$GloCEE - Global Change Ecology and Evolution Group, Department of Life Sciences, University of Alcal\'a, Alcal\'a de Henares, Spain\\ % (ORCID: 0000-0002-8570-9312)
 
+<<>>=
+wd <- '/home/victor/projects/seedsarentreal/docs/beechmasting'
+# wd <- 
+
+kq <- readRDS(file.path(wd, 'figures', 'key_quantities.rds'))
+@
+
 \section*{Introduction}
 
 % <!-- %\item Widespread meltdown fears\\ -->
@@ -107,7 +114,7 @@ We developed a model in which individual trees may alternate between two latent 
 % <!-- % \item some level of synchrony within stands -->
 % <!-- % \item say how often they transition in average conditions... -->
 % <!-- % \end{itemize} -->
-The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability of X of transitioning from a low-reproduction to a high-reproduction state, and a low probability of Y of remaining in that state in the following year (Fig. \ref{fig:overview}C).
+The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$average_transition['50%'],2)} (95\%CI \Sexpr{round(kq$average_transition['2.5%'],2)}-\Sexpr{round(kq$average_transition['97.5%'],2)}) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of \Sexpr{round(kq$average_persistence['50%'],2)} (95\%CI \Sexpr{round(kq$average_persistence['2.5%'],2)}-\Sexpr{round(kq$average_persistence['97.5%'],2)}) of remaining in that state the following year (Fig. \ref{fig:overview}C).
 
 \begin{figure}[htbp]
   \centering
@@ -122,7 +129,7 @@ The model separates out two distinct modalities of seed production in beech fore
 % <!-- % \item frost decrease number of seeds  -->
 % <!-- % \item no efect of spring (supp mat) -->
 % <!-- % \end{itemize} -->
-Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees in a low-reproduction state are X times more likely to transition to a high-reproduction state than during cold summers (XdegC, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a two-fold increase of spring frost risk---measured as growing-degree days until last frost---can decrease seed production by X\% (Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production. 
+Reproductive dynamics are impacted by climate. In a warm summer (\Sexpr{kq$warmsummertemp}$^\circ$C), trees in a low-reproduction state are \Sexpr{round(kq$probability_ratio['50%'],1)} times (95\%CI \Sexpr{round(kq$probability_ratio['2.5%'],1)}-\Sexpr{round(kq$probability_ratio['97.5%'],1)}) more likely to transition to a high-reproduction state than during cold summers (\Sexpr{kq$coldsummertemp}$^\circ$C, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a three-fold increase of growing-degree days until last frost---a metric for late spring frost risk---can decrease seed production by \Sexpr{round(kq$frost_decrease['50%'],1)}\%  (95\%CI \Sexpr{round(kq$frost_decrease['2.5%'],1)} to \Sexpr{round(kq$frost_decrease['97.5%'],1)}\%, Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production (Supp. Fig.). 
 
 % <!-- % \item Our projections vs current studies -->
 % <!-- % \begin{itemize} -->
@@ -132,7 +139,7 @@ Reproductive dynamics are impacted by climate. In a warm summer (XdegC), trees i
 % <!-- % \item To actually ahve a breakdown, we would nee the parameter valeu on M to M to be at least as important as NM to M -->
 % <!-- % \end{itemize} -->
 Increasing summer temperatures with climate change have been predicted to disrupt masting by reducing variability and synchrony---a phenomenon previously called breakdown \citep{Bogdziewicz2021, Foest2024}. Trees are expected to be more frequently in a high-reproduction state, and years with low seed production to become rarer \citep{Foest2024}, potentially at the cost of individual tree growth \citep{Koenig1998, HacketPain2025}.
-However, even with a significant and continuous summer warming (+7degC in one century), only X\% of trees in a population would mast every year (Fig. \ref{fig:future}). 
+However, even with a significant and continuous summer warming ($+7^\circ$C in one century), only \Sexpr{round(kq$mastingtrees_warmfuture['50%'],1)}\%  (95\%CI \Sexpr{round(kq$mastingtrees_warmfuture['2.5%'],1)} to \Sexpr{round(kq$mastingtrees_warmfuture['97.5%'],1)}\%) of trees in a population would mast in any given year (Fig. \ref{fig:future}). % change 'every year' to 'in any given year' because it's not always the same trees... Is it clearer now?
 
 Since our initial model allowed summer temperatures to affect only transitions from low- to high-reproduction state, we additionally tested whether warm summer influences the probability of persistence in a high-reproduction state and found a weak effect (Supp. Fig.). Even with this additional effect, trees cannot get stuck indefinitely in a highly reproductive state. On the contrary, a breakdown because of climate change would require summer warming to have a similar impact on both transition and persistence into a high-reproduction year --- an hypothesis not supported by the data we used here (Fig. \ref{fig:future}).
 
@@ -173,7 +180,7 @@ The evolutionary benefits of masting depend on the spatial scale at which trees 
 % <!-- % \item within between -->
 % <!-- % \item discuss results... maybe figure with \%? -->
 % <!-- % \end{itemize} -->
-The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations (Fig. \ref{fig:synchrony}A). Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized. 
+The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations (Fig. \ref{fig:synchrony}A). Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized (Supp. Fig.). 
 
 Synchronization depends not only on climate but also on previous reproductive states. This mechanism provides a simple physiological explanation for previous findings that temperature difference between the two previous summers mattered for masting ($\Delta T$ model; \citealp{Kelly2012}). Rather than complex molecular pathways such as `epigenetic summer memory' \citep{Samarth2020}, a cold summer followed by a warm summer generates synchrony simply because cold temperatures leave most trees in a low-reproduction state, allowing them to respond consistently to following warm temperatures that promote floral induction (Fig. \ref{fig:synchrony}B).
 

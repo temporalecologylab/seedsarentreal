@@ -435,7 +435,7 @@ arrows(x[1:4]+1, 0.2, x[1:4]+1, 0.5, col = 'grey40', lwd=1, length = 0.07, lty =
 
 # The case of beech masting dynamics
 
-We applied our model to data collected in England. We have annual seed production time series for 57 trees across 7 sites. The maximum duration is 43 years, but most series are shorter (and contained some missing values). For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with biological constraints to impact masting. 
+We applied our model to data collected in England. We have annual seed production time series for 57 trees across 7 populations. The maximum duration is 43 years, but most series are shorter (and contained some missing values). For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with biological constraints to impact masting. 
 
 The diagram below illustrates how to interpret the following plots. The red bars correspond to the model predictions.
 
@@ -460,17 +460,49 @@ Everything looks consistent. Next we can explore how consistent the observations
 ```{=latex}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.82\linewidth]{external_figures/tree_checks.pdf}
+  \includegraphics[width=0.84\linewidth]{external_figures/tree_checks.pdf}
 \end{figure}
 ```
 
 The grey bars indicate years with missing observations. A strength of the model is that it still allows to estimate the reproductive state and seed production during those years with missing data.
 
-We can also look at the latent states that are estimated by the model. Remember: these are _latent_, so we don't have observations (no black lines).
+We can also look at the latent states estimated by the model. Remember: these are _latent_, so we don't have observations (no black lines).
 
 ```{=latex}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.82\linewidth]{external_figures/tree_states.pdf}
+  \includegraphics[width=0.84\linewidth]{external_figures/tree_states.pdf}
 \end{figure}
 ```
+
+\newpage
+Using these tree-level states, we can quantify the percentage of trees in an on-year across the 7 populations. This gives us some quantification of synchrony across all stands.
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{external_figures/masting_trees.pdf}
+\end{figure}
+```
+
+We can then examine both within-stand and synchrony between stands. Synchrony within stands is likely more relevant for predator satiation hypothesis, as many seed predators have a limited foraging distance. Here, we examine the temporal dynamics of these two distinct components, so we aggregated observations into 5-year bins.
+
+```{=latex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\linewidth]{external_figures/synchrony.pdf}
+\end{figure}
+```
+
+Because we have only two states, the minimum synchrony is $0.5$, because at least 50\% of the trees are in the same state.  I do not go into detail here about our results related to climate impacts, as I believe they may be less directly relevant to Eléonore's project.
+
+\newpage
+These results on synchrony open up many possibilities with the data from Mt Rainier! \
+At what level of synchrony does reproduction is enough to offer a real fitness benefit to trees? Does synchrony across stands matter more in Mt Rainier, because stands are likely closer than our English dataset? We will also be able to investigate synchrony within species and across species, and maybe relate the patterns to seed predators. For example, are species that share the same seed predators also more synchronous? Many exciting avenues to explore! \
+
+::: {.callout-note}
+Remind that one of the strength of our model is to explicitly incorporate the biological constraints at the individual level that shape population masting dynamics. Thus, we will need to think carefully about these constraints and the reproductive biology of each species. In our case, beech has a 2-year cycle, but some species may have a 3-year cycle that could require to tweak the model.
+:::
+
+
+

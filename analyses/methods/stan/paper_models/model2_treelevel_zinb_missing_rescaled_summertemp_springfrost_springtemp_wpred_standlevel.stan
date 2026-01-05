@@ -343,6 +343,9 @@ generated quantities {
   // array[Nnew] int states_new;
   // array[Nnew] int seed_counts_new;
   
+  array[N_max_newyears] int states_new;
+  array[N_max_newyears] int seed_counts_new;
+  
   array[N_newstands, N_max_newyears] int states_new_plot = rep_array(0, N_newstands, N_max_newyears);
   array[N_newstands, N_max_newyears] int seed_counts_new_plot = rep_array(0, N_newstands, N_max_newyears);
   
@@ -354,10 +357,6 @@ generated quantities {
   
   
   for(newt in 1:N_newtrees){
-    
-    array[N_max_newyears] int states_new;
-    array[N_max_newyears] int seed_counts_new;
-    
     
     matrix[2, N_max_newyears] omega = rep_matrix(1, 2, N_max_newyears);
     
