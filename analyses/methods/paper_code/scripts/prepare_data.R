@@ -54,7 +54,7 @@ for (tid in uniq_tree_ids) {
 }
 
 # Create hypothetical future climates
-years_to_predict <- (2000:2100)
+years_to_predict <- (1980:2100)
 ## summer temperature
 clim_df <- clim_data[clim_data$site.ID == 'Benwell',]
 baseline_2000 <- mean(clim_df[clim_df$year %in% c(1980:2000), 'meantmax_ja']) # average summer temp. from 1980-2000 in Benwell

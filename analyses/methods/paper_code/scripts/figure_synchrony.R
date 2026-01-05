@@ -7,6 +7,7 @@ layout(matrix(c(1,1, 2, 3), ncol=2, byrow = F), widths = c(0.6,0.4))
 sites <- stringr::str_split_i(uniq_tree_ids, '_', 1)
 uniq_sites <- unique(sites)
 synchrony_within <- synchrony_across <- c()
+trees <- 1:data$N_trees
 for(y in 1980:2022){
   
   ## Look at all trees within one year
@@ -23,7 +24,6 @@ for(y in 1980:2022){
     samples[[name]] <- 0
   }
   
-  obstrees_persite <- rep(0, length(uniq_sites))
   trees_persite <- rep(0, length(uniq_sites))
   for(t in 1:data$N_trees){
     name <- paste0('masting_site[', which(uniq_sites == sites[t]), ']')
@@ -32,9 +32,6 @@ for(y in 1980:2022){
     name <- paste0('nonmasting_site[', which(uniq_sites == sites[t]), ']')
     samples[[name]] <- samples[[name]] + abs(samples[[names[t]]]-2)
     
-    obstrees_persite[which(uniq_sites == sites[t])] <- 
-      obstrees_persite[which(uniq_sites == sites[t])] +
-      ifelse(idxs_tree[t]%in%observed_flags,1, 0)
     trees_persite[which(uniq_sites == sites[t])] <-
       trees_persite[which(uniq_sites == sites[t])] + 1
   }
@@ -162,44 +159,47 @@ plot_quantiles_w <- do.call(cbind, lapply(plot_idxs,
 
 
 lines(c(1:8)+0.2, quantiles_w[3, ],
-      col=util$c_mid, lwd=1, lty = 2)
+      col='#754875', lwd=1, lty = 2)
 
 lines(c(1:8)-0.2, quantiles_a[3, ],
-      col=util$c_mid_teal, lwd=1, lty = 2)
+      col='#466f8a', lwd=1, lty = 2)
 
 for(i in seq(1, 2*N, 2)){
   
   rect(xleft = plot_xs[i]+0.1, xright = plot_xs[i+1]-0.5,
        ybottom = plot_quantiles_a[1,i], ytop = plot_quantiles_a[5,i+1],
-       col = '#a6bbbb', border = NA)
+       col = '#b7cddb', border = NA)
   
   rect(xleft = plot_xs[i]+0.1, xright = plot_xs[i+1]-0.5,
        ybottom = plot_quantiles_a[2,i], ytop = plot_quantiles_a[4,i+1],
-       col = '#88a4a4', border = NA)
+       col = '#7fa4bb', border = NA)
   
   lines(c(plot_xs[i]+0.1,  plot_xs[i+1]-0.5), plot_quantiles_a[3, i:(i+1)],
-        col=util$c_dark_teal, lwd=2)
+        col="#1b3f5a", lwd=2)
   
 }
 
+#1b3f5a  #466f8a  #7fa4bb  #b7cddb
 
 for(i in seq(1, 2*N, 2)){
   
   rect(xleft = plot_xs[i]+0.5, xright = plot_xs[i+1]-0.1,
        ybottom = plot_quantiles_w[1,i], ytop = plot_quantiles_w[5,i+1],
-       col = util$c_light, border = NA)
+       col = '#bba6bb', border = NA)
   
   rect(xleft = plot_xs[i]+0.5, xright = plot_xs[i+1]-0.1,
        ybottom = plot_quantiles_w[2,i], ytop = plot_quantiles_w[4,i+1],
-       col = util$c_light_highlight, border = NA)
+       col = '#a488a4', border = NA)
   
   lines(c(plot_xs[i]+0.5,  plot_xs[i+1]-0.1), plot_quantiles_w[3, i:(i+1)],
-        col=util$c_dark, lwd=2)
+        col='#4f1d4b', lwd=2)
   
   lines(c(plot_xs[i]+0.1,  plot_xs[i+1]-0.1), c(0.5,0.5),
         col='black', lwd=1)
   
 }
+
+
 
 # text(x = 1:8, y = 0.45, labels = 
 #        c('1980\nto\n1984', '1985\nto\n1989', '1990\nto\n1994', '1995\nto\n1999',
@@ -211,15 +211,36 @@ text(x = 1:8, y = 0.47, labels =
          '2000-\n2004', '2005-\n2009', '2010-\n2014', '2015-\n2022'),
      cex = 0.77)
 
-legend("topleft", 
-       legend = c("Within stand", "Between stands"), 
-       col = c(util$c_mid_highlight, util$c_mid_teal), 
-       lwd = 2, 
-       bty = "n", 
-       cex = 0.9, 
-       text.col = "black", 
-       horiz = T, 
+legend("topleft",
+       legend = c("Within stand", "Between stands"),
+       col = c("#bba6bb", "#b7cddb"),
+       lwd = 8,
+       cex = 0.9,
+       text.col = "black",
+       horiz = F,
+       bty = "n",
        inset = c(0.05, 0.07))
+legend("topleft",
+       legend = c("", ""),
+       col = c("#754875", "#466f8a"),
+       lwd = 2,
+       bty = "n",
+       cex = 0.9,
+       text.col = "black",
+       horiz = F,
+       inset = c(0.05, 0.07))
+
+
+# 
+# legend( x="topleft", 
+#         legend=c("",""),
+#         fill=c("#a488a4","#a4a488"), lwd=1, lty=c(0,0), 
+#         bty="n", border = FALSE)
+# legend( x="topleft", 
+#         legend=c("Red line, blue points","Green line, purple points"),
+#         col=c("#754875","#757548"), lwd=1, 
+#         pch=c(NA,NA),bty="n")
+
 
 mtext(LETTERS[1], side = 3, line = -1.2, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
 
@@ -264,6 +285,8 @@ xlim <- c(-4, 4)
 x <- seq(xlim[1], xlim[2], length.out = 100)
 lines(x, predict(fit, newdata = data.frame(delta = x)), col = util$c_mid, lty = 2, lwd = 1.2)
 
+
+
 mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.2, cex = 1.2, font = 2, col = 'grey30')
 
 
@@ -284,11 +307,11 @@ axis(1, at=seq(-4,4,1), seq(-4,4,1),
      cex.axis = 0.85, mgp = c(0, 0.3, 0)) 
 title(xlab = 'Temperature diff. between two previous summers (°C)', line = 1.5)
 
-segments(x0 = delta, y0 = quantiles_nm['10%',], y1 = quantiles_nm['90%',], col='#a6bbbb', lwd = 0.75)
-points(quantiles_nm['50%',] ~ delta, col = '#a6bbbb', pch = 20)
+segments(x0 = delta, y0 = quantiles_nm['10%',], y1 = quantiles_nm['90%',], col='#96b096', lwd = 0.75)
+points(quantiles_nm['50%',] ~ delta, col = '#96b096', pch = 20)
 fit <- lm(quantiles_nm['50%',] ~ delta)
 xlim <- c(-4, 4)
 x <- seq(xlim[1], xlim[2], length.out = 100)
-lines(x, predict(fit, newdata = data.frame(delta = x)), col = util$c_mid_teal, lty = 2, lwd = 1.2)
+lines(x, predict(fit, newdata = data.frame(delta = x)), col = "#487548", lty = 2, lwd = 1.2)
 
 dev.off()

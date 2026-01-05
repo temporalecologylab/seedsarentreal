@@ -1,4 +1,4 @@
-set.seed(123456)
+set.seed(12345)
 par(mfrow=c(1, 1), mar = c(4,4,2,2))
 
 nsamples <- length(samples[['theta1']])
@@ -20,7 +20,7 @@ for(i in 1:nsamples){
   masting <- c(masting, mas)
 }
 
-hist(nonmasting, breaks=seq(0,800,l=80), col = '#48757560', border = 'white', 
+hist(nonmasting, breaks=seq(0,800,l=80), col = '#48754860', border = 'white', 
      xlab = '', main = '', prob = TRUE, yaxt = "n", ylab = '', xaxt = 'n', xlim = c(0,500))
 
 usr <- par("usr")
@@ -33,7 +33,7 @@ title(xlab = 'Number of seeds', line = 2)
 masting <- MASS::rnegbin(10000, 160, 2)
 hist(masting[masting < 650], breaks=seq(0,800,l=80), col = "#8F272760", border = 'white', 
      xlab = 'Number of seeds', main = '', add = TRUE, prob = TRUE, xlim = c(0,500))
-text(x = 30, y = 0.03, labels = 'Low-reproduction\nstate', col = util$c_mid_teal, font = 1, adj = 0)
+text(x = 30, y = 0.03, labels = 'Low-reproduction\nstate', col = '#487548', font = 1, adj = 0)
 text(x = 100, y = 0.008, labels = 'High-reproduction state', col = util$c_mid, font = 1, adj = 0)
 
 mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 'grey30')
