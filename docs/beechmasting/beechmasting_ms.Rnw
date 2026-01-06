@@ -84,13 +84,13 @@ At the individual level, the alternating reproductive cycle is constrained by en
 % <!-- % \begin{itemize} -->
 % <!-- % \item year before need warm summer... -->
 % <!-- % \end{itemize} -->
-The combination of endogeneous constraints and local climatic conditions could explain how individual-level intrinsic alternation leads to masting behavior at the population scale \citep{Matthews1955, Monselise1982}. Floral bud initiation requires warm summer temperatures \citep{Vacchiano2017}.  Unfavorable or favorable summer conditions could act as a  hinge point to synchronize individual reproductive cycles within a population, and this synchrony may then persist over several years.
+% I feel the below needs a bit more but I'm not inspired right now
+The combination of endogeneous constraints and local climatic conditions could explain how individual-level intrinsic alternation leads to masting behavior at the population scale \citep{Matthews1955, Monselise1982}. %Floral bud initiation requires warm summer temperatures \citep{Vacchiano2017}.  
+Unfavorable or favorable summer conditions could act as a  hinge point to synchronize individual reproductive cycles within a population, and this synchrony may then persist over several years.
 
 % <!-- % \item So ACC could really screw this up -->
 % <!-- % $\rightarrow$ but to know this, we need to model the individuals! -->
 Anthropogenic climate change could alter the climatic cues that synchronize individual reproductive cycles. Without any constraints, novel climatic conditions could disrupt masting and its evolutionary benefits  \citep{Bogdziewicz2023, Foest2024}. However, endogenous constraints linked to reproductive biology could buffer the effects of climate change. Reliable forecasts of long-term population-level synchrony thus require to model how individual endogeneous constraints and climate act together. 
-
-\section*{Results and discussion}
 
 % <!-- % \item We built a model that matches conceptual figure -->
 % <!-- % \begin{itemize} -->
@@ -101,6 +101,9 @@ Anthropogenic climate change could alter the climatic cues that synchronize indi
 % <!-- % \end{itemize} -->
 We developed a model in which individual trees may alternate between two latent reproductive states. These states explicitly encode endogenous constraints, i.e. the alternate bearing because of the temporal overlap between floral bud initiation and fruit development. For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with endogenous constraints to impact masting. 
 
+\section*{Results and discussion}
+
+% I'm thinking that the panel C could be a reminder of the conceptual figure, with the fitted values of transition probabilities
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.1\linewidth]{figures/model_overview.pdf}
@@ -114,7 +117,9 @@ We developed a model in which individual trees may alternate between two latent 
 % <!-- % \item some level of synchrony within stands -->
 % <!-- % \item say how often they transition in average conditions... -->
 % <!-- % \end{itemize} -->
-The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$average_transition['50%'],2)} (95\%CI \Sexpr{round(kq$average_transition['2.5%'],2)}-\Sexpr{round(kq$average_transition['97.5%'],2)}) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of \Sexpr{round(kq$average_persistence['50%'],2)} (95\%CI \Sexpr{round(kq$average_persistence['2.5%'],2)}-\Sexpr{round(kq$average_persistence['97.5%'],2)}) of remaining in that state the following year (Fig. \ref{fig:overview}C).
+% The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B).
+Using these data, our model identified two latent states at the tree level, similar to those deserved for masting (Fig. \ref{fig:overview}A-B). 
+Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$average_transition['50%'],2)} (95\%CI \Sexpr{round(kq$average_transition['2.5%'],2)}-\Sexpr{round(kq$average_transition['97.5%'],2)}) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of \Sexpr{round(kq$average_persistence['50%'],2)} (95\%CI \Sexpr{round(kq$average_persistence['2.5%'],2)}-\Sexpr{round(kq$average_persistence['97.5%'],2)}) of remaining in that state the following year (Fig. \ref{fig:overview}C). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. 
 
 \begin{figure}[htbp]
   \centering
