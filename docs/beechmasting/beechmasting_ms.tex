@@ -93,7 +93,8 @@ Anthropogenic climate change could alter the climatic cues that synchronize indi
 % <!-- % \item tree level estimates lead to stand estimates! -->
 % <!-- % \item and we added climate -->
 % <!-- % \end{itemize} -->
-We developed a model in which individual trees may alternate between two latent reproductive states. These states explicitly encode endogenous constraints, i.e. the alternate bearing because of the temporal overlap between floral bud initiation and fruit development. For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with endogenous constraints to impact masting. 
+% Below: slim it down (push a lot of it into the conceptual figure caption)
+We developed a model in which individual trees may alternate between two latent reproductive states. These states explicitly encode endogenous constraints, i.e. the alternate bearing because of the temporal overlap between floral bud initiation and fruit development. For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with endogenous constraints to impact masting. We apply this model to seed data collected in beech forests of England, since 1980. 
 
 \section*{Results and discussion}
 
@@ -113,7 +114,7 @@ We developed a model in which individual trees may alternate between two latent 
 % <!-- % \end{itemize} -->
 % The model separates out two distinct modalities of seed production in beech forests in England (Fig. \ref{fig:overview}A), supporting the existence of two reproductive states at the tree level (Fig. \ref{fig:overview}B).
 Using these data, our model identified two latent states at the tree level, similar to those deserved for masting (Fig. \ref{fig:overview}A-B). 
-Under average climatic conditions, a tree has a probability of 0.66 (95\%CI 0.59-0.72) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of 0.17 (95\%CI 0.07-0.28) of remaining in that state the following year (Fig. \ref{fig:overview}C). Alternance between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. 
+Under average climatic conditions, a tree has a probability of 0.66 (90\%CI 0.6-0.71) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of 0.17 (90\%CI 0.09-0.27) of remaining in that state the following year (Fig. \ref{fig:overview}C). Alternation between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). Individual reproductive behaviors are relatively synchronous: years of high population-level seed production---mast years---are separated by periods of low seed production. 
 
 \begin{figure}[htbp]
   \centering
@@ -128,7 +129,7 @@ Under average climatic conditions, a tree has a probability of 0.66 (95\%CI 0.59
 % <!-- % \item frost decrease number of seeds  -->
 % <!-- % \item no efect of spring (supp mat) -->
 % <!-- % \end{itemize} -->
-Reproductive dynamics are impacted by climate. In a warm summer (23$^\circ$C), trees in a low-reproduction state are 2 times (95\%CI 1.4-3) more likely to transition to a high-reproduction state than during cold summers (17$^\circ$C, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a three-fold increase of growing-degree days until last frost---a metric for late spring frost risk---can decrease seed production by -15.1\%  (95\%CI -24.3 to -4.4\%, Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production (Supp. Fig.). 
+Reproductive dynamics are impacted by climate. In a warm summer (23$^\circ$C), trees in a low-reproduction state are 2 times (90\%CI 1.5-2.8) more likely to transition to a high-reproduction state than during cold summers (17$^\circ$C, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a three-fold increase of growing-degree days until last frost---a metric for late spring frost risk---can decrease seed production by -15.1\%  (90\%CI -23 to -6.4\%, Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production (Supp. Fig.). 
 
 % <!-- % \item Our projections vs current studies -->
 % <!-- % \begin{itemize} -->
@@ -138,7 +139,7 @@ Reproductive dynamics are impacted by climate. In a warm summer (23$^\circ$C), t
 % <!-- % \item To actually ahve a breakdown, we would nee the parameter valeu on M to M to be at least as important as NM to M -->
 % <!-- % \end{itemize} -->
 Increasing summer temperatures with climate change have been predicted to disrupt masting by reducing variability and synchrony---a phenomenon previously called breakdown \citep{Bogdziewicz2021, Foest2024}. Trees are expected to be more frequently in a high-reproduction state, and years with low seed production to become rarer \citep{Foest2024}, potentially at the cost of individual tree growth \citep{Koenig1998, HacketPain2025}.
-However, even with a significant and continuous summer warming ($+7^\circ$C in one century), only 56\%  (95\%CI 41.8 to 72.2\%) of trees in a population would mast in any given year (Fig. \ref{fig:future}). % change 'every year' to 'in any given year' because it's not always the same trees... Is it clearer now?
+However, even with a significant and continuous summer warming ($+7^\circ$C in one century), only 56\%  (90\%CI 44 to 69.5\%) of trees in a population would mast in any given year (Fig. \ref{fig:future}). % change 'every year' to 'in any given year' because it's not always the same trees... Is it clearer now?
 
 Since our initial model allowed summer temperatures to affect only transitions from low- to high-reproduction state, we additionally tested whether warm summer influences the probability of persistence in a high-reproduction state and found a weak effect (Supp. Fig.). Even with this additional effect, trees cannot get stuck indefinitely in a highly reproductive state. On the contrary, a breakdown because of climate change would require summer warming to have a similar impact on both transition and persistence into a high-reproduction year --- an hypothesis not supported by the data we used here (Fig. \ref{fig:future}).
 
@@ -153,7 +154,7 @@ Since our initial model allowed summer temperatures to affect only transitions f
 % <!-- % \begin{itemize} -->
 % <!-- % \item ... -->
 % <!-- % \end{itemize} -->
-Climate impacts on reproduction are not independent of the reproductive state of trees. Endogenous constraints intrinsically prevent individuals from producing a high number of seeds every year. Warm summer temperatures can improve floral bud initiation, but do not suppress the trade-off imposed by a large fruit load. Because masting behavior arise from tree-level reproductive cycles, these constraints cannot be ignored when forecasting population-scale dynamics. The biological processes underlying tree reproduction could slow down the increase of reproduction sensitivity to climate change, potentially preventing unlimited amplification of climate effects and an abrupt collapse of masting.
+Climate impacts on reproduction are not independent of the reproductive state of trees. Endogenous constraints intrinsically prevent individuals from producing a high number of seeds every year. Warm summer temperatures can improve floral bud initiation, but do not suppress the trade-off imposed by a large fruit load. Because masting behavior arise from tree-level reproductive cycles, these constraints cannot be ignored when forecasting population-scale dynamics. The biological constraints underlying tree reproduction could slow down the increase of reproduction sensitivity to climate change, potentially preventing unlimited amplification of climate effects and an abrupt collapse of masting.
 
 % <!-- % \item But synchrony does appear to go down -->
 % <!-- % \begin{itemize} -->
