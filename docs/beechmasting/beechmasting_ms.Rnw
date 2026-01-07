@@ -108,9 +108,10 @@ We developed a model in which individual trees may alternate between two latent 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.1\linewidth]{figures/model_overview.pdf}
-  \caption{Distinct tree reproductive states generates variability at the population level.}
+  \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. \textbf{(B)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot). \textbf{(C)} The differences in transition probabilities between states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(D)} these individual cycles generate some amount of variability and synchrony in seed production across years. In \textbf{(B)} and \textbf{(D)}, the red line represents the median, while the shaded areas reporesent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts.}
   \label{fig:overview}
 \end{figure}
+
 
 % <!-- % \item Model identifies 2 states (here, figure with the two distributions) -->
 % <!-- % \begin{itemize} -->
