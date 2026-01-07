@@ -108,7 +108,7 @@ We developed a model in which individual trees may alternate between two latent 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.1\linewidth]{figures/model_overview.pdf}
-  \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. \textbf{(B)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot). \textbf{(C)} The differences in transition probabilities between states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(D)} these individual cycles generate some amount of variability and synchrony in seed production across years. In \textbf{(B)} and \textbf{(D)}, the red line represents the median, while the shaded areas reporesent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts.}
+  \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. \textbf{(B)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot). \textbf{(C)} The differences in transition probabilities between states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(D)} these individual cycles generate some amount of variability and synchrony in seed production across years. In \textbf{(B)} and \textbf{(D)}, the red line represents the median model prediction, while the shaded areas reporesent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts, and the grey lines and areas indicate model predictions for years when observations were missing.}
   \label{fig:overview}
 \end{figure}
 
@@ -126,9 +126,11 @@ Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$a
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.1\linewidth]{figures/climate_predictors.pdf}
-  \caption{Effects of climate.}
+  \caption{\textbf{Climate conditions impact both transition probabilities between states and seed production in a high reproduction state.} \textbf{(A)} Average maximum temperature in July and August of the previous year increases the probability of transition from a low-reproduction to a high-reproduction state. \textbf{(B)} The accumulated growing-degree days (GDD) until the last frost day decreases the number of seeds produced in a high-reproduction state. Plants that have accumulated more GDD before a frost event are phenologically more advanced and thus face a higher risk of frost injury. In \textbf{(A)} and \textbf{(B)}, the solid red line and dashed lines respectively represent the median and the 5\% and 95\% quantiles, while the gray boxplots show observed conditions (1980–2022).}
   \label{fig:climate}
 \end{figure}
+
+
 
 % <!-- % \item Climate impacts on masting (figure of climate effects) -->
 % <!-- % \begin{itemize} -->
@@ -153,7 +155,7 @@ Since our initial model allowed summer temperatures to affect only transitions f
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.7\linewidth]{figures/climate_nobreakdown.pdf}
-  \caption{Constraints prevent breakdown.}
+  \caption{\textbf{Endogeneous constraints prevent masting breakdown under a significant summer warming.} We predicted the percentage of masting trees for 50 new trees in an average population in England. The green line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the predictions with the model fitted on the data used in this paper. With this model, the fitted transition probabilities indicate that trees cannot remain continuously in a high-reproduction state. The orange line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the predictions from an hypothetical model where summer warming increases the probability of persisting into a high-reproduction state --- and would lead to most trees masting every year (i.e. reproductive breakdown). These predictions are not supported by the data used here.}
   \label{fig:future}
 \end{figure}
 
@@ -178,9 +180,11 @@ The evolutionary benefits of masting depend on the spatial scale at which trees 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.1\linewidth]{figures/synchrony.pdf}
-  \caption{How synchrony arises from two scales!}
+  \caption{\textbf{Reproductive synchrony arises from populations of individual trees.} \textbf{(A)} Blue line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the synchrony within population, i.e. the average proportion of trees of the same population that are in the same state. Some populations can be in a non-masting year, while some population can mast. Purple line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the synchrony across populations, i.e. the proportion of trees that are in the same state across all populations. Since our model includes only two states, the minimum synchrony is 0.5 (i.e. at least 50\% of the trees are in the same state). \textbf{(B)} The interactions of previous summer conditions and previous latent states explains the apparent two-year lag effect of climate on observed synchrony across populations.}
   \label{fig:synchrony}
 \end{figure}
+
+
 
 % <!-- % \item Asynchrony indeed driven by multiple factors -->
 % <!-- % \begin{itemize} -->
