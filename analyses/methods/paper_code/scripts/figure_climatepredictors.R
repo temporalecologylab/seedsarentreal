@@ -19,7 +19,7 @@ for(temp_prevsummer in seq(12,26,0.1)){
     tau_nm_m[c,] <- sapply(1:ncol(tau_nm_m), function(i) invlogit(logit(samples[['tau_nm_m0']][c,i])+samples[['beta_nm_m']][c,i]*(temp_prevsummer-temp0)))
   }
   tau_nm_m_df <- rbind(tau_nm_m_df,
-                       data.frame(temp_prevsummer, t(util$ensemble_mcmc_quantile_est(tau_nm_m, probs = c(0.025,0.5,0.975)))))
+                       data.frame(temp_prevsummer, t(util$ensemble_mcmc_quantile_est(tau_nm_m, probs = c(0.05,0.5,0.95)))))
 }
 
 par(mar = c(4.5,4.5,2,2))
@@ -39,8 +39,8 @@ axis(2, at=seq(0,1,0.25), seq(0,1,0.25),
 title(ylab = 'Probability of transition from\nlow- to high-reproduction state', line = 2.5, cex.lab = 0.85)
 
 lines(tau_nm_m_df$X50. ~ tau_nm_m_df$temp_prevsummer, col = util$c_dark, lwd = 2)
-lines(tau_nm_m_df$X2.5. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
-lines(tau_nm_m_df$X97.5. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
+lines(tau_nm_m_df$X5. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
+lines(tau_nm_m_df$X95. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
 
 mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.2, cex = 1.2, font = 2, col = 'grey30')
 
@@ -52,7 +52,7 @@ for(gdd_lastfrost in seq(0,35,0.1)){
     lambda2[c,] <- sapply(1:ncol(lambda2), function(i) exp(log(samples[['lambda20']][c,i]) +samples[['beta_lambda2_frost']][c,i]*(gdd_lastfrost-gdd0)))
   }
   lambda2_df <- rbind(lambda2_df,
-                      data.frame(gdd_lastfrost, t(util$ensemble_mcmc_quantile_est(lambda2, probs = c(0.025,0.5,0.975)))))
+                      data.frame(gdd_lastfrost, t(util$ensemble_mcmc_quantile_est(lambda2, probs = c(0.05,0.5,0.95)))))
 }
 
 
@@ -73,8 +73,8 @@ axis(2, at=seq(120,220,20), seq(120,220,20),
 title(ylab = 'Average seed production in\na high-reproduction state', line = 2.5, cex.lab = 0.85)
 
 lines(lambda2_df$X50. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_dark, lwd = 2)
-lines(lambda2_df$X2.5. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
-lines(lambda2_df$X97.5. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
+lines(lambda2_df$X5. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
+lines(lambda2_df$X95. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
 
 mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.2, cex = 1.2, font = 2, col = 'grey30')
 

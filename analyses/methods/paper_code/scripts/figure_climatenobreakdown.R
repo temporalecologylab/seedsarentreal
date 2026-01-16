@@ -26,13 +26,13 @@ plot_idxs <- plot_config[[1]]
 plot_xs <- plot_config[[2]]
 
 # Construct marginal quantiles
-probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
 calc <- function(n) {
   util$ensemble_mcmc_quantile_est(samples_brk[[names[n]]]/data$N_newtrees, probs)
 }
 quantiles <- sapply(1:N, calc)
 plot_quantiles <- do.call(cbind, lapply(plot_idxs,
-                                        function(n) quantiles[1:9, n]))
+                                        function(n) quantiles[1:5, n]))
 
 delta <- 0.05 * (display_ylim[2] - display_ylim[1])
 display_ylim[1] <- 0
@@ -58,19 +58,19 @@ for(n in 10:N){
   
   idplot <- c(n*2-1, n*2)
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+          c(plot_quantiles[1,idplot], rev(plot_quantiles[5,idplot])),
           col = "#bcdccc90", border = NA)
+  # polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+  #         c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+  #         col = "#99c7b090", border = NA)
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
-          col = "#99c7b090", border = NA)
-  polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+          c(plot_quantiles[2,idplot], rev(plot_quantiles[4,idplot])),
           col = "#7cb99b90", border = NA)
-  polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
-          col = "#50a27990", border = NA)
+  # polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+  #         c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+  #         col = "#50a27990", border = NA)
   
-  lines(plot_xs[idplot], plot_quantiles[5, idplot],
+  lines(plot_xs[idplot], plot_quantiles[3, idplot],
         col= '#278f5b', lwd=2)
 }
 
@@ -79,45 +79,45 @@ names <- sapply(idxs_tree,
                 function(n) paste0('states_new_brkd_plot[1,', n, ']'))
 
 # Construct marginal quantiles
-probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
 calc <- function(n) {
   util$ensemble_mcmc_quantile_est(samples_brk[[names[n]]]/data$N_newtrees, probs)
 }
 quantiles <- sapply(1:N, calc)
 plot_quantiles <- do.call(cbind, lapply(plot_idxs,
-                                        function(n) quantiles[1:9, n]))
+                                        function(n) quantiles[1:5, n]))
 
 
 for(n in 10:N){
   
   idplot <- c(n*2-1, n*2)
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[1,idplot], rev(plot_quantiles[9,idplot])),
+          c(plot_quantiles[1,idplot], rev(plot_quantiles[5,idplot])),
           col = "#e4c19d90", border = NA)
+  # polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+  #         c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
+  #         col = "#deb48990", border = NA)
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
-          col = "#deb48990", border = NA)
-  polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[3,idplot], rev(plot_quantiles[7,idplot])),
+          c(plot_quantiles[2,idplot], rev(plot_quantiles[4,idplot])),
           col = "#d49b6190", border = NA)
-  polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
-          c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
-          col = "#cd8e4d90", border = NA)
+  # polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
+  #         c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
+  #         col = "#cd8e4d90", border = NA)
   
-  lines(plot_xs[idplot], plot_quantiles[5, idplot],
+  lines(plot_xs[idplot], plot_quantiles[3, idplot],
         col= '#c98139', lwd=2)
 }
 
 
 legend("topleft",
-       legend = c("Constraints buffer warming", "Masting breakdown"),
+       legend = c("Constraints buffer warming", "Masting breakdown (no constraints)"),
        col = c("#bcdccc", "#e4c19d"),
        lwd = 8,
        cex = 0.85,
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.55, 0.75))
+       inset = c(0.5, 0.75))
 legend("topleft",
        legend = c("", ""),
        col = c("#278f5b", "#c98139"),
@@ -126,7 +126,7 @@ legend("topleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.55, 0.75))
+       inset = c(0.5, 0.75))
 
 
 

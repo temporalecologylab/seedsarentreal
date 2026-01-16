@@ -77,7 +77,8 @@ for(y in 1980:2022){
 intervals <- list('1980s' = 1980:1984, '1985s' = 1985:1989,  
                   '1990s' = 1990:1994, '1995s' = 1995:1999, 
                   '2000s' = 2000:2004, '2005s' = 2005:2009, 
-                  '2010s' = 2010:2014, '2015s' = 2015:2022)
+                  '2010s' = 2010:2014, '2015s' = 2015:2019,
+                  '2020s' = 2020:2022)
 
 for(i in 1:length(intervals)){
   newname <- paste0('withinstand_synchrony_', names(intervals)[i])
@@ -158,10 +159,10 @@ plot_quantiles_w <- do.call(cbind, lapply(plot_idxs,
                                           function(n) quantiles_w[1:5, n]))
 
 
-lines(c(1:8)+0.2, quantiles_w[3, ],
+lines(c(1:N)+0.2, quantiles_w[3, ],
       col='#754875', lwd=1, lty = 2)
 
-lines(c(1:8)-0.2, quantiles_a[3, ],
+lines(c(1:N)-0.2, quantiles_a[3, ],
       col='#466f8a', lwd=1, lty = 2)
 
 for(i in seq(1, 2*N, 2)){
@@ -206,13 +207,14 @@ for(i in seq(1, 2*N, 2)){
 #          '2000\nto\n2004', '2005\nto\n2009', '2010\nto\n2014', '2015\nto\n2022'),
 #      cex = 0.8)
 
-text(x = 1:8, y = 0.47, labels = 
+text(x = 1:N, y = 0.47, labels = 
        c('1980-\n1984', '1985-\n1989', '1990-\n1994', '1995-\n1999',
-         '2000-\n2004', '2005-\n2009', '2010-\n2014', '2015-\n2022'),
+         '2000-\n2004', '2005-\n2009', '2010-\n2014', '2015-\n2019',
+         '2020-\n2022'),
      cex = 0.77)
 
 legend("topleft",
-       legend = c("Within stand", "Between stands"),
+       legend = c("Within population", "Between populations"),
        col = c("#bba6bb", "#b7cddb"),
        lwd = 8,
        cex = 0.9,
@@ -271,7 +273,7 @@ plot(1, type="n", main=main,
      yaxt = 'n', xaxt = 'n',
      ylim=c(-0.05,1.05), ylab='',
      frame = FALSE)
-title(ylab = 'Masting synchrony\nbetween stands', line = 2, cex.lab = 0.9)
+title(ylab = 'Masting synchrony\nbetween populations', line = 2, cex.lab = 0.9)
 
 # axis(2, at= seq(0,1,0.1), labels=seq(0,1,0.1))
 axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
@@ -296,7 +298,7 @@ plot(1, type="n", main=main,
      yaxt = 'n', xaxt = 'n',
      ylim=c(-0.05,1.05), ylab='',
      frame = FALSE)
-title(ylab = 'Non-masting synchrony\nbetween stands', line = 2, cex.lab = 0.9)
+title(ylab = 'Non-masting synchrony\nbetween populations', line = 2, cex.lab = 0.9)
 
 axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
