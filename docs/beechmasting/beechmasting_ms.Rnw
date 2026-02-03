@@ -1,5 +1,3 @@
-% Last version from Jan. 7
-
 \documentclass[11pt]{article}
 \usepackage[top=1.0in, bottom=1.0in, left=1.0in, right=1.0in]{geometry}
 \usepackage{Sweave}
@@ -96,7 +94,7 @@ At the individual level, the alternating reproductive cycle is constrained by en
 % I feel the below needs a bit more but I'm not inspired right now
 The combination of endogeneous constraints and local climatic conditions could explain how individual-level intrinsic alternation leads to masting behavior at the population scale \citep{Matthews1955, Monselise1982}. %Floral bud initiation requires warm summer temperatures \citep{Vacchiano2017}. 
 %emwJan23: I would merge the previous sentence into your reproductive constraints paragraph and save the below point as something that emerges from the R&D -- this is more of a finding so does not fit here to me.  
-Unfavorable or favorable summer conditions could act as a  hinge point to synchronize individual reproductive cycles within a population, and this synchrony may then persist over several years.
+
 
 % <!-- % \item So ACC could really screw this up -->
 % <!-- % $\rightarrow$ but to know this, we need to model the individuals! -->
@@ -139,18 +137,26 @@ Following the paradigm that masting is defined by of `boom and bust' reproductio
 %emwFeb2: We could add in here refs to the literature, like 'this contrasts with the idea that masting produces dramatically different seed counts from non-masting years (CITES), at least at the individual tree level.
 These individual tree-level states scale up to produce population-level seed production that we found was relatively synchronous---further supporting the general definition of masting (CITES): years of high population-level seed production---mast years---were almost always separated by periods of low seed production (Fig. \ref{fig:overview}D). %emwFeb2: check -- is 'almost always' accurate?
 
-Transitioning between reproductive states depended on the state (high or low).  In a year with average climatic conditions (GIVE mean temp here? Or some quick definition of what is average climate in parentheses), a tree in a low reproductive state is most likely to transition to a high reproductive state the next year, with a probability of \Sexpr{round(kq$average_transition['50%'],2)} (90\%CI \Sexpr{round(kq$average_transition['5%'],2)}-\Sexpr{round(kq$average_transition['95%'],2)}), with a 3X lower probability [make Sexpr] \Sexpr{round(kq$average_persistence['50%'],2)} (90\%CI \Sexpr{round(kq$average_persistence['5%'],2)}-\Sexpr{round(kq$average_persistence['95%'],2)}) of staying in a low reproductive state (Fig. \ref{fig:overview}C).
-%emwFeb2: The probabilities scale to 1? If so, we should make that clear or somehow help the audience interpret these #s better... Could we say 66% probability? Or in 66% of years?  
-[Can we next add the rest of the probabilities? What happens in a HIGH state? We probably could address this here ... something like: Following constraints of reproductive biology (re-explain in parentheses quickly) we assumed trees in a high reproductive state would have to transition to low the following year (prob equals 1?), which we found strong support for when we relaxed this assumption (give \#s or ref supp?).] We found transitioning between states, however, was also strongly dependent on climate.
 
-%emwFeb2: I think that I included all of this above now, so you can cut it (if you agree). 
-Using these data and our model, we identified two latent states at the individual tree level, similar to those deserved for masting (Fig. \ref{fig:overview}A-B). %emwJan23: Not sure what deserved means here ... maybe start simpler -- we identified years as high or low seed production, as commonly hypothesized for masting. Then I could give more detail on these two latent states and some discussion -- for example, how much do they overlap? How different are they? How does this compare to the literature? Right now this paragraph needs more D of the R&D. 
-%emwJan23: The below (and further below) is showing up as almost all commented out for me (because of %) so hard to edit ... how is it working for you?
-Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$average_transition['50%'],2)} (90\%CI \Sexpr{round(kq$average_transition['5%'],2)}-\Sexpr{round(kq$average_transition['95%'],2)}) of transitioning from a low-reproduction to a high-reproduction state, and a lower probability of \Sexpr{round(kq$average_persistence['50%'],2)} (90\%CI \Sexpr{round(kq$average_persistence['5%'],2)}-\Sexpr{round(kq$average_persistence['95%'],2)}) of remaining in that state the following year (Fig. \ref{fig:overview}C). Alternation between these states at the tree level generates high variability in seed production at the population scale (Fig. \ref{fig:overview}D). 
+Transitioning between reproductive states depended on the state (high or low).  In a year with average climatic conditions (GIVE mean temp here? Or some quick definition of what is average climate in parentheses), a tree in a low reproductive state is most likely to transition to a high reproductive state the next year, with a probability of \Sexpr{round(kq$average_transitiontohigh['50%']*100,0)}\% (90\%CI \Sexpr{round(kq$average_transitiontohigh['5%']*100,0)} -- \Sexpr{round(kq$average_transitiontohigh['95%']*100,0)}), with a \Sexpr{round(kq$prob_ratio['50%'],1)} times lower probability (\Sexpr{round(kq$average_persistenceinlow['50%']*100,0)}\%, 90\%CI \Sexpr{round(kq$average_persistenceinlow['5%']*100,0)} -- \Sexpr{round(kq$average_persistenceinlow['95%']*100,0)}) of staying in a low reproductive state (Fig. \ref{fig:overview}C).
+Following a high reproduction year, trees almost systematically go back to a low reproduction state (\Sexpr{round(kq$average_transitiontolow['50%']*100,0)}\%, 90\%CI \Sexpr{round(kq$average_transitiontolow['5%']*100,0)} -- \Sexpr{round(kq$average_transitiontolow['95%']*100,0)}) rather than persisting in a high reproduction state two consecutive years (\Sexpr{round(kq$average_persistenceinhigh['50%']*100,0)}\%, 90\%CI \Sexpr{round(kq$average_persistenceinhigh['5%']*100,0)} -- \Sexpr{round(kq$average_persistenceinhigh['95%']*100,0)}).
+% We found transitioning between states, however, was also strongly dependent on climate. % vvdmFeb2: I commented this as it was repetitive with the topic sentence of the next paragrpah, but maybe you have a better idea
 
 %emwFeb2:
 % START here on CLIMATE ... (and be sure to include the probabilities in parentheses so I can better understand what you mean with 2X etc.).
+Climate strongly affected these transition dynamics. Similar to previous studies (CITE), we found that summer temperature increases the probability that trees in a low-reproduction year transition to a high-reproduction state (Fig. \ref{fig:climate}A). For example, the transition probability during a warm summer at \Sexpr{kq$warmsummertemp}\celsius ~(\Sexpr{round(kq$warmsummer_prob['50%']*100,0)}, 90\%CI \Sexpr{round(kq$warmsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$warmsummer_prob['95%']*100,0)}) was \Sexpr{round(kq$warmcold_prob_ratio['50%'],1)} times higher than during a \Sexpr{kq$coldsummertemp}\celsius ~summer (\Sexpr{round(kq$coldsummer_prob['50%']*100,0)}, 90\%CI \Sexpr{round(kq$coldsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$coldsummer_prob['95%']*100,0)}). % vvdmFeb2: 17 and 23 are just examples I took along the gradient of temp. represented in the figure...
+Following constraints of reproductive biology (because of the competitive overlap of flower bud formation and fruit development), we assumed the transition from a high to a low reproductive state is not affected by climate, which we found strong support for when we relaxed this assumption (Supp. Fig.).
+Once a tree is in a high-reproduction year, we found that late spring frosts may reduce its seed production. A three-fold increase of growing-degree days until last frost---a metric for late spring frost risk (CITE)---decreased seed production by \Sexpr{round(kq$frost_decrease['50%'],1)}\%  (90\%CI \Sexpr{round(kq$frost_decrease['5%'],1)} -- \Sexpr{round(kq$frost_decrease['95%'],1)}\%, Fig. \ref{fig:climate}B). In contrast, warmer spring conditions alone had not effect on seed production (Supp. Fig.). 
+
 % After that paragraph we may be able to move up the paragraph after % emwFeb2: MOVE UP? (below) ... not sure and either way we need to re-write it to explain more clearly first how cues drive synchronization (and give some synchronization results in there) ... 
+%emwJan23: I would move this up to the cues section of the R&D. We need to add to the R&D some of the points you have in the intro currently, including that cold summers/frosts could drove synchronization so I think if you move this point up you can start to build that finding in there and come back to it later as you look at shifts in synchrony across and within populations. 
+% emwFeb2: MOVE UP?
+Synchronization depends not only on climate but also on previous reproductive states. This mechanism provides a simple physiological explanation for previous findings that temperature difference between the two previous summers mattered for masting ($\Delta T$ model; \citealp{Kelly2012}). Rather than complex molecular pathways such as `epigenetic summer memory' \citep{Samarth2020}, a cold summer followed by a warm summer generates synchrony simply because cold temperatures leave most trees in a low-reproduction state, allowing them to respond consistently to following warm temperatures that promote floral induction (Fig. \ref{fig:synchrony}B).
+% Some ideas moved from the intro:
+% - Unfavorable or favorable summer conditions could act as a  hinge point to synchronize individual reproductive cycles within a population, and this synchrony may then persist over several years.
+
+
+
 
 \begin{figure}[htbp]
   \centering
@@ -158,18 +164,6 @@ Under average climatic conditions, a tree has a probability of \Sexpr{round(kq$a
   \caption{\textbf{Climate conditions impact both transition probabilities between states and seed production in a high reproduction state.} \textbf{(A)} Average maximum temperature in July and August of the previous year increases the probability of transition from a low-reproduction to a high-reproduction state. \textbf{(B)} The accumulated growing-degree days (GDD) until the last frost day decreases the number of seeds produced in a high-reproduction state. Plants that have accumulated more GDD before a frost event are phenologically more advanced and thus face a higher risk of frost injury \citep{Vitasse2018}. In \textbf{(A)} and \textbf{(B)}, the solid red line and dashed lines respectively represent the median and the 5\% and 95\% quantiles, while the gray boxplots show observed conditions (1980–2022).}
   \label{fig:climate}
 \end{figure}
-
-
-
-% <!-- % \item Climate impacts on masting (figure of climate effects) -->
-% <!-- % \begin{itemize} -->
-% <!-- % \item warm summer increase transition -->
-% <!-- % \item frost decrease number of seeds  -->
-% <!-- % \item no efect of spring (supp mat) -->
-% <!-- % \end{itemize} -->
-%emwJan23:  less 'our model' and more 'we find' or similar, also less PV. I also think we could refer to 'years' more than 'states' -- it's just jargon here since our model encodes the states as different individual tree years (this distinction you could sneak into first paragraph)
-%emwJan23: This paragraph also needs more D in the R and D ... and sneak in your methods (how did we come up with 23 C?). This is an R&D so you can say more: similar to many previous studies we found climate affected reproduction ...
-Reproductive dynamics are impacted by climate. In a warm summer (\Sexpr{kq$warmsummertemp}\celsius), trees in a low-reproduction state are \Sexpr{round(kq$probability_ratio['50%'],1)} times (90\%CI \Sexpr{round(kq$probability_ratio['5%'],1)}-\Sexpr{round(kq$probability_ratio['95%'],1)}) more likely to transition to a high-reproduction state than during cold summers (\Sexpr{kq$coldsummertemp}\celsius, Fig. \ref{fig:climate}A). Once in a high-reproduction state, a three-fold increase of growing-degree days until last frost---a metric for late spring frost risk---can decrease seed production by \Sexpr{round(kq$frost_decrease['50%'],1)}\%  (90\%CI \Sexpr{round(kq$frost_decrease['5%'],1)} to \Sexpr{round(kq$frost_decrease['95%'],1)}\%, Fig. \ref{fig:climate}B). However, warmer spring conditions have no effects on seed production (Supp. Fig.). 
 
 % <!-- % \item Our projections vs current studies -->
 % <!-- % \begin{itemize} -->
@@ -229,9 +223,7 @@ The evolutionary benefits of masting depend on the spatial scale at which trees 
 % <!-- % \end{itemize} -->
 The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations (Fig. \ref{fig:synchrony}A). Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized (Supp. Fig.). 
 
-%emwJan23: I would move this up to the cues section of the R&D. We need to add to the R&D some of the points you have in the intro currently, including that cold summers/frosts could drove synchronization so I think if you move this point up you can start to build that finding in there and come back to it later as you look at shifts in synchrony across and within populations. 
-% emwFeb2: MOVE UP?
-Synchronization depends not only on climate but also on previous reproductive states. This mechanism provides a simple physiological explanation for previous findings that temperature difference between the two previous summers mattered for masting ($\Delta T$ model; \citealp{Kelly2012}). Rather than complex molecular pathways such as `epigenetic summer memory' \citep{Samarth2020}, a cold summer followed by a warm summer generates synchrony simply because cold temperatures leave most trees in a low-reproduction state, allowing them to respond consistently to following warm temperatures that promote floral induction (Fig. \ref{fig:synchrony}B).
+
 
 % <!-- % \item What drives synchrony?  -->
 % <!-- % \begin{itemize} -->
