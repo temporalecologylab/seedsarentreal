@@ -187,12 +187,13 @@ This result remains even when we relax reproductive constraints and allow warm s
 % <!-- % \begin{itemize} -->
 % <!-- % \item ... -->
 % <!-- % \end{itemize} -->
-%emwFeb5:  START here ... now we can have a bit of a lit review paragraph but it needs to tie tightly to previous paragraph .... Start with something like: These results highlight how biological constraints on plant reproduction may limit the runaway effects of climate change sometimes proposed.... and then edit (this paragraph needs some work, I did not work on it, I just added a potential ending to it and looked ahead).
-Climate impacts on reproduction are not independent of the reproductive state of trees. Endogenous constraints intrinsically prevent individuals from producing a high number of seeds every year. Warm summer temperatures can improve floral bud initiation, but do not suppress the trade-off imposed by a large fruit load. Because masting behavior arise from tree-level reproductive cycles, these constraints cannot be ignored when forecasting population-scale dynamics. The biological constraints underlying tree reproduction could slow down the increase of reproduction sensitivity to climate change, potentially preventing unlimited amplification of climate effects and an abrupt collapse of masting.
-%emwFeb5: Maybe end on ...
-Despite these constraints, synchrony across populations still appears to go down in the last two decades (Fig. \ref{fig:overview}D). 
+% vvdmFeb6: I tried to modify the paragraph below, but it's not great great
+These results highlight how biological constraints on plant reproduction may limit the runaway effects of climate change sometimes proposed. 
+At the individual level, floral bud initiation is promoted by warm summer temperatures, potentially leading to a higher number of flowers and fruits in the following year (CITE). However, in the next summer, the development of a larger fruit load inherently imposes a trade-off that limits the tree ability to initiate a large number of floral buds again (CITE). These individual-level constraints scale up to the population level by preventing the entire population from producing large seed crops every year---reducing the likelihood an unlimited amplification of climate effects on masting. Our results highlights that constraints operating at the individual level should not be ignored when forecasting population-scale dynamics (CITE?). Importantly, our findings do not imply that climate change cannot induce massive tree recruitment and forest regeneration failure---since seed production is only the first step toward regeneration---but rather that we find no evidence for a positive feedback of summer warming that would trigger an abrupt shift in masting dynamics. Yet, despite these constraints, synchrony across populations still appears to go down in the last two decades (Fig. \ref{fig:overview}D). 
+
 
 % <!-- % \item But synchrony does appear to go down -->
+
 % <!-- % \begin{itemize} -->
 % <!-- % \item Review previous results and overall figure -->
 % <!-- % \item these years look less synchrone\dots -->
