@@ -33,8 +33,8 @@ if(FALSE){
   
   fit <- stan(file= file.path(wd, "stan", "paper_models", "model2_treelevel_zinb_missing_rescaled_summertemp_springfrost_springtemp_wpred_standlevel.stan"),
               data=data, seed=5838299, chain = 4, cores = 4,
-              warmup=1000, iter=2024, refresh=100)
-  saveRDS(fit, file = file.path(wd, 'output', 'fit_03jan2026_biologymodel.rds'))
+              warmup=10, iter=20, refresh=100)
+  saveRDS(fit, file = file.path(wd, 'output', 'fit_13feb2026_biologymodel.rds'))
   diagnostics <- util$extract_hmc_diagnostics(fit)
   util$check_all_hmc_diagnostics(diagnostics)
   samples <- util$extract_expectand_vals(fit)
@@ -48,7 +48,7 @@ if(FALSE){
 }else{
   fit_full_const <- readRDS(file.path(wd, 'output', 'fit_03jan2026_fullmodel_constrainedslopes.rds'))
   # fit_biol_const <- readRDS(file = file.path(wd, 'output', 'fit_25sept2025_biologymodel_constrainedslopes.rds'))
-  fit_biol <- readRDS(file = file.path(wd, 'output', 'fit_03jan2026_biologymodel.rds'))
+  fit_biol <- readRDS(file = file.path(wd, 'output', 'fit_13feb2026_biologymodel.rds'))
 }
 
 samples <- util$extract_expectand_vals(fit_biol)

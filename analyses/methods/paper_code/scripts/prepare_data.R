@@ -102,9 +102,55 @@ for (i in 1:N_newtrees) {
   newtree_end_idxs <- c(newtree_end_idxs, idx - 1)
 }
 
+# Create hypothetical c/w. summer alternations
+summertemp_cw <- c(rnorm(2, 16, 1/2.57), rnorm(1, 26, 1/2.57), rnorm(2, 16, 1/2.57), rnorm(2, 26, 1/2.57), rnorm(2, 16, 1/2.57), rnorm(1, 26, 1/2.57),
+          rnorm(3, 16, 1/2.57), rnorm(1, 26, 1/2.57), rnorm(2, 16, 1/2.57), rnorm(1, 26, 1/2.57), rnorm(2, 16, 1/2.57), rnorm(1, 26, 1/2.57),
+          rnorm(3, 16, 1/2.57), rnorm(1, 26, 1/2.57), rnorm(2, 16, 1/2.57), rnorm(1, 26, 1/2.57), rnorm(2, 16, 1/2.57))
+years_to_predict <- seq(1980,  1980+length(summertemp_cw)-1, 1)
+summertemp_ww <- c(rnorm(years_to_predict, 26, 1/2.57))
+# years_to_predict <- seq(1980,  2010, 1)
+# summertemp_ww <- rnorm(length(years_to_predict), 24, 1/2.57)
+# summertemp_cw <- rnorm(length(years_to_predict), 24, 1/2.57)
+# summertemp_cw[c(20)] <- rnorm(1, 16, 1/2.57)
+
+
+# Create hypotehtical trees to predict
+trees_per_stand <- 50
+unique_stands <- "Benwell"
+newtree_cw_stand_idxs <- rep(which(unique_stands==unique_stands), each = trees_per_stand)
+N_newtrees_cw <- length(newtree_cw_stand_idxs)
+N_max_newyears_cw <- length(years_to_predict)
+first_newyear_cw <- min(years_to_predict)
+newyears_cw <- c()
+newprevsummer_temps_cw <-c()
+newprevsummer_temps_ww <-c()
+N_newyears_cw <- c()
+idx <- 1
+newtree_cw_start_idxs <- c()
+newtree_cw_end_idxs <- c()
+for (i in 1:N_newtrees_cw) {
+  
+  newyears_tree <- years_to_predict-first_newyear+1
+  newyears_cw <- c(newyears_cw, newyears_tree)
+  
+  N_newyears_tree <- length(newyears_tree)
+  N_newyears_cw <- c(N_newyears_cw, N_newyears_tree)
+  
+  newprevsummer_temps_tree <- summertemp_cw
+  newprevsummer_temps_cw <- c(newprevsummer_temps_cw, newprevsummer_temps_tree)
+  
+  newprevsummer_temps_tree <- summertemp_ww
+  newprevsummer_temps_ww <- c(newprevsummer_temps_ww, newprevsummer_temps_tree)
+  
+  newtree_cw_start_idxs <- c(newtree_cw_start_idxs, idx)
+  idx <- idx + N_newyears_tree
+  newtree_cw_end_idxs <- c(newtree_cw_end_idxs, idx - 1)
+}
+
 # Collect data
 N <- length(years)
 Nnew <- length(newyears)
+Nnew_cw <- length(newyears_cw)
 data <- mget(c('N', 'N_trees', 'N_max_years',
                'N_years', 'tree_start_idxs', 'tree_end_idxs',
                'seed_counts', 'years', 
@@ -112,5 +158,10 @@ data <- mget(c('N', 'N_trees', 'N_max_years',
                # for predictions
                'Nnew', 'N_newtrees', 'N_max_newyears', 'newtree_stand_idxs',
                'N_newyears', 'newtree_start_idxs', 'newtree_end_idxs','newyears', 
-               'newprevsummer_temps', 'newgdd_lastfrost', 'newspring_temps'
+               'newprevsummer_temps', 'newgdd_lastfrost', 'newspring_temps',
+               
+               # for predictions
+               'Nnew_cw', 'N_newtrees_cw', 'N_max_newyears_cw', 'newtree_cw_stand_idxs',
+               'N_newyears_cw', 'newtree_cw_start_idxs', 'newtree_cw_end_idxs','newyears_cw', 
+               'newprevsummer_temps_cw', 'newprevsummer_temps_ww'
 ))

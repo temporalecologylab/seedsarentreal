@@ -22,7 +22,7 @@ for(i in 1:nsamples){
   masting <- c(masting, mas)
 }
 
-hist(nonmasting, breaks=seq(0,800,l=80), col = '#48754860', border = 'white', 
+hist(nonmasting, breaks=seq(0,920,l=80), col = '#48754860', border = 'white', 
      xlab = '', main = '', prob = TRUE, yaxt = "n", ylab = '', xaxt = 'n', xlim = c(0,500))
 
 usr <- par("usr")
@@ -33,7 +33,7 @@ axis(1, at=seq(0, 500,100), labels=seq(0, 500,100),
 title(xlab = 'Number of seeds', line = 2)
 
 masting <- MASS::rnegbin(10000, 160, 2)
-hist(masting[masting < 650], breaks=seq(0,800,l=80), col = "#8F272760", border = 'white', 
+hist(masting[masting < 650], breaks=seq(0,920,l=80), col = "#8F272760", border = 'white', 
      xlab = 'Number of seeds', main = '', add = TRUE, prob = TRUE, xlim = c(0,500))
 text(x = 25, y = 0.03, labels = 'Low-reproduction\nstate', col = '#487548', font = 1, adj = 0)
 text(x = 100, y = 0.008, labels = 'High-reproduction state', col = util$c_mid_highlight, font = 1, adj = 0)
