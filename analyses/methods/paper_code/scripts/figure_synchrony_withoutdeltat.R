@@ -1,7 +1,4 @@
 
-pdf(file = file.path(figpath, 'synchrony_withoutdeltat.pdf'),
-    width = 6, height = 4)
-# layout(matrix(c(1,1, 2, 3), ncol=2, byrow = F), widths = c(0.6,0.4))
 
 # Manipulate posteriors
 sites <- stringr::str_split_i(uniq_tree_ids, '_', 1)
@@ -122,6 +119,9 @@ names <- paste0('acrossstands_synchrony_', names(intervals))
 
 
 # Plot
+pdf(file = file.path(figpath, 'synchrony_withoutdeltat.pdf'),
+    width = 6, height = 3.3)
+
 names <- paste0('acrossstands_synchrony_', names(intervals))
 
 # Construct bins
@@ -138,10 +138,10 @@ plot_xs <- plot_config[[2]]
 par(mar = c(0.5,4,0.25,0))
 plot(1, type="n", main=main,
      xlim=c(bin_min, bin_max), xlab='', xaxt="n", yaxt = 'n',
-     ylim=c(0.45,1.05), ylab='Synchrony',
-     frame = FALSE)
+     ylim=c(0.43,1.05), ylab='Synchrony (% of trees)',
+     frame = FALSE, cex.axis = 0.9)
 
-axis(2, at= seq(0.5,1,0.1), labels=seq(0.5,1,0.1), cex.axis = 0.9)
+axis(2, at= seq(0.5,1,0.1), labels=seq(50,100,10), cex.axis = 0.9)
 
 # Construct marginal quantiles
 probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
@@ -202,7 +202,7 @@ for(i in seq(1, 2*N, 2)){
   lines(c(plot_xs[i]+0.5,  plot_xs[i+1]-0.1), plot_quantiles_w[3, i:(i+1)],
         col='#4f1d4b', lwd=2)
   
-  lines(c(plot_xs[i]+0.1,  plot_xs[i+1]-0.1), c(0.5,0.5),
+  lines(c(plot_xs[i]+0.1,  plot_xs[i+1]-0.1), c(0.48,0.48),
         col='black', lwd=1)
   
 }
@@ -214,7 +214,7 @@ for(i in seq(1, 2*N, 2)){
 #          '2000\nto\n2004', '2005\nto\n2009', '2010\nto\n2014', '2015\nto\n2022'),
 #      cex = 0.8)
 
-text(x = 1:N, y = 0.47, labels = 
+text(x = 1:N, y = 0.44, labels = 
        c('1980-\n1984', '1985-\n1989', '1990-\n1994', '1995-\n1999',
          '2000-\n2004', '2005-\n2009', '2010-\n2014', '2015-\n2019',
          '2020-\n2022'),
@@ -224,7 +224,7 @@ legend("topleft",
        legend = c("Within population", "Between populations"),
        col = c("#bba6bb", "#b7cddb"),
        lwd = 8,
-       cex = 0.9,
+       cex = 0.85,
        text.col = "black",
        horiz = F,
        bty = "n",
@@ -234,11 +234,13 @@ legend("topleft",
        col = c("#754875", "#466f8a"),
        lwd = 2,
        bty = "n",
-       cex = 0.9,
+       cex = 0.85,
        text.col = "black",
        horiz = F,
        inset = c(0.05, 0.07))
 
+text(y = 0.515, x = 0.3, labels = 'Minimum synchrony', cex = 0.75, col = 'grey70', adj = 0)
+segments(y0 = 0.5, x0 = 0, x1 = 9.5, lty = 2, col = 'grey70')
 
 
 dev.off()

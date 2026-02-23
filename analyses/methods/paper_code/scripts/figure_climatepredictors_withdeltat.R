@@ -33,12 +33,12 @@ usr <- par("usr")
 axis(1, at=seq(12,26,2), labels=seq(12,26,2), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(0, 0.3, 0))
-title(xlab = 'Previous summer temperature (°C)', line = 1.5, cex.lab = 0.85)
+title(xlab = 'Previous summer temperature (°C)', line = 1.5, cex.lab = 0.9)
 
 axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(2, 0.7, 0))  
-title(ylab = 'Probability of transition from\nlow to high reproductive state', line = 2.5, cex.lab = 0.85)
+title(ylab = 'Probability of transition from\nlow to high reproductive state', line = 2.5, cex.lab = 0.9)
 
 lines(tau_nm_m_df$X50. ~ tau_nm_m_df$temp_prevsummer, col = util$c_dark, lwd = 2)
 lines(tau_nm_m_df$X5. ~ tau_nm_m_df$temp_prevsummer, col = util$c_mid, lty = 2)
@@ -50,13 +50,13 @@ mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.18, cex = 1.2, font = 2, col = 
 
 gdd0 <- 15
 lambda2_df <- data.frame()
-for(gdd_lastfrost in seq(0,35,0.1)){
+for(gdd in seq(0,35,0.1)){
   lambda2 <- matrix(nrow = nrow(samples[['lambda20']]), ncol = ncol(samples[['lambda20']]))
   for(c in 1:nrow(lambda2)){
-    lambda2[c,] <- sapply(1:ncol(lambda2), function(i) exp(log(samples[['lambda20']][c,i]) +samples[['beta_lambda2_frost']][c,i]*(gdd_lastfrost-gdd0)))
+    lambda2[c,] <- sapply(1:ncol(lambda2), function(i) exp(log(samples[['lambda20']][c,i]) +samples[['beta_lambda2_frost']][c,i]*(gdd-gdd0)))
   }
   lambda2_df <- rbind(lambda2_df,
-                      data.frame(gdd_lastfrost, t(util$ensemble_mcmc_quantile_est(lambda2, probs = c(0.05,0.5,0.95)))))
+                      data.frame(gdd, t(util$ensemble_mcmc_quantile_est(lambda2, probs = c(0.05,0.5,0.95)))))
 }
 
 par(mar = c(3.5,4.5,1,2))
@@ -68,16 +68,16 @@ usr <- par("usr")
 axis(1, at=seq(0,350,50), labels=seq(0,350,50), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(0, 0.3, 0))
-title(xlab = 'GDD until the last frost day (°C)', line = 1.5, cex.lab = 0.85)
+title(xlab = 'GDD until the last frost day (°C)', line = 1.5, cex.lab = 0.9)
 
 axis(2, at=seq(120,220,20), seq(120,220,20), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(2, 0.7, 0))  
-title(ylab = 'Average seed production in\na high-reproduction state', line = 2.5, cex.lab = 0.85)
+title(ylab = 'Average seed production in\na high reproductive state', line = 2.5, cex.lab = 0.9)
 
-lines(lambda2_df$X50. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_dark, lwd = 2)
-lines(lambda2_df$X5. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
-lines(lambda2_df$X95. ~ c(lambda2_df$gdd_lastfrost*10), col = util$c_mid, lty = 2)
+lines(lambda2_df$X50. ~ c(lambda2_df$gdd*10), col = util$c_dark, lwd = 2)
+lines(lambda2_df$X5. ~ c(lambda2_df$gdd*10), col = util$c_mid, lty = 2)
+lines(lambda2_df$X95. ~ c(lambda2_df$gdd*10), col = util$c_mid, lty = 2)
 
 mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.18, cex = 1.2, font = 2, col = 'grey30')
 
@@ -118,16 +118,16 @@ prevsummer_n1 <- aggregate(meantmax_ja ~ year, data = clim_data[clim_data$year %
 
 delta <- prevsummer_n1-prevsummer_n2
 
-par(mar=c(1.5,5,2,0.5), cex.lab = 0.9)
+par(mar=c(1.5,5,2,0.5), cex.lab = 0.85)
 plot(1, type="n", main=main,
      xlim=c(-4, 4), xlab='', 
      yaxt = 'n', xaxt = 'n',
      ylim=c(-0.05,1.05), ylab='',
      frame = FALSE)
-title(ylab = 'Masting synchrony\nbetween populations', line = 2, cex.lab = 0.9)
+title(ylab = 'Masting synchrony\nbetween populations (% of trees)', line = 2, cex.lab = 0.9)
 
 # axis(2, at= seq(0,1,0.1), labels=seq(0,1,0.1))
-axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
+axis(2, at=seq(0,1,0.25), seq(0,100,25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(2, 0.7, 0)) 
 
@@ -143,22 +143,22 @@ lines(x, predict(fit, newdata = data.frame(delta = x)), col = util$c_mid, lty = 
 mtext(LETTERS[3], side = 3, line = 0.5, adj = -0.18, cex = 1.2, font = 2, col = 'grey30')
 
 
-par(mar=c(3.5,5,0,0.5), cex.lab = 0.9)
+par(mar=c(3.5,5,0,0.5), cex.lab = 0.85)
 plot(1, type="n", main=main,
      xlim=c(-4, 4), xlab='', 
      yaxt = 'n', xaxt = 'n',
      ylim=c(-0.05,1.05), ylab='',
      frame = FALSE)
-title(ylab = 'Non-masting synchrony\nbetween populations', line = 2, cex.lab = 0.9)
+title(ylab = 'Non-masting synchrony\nbetween populations (% of trees)', line = 2, cex.lab = 0.9)
 
-axis(2, at=seq(0,1,0.25), seq(0,1,0.25), 
+axis(2, at=seq(0,1,0.25), seq(0,100,25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(2, 0.7, 0)) 
 
 axis(1, at=seq(-4,4,1), seq(-4,4,1), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(0, 0.3, 0)) 
-title(xlab = 'Temperature diff. between two previous summers (°C)', line = 1.5)
+title(xlab = 'Temperature diff. between two previous summers (°C)', line = 1.5, cex.lab = 0.9)
 
 segments(x0 = delta, y0 = quantiles_nm['10%',], y1 = quantiles_nm['90%',], col='#96b096', lwd = 0.75)
 points(quantiles_nm['50%',] ~ delta, col = '#96b096', pch = 20)

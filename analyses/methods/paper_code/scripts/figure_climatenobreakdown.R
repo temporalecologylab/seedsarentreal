@@ -2,8 +2,8 @@
 
 
 pdf(file = file.path(figpath, 'climate_nobreakdown.pdf'),
-    width = 6.5, height = 4)
-par(mfrow = c(1,1), mar = c(4.5,3.5,2,2))
+    width = 6, height = 3.3)
+par(mfrow = c(1,1),  mar = c(3,4,0.25,0))
 
 
 idxs_tree <- 1:data$N_max_newyears
@@ -39,19 +39,20 @@ display_ylim[1] <- 0
 display_ylim[2] <- display_ylim[2] + delta      
 
 plot(1, type="n", main=main,
-     xlim=c(10, N), xlab='Previous summer temperature (°C)', xaxt="n",
+     xlim=c(10, N), xlab='', xaxt="n",
      ylim=display_ylim, ylab='', yaxt="n",, frame = FALSE)
 
 usr <- par("usr")
-segments(x0 = 10,  x1 = 121, y0 = usr[3], y1 = usr[3], lwd = 1.5)
+segments(x0 = 10,  x1 = 121, y0 = usr[3], y1 = usr[3], lwd = 1.7)
 axis(1, at= c(19, 34, 48, 62, 76, 91, 105, 119),
      labels=seq(18,25,1), 
      lwd = 0, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))    
+     cex.axis = 0.9, mgp = c(0, 0.6, 0))  
+title(xlab = "Previous summer temperature (°C)", line = 1.7)
 
 axis(2, at=seq(0,1,0.25), seq(0,100,25), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(2, 0.7, 0))  
+     cex.axis = 0.9, mgp = c(0 ,0.7 , 0))  
 title(ylab = ylab, line = 2.5)
 
 for(n in 10:N){
@@ -117,7 +118,7 @@ legend("topleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.5, 0.75))
+       inset = c(0.5, 0.70))
 legend("topleft",
        legend = c("", ""),
        col = c("#278f5b", "#c98139"),
@@ -126,7 +127,7 @@ legend("topleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.5, 0.75))
+       inset = c(0.5, 0.70))
 
 
 

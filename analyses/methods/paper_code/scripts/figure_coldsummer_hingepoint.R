@@ -93,14 +93,14 @@ for(y in 1:data$N_max_newyears_cw){
 
 
 pdf(file = file.path(figpath, 'coldsummer_hingepoint.pdf'),
-    width = 6.5, height = 4)
-par(mfrow = c(1,1), mar = c(4.5,3.5,2,2))
+    width = 6, height = 3.3)
+par(mfrow = c(1,1), mar = c(3,4,0.25,0))
 
 years_to_plot <- years_to_predict[10:data$N_max_newyears_cw]
 names <- sapply(10:data$N_max_newyears_cw,
                 function(n) paste0('withinstand_synchrony_cw[', n, ']'))
 
-ylab="Synchrony"
+ylab="Synchrony (% of trees)"
 display_ylim=c(0, 1)
 main=''
 
@@ -130,7 +130,7 @@ display_ylim[2] <- display_ylim[2] + delta
 
 plot(1, type="n", main=main,
      xlim=c(1, N), xlab='', xaxt="n",
-     ylim=c(0.5,1), ylab='', yaxt="n",, frame = FALSE)
+     ylim=c(0.49,1), ylab='', yaxt="n",, frame = FALSE)
 
 usr <- par("usr")
 segments(x0 = 0.5,  x1 = N+0.5, y0 = usr[3], y1 = usr[3], lwd = 1.5)
@@ -146,7 +146,7 @@ axis(1, at= c(0.5,10.5,N+0.5),
      cex.axis = 0.9, mgp = c(2, 0.7, 0))    
 #title(xlab = "Year", line = 1.5)
 
-axis(2, at=seq(0.5,1,0.25), seq(0.5,1,0.25), 
+axis(2, at=seq(0.5,1,0.1), seq(50,100,10), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))  
 title(ylab = ylab, line = 2.5)
@@ -230,5 +230,8 @@ legend("bottomleft",
        inset = c(0.55, -0.18))
 
 par(xpd=FALSE)
+
+text(y = 0.515, x = 0.5, labels = 'Minimum synchrony', cex = 0.75, col = 'grey70', adj = 0)
+segments(y0 = 0.5, x0 = -0.5, x1 = 22.5, lty = 2, col = 'grey70')
 
 dev.off()
