@@ -82,22 +82,14 @@ A mechanistically grounded framework accounting for these differential effects o
 % ...  driven mainly by the reality of reproductive cycle yet still influenced by climate.
 
 % Next paragraph...
-Here we develop a predictive model that builds from climatic effects on individual trees constrained by their reproductive cycle. 
-...
-To do this, we develop a predictive model where individual trees may alternate between two latent reproductive states, which determine subsequent seed production. From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with individual constraints to impact masting. We apply this model to seed data collected in beech forests of England, since 1980.
+Here we develop a predictive model that builds from climatic effects on individual trees constrained by their reproductive cycle (through two latent states). Our approach easilly scales up these individual dynamics to population-level behavior, to investigate how climate interacts with individual constraints to shape masting. Using seed data collected in beech forests of England since 1980, we first tested whether individual trees show evidence for alternative reproductive states that could lead to masting at the population level. Then, we examined how synchrony might arise from the combination of reproductive constraints, at the individual-level, and climatic cues that operate over larger scales. Finally, we forecasted how future warming may affect both tree-level seed production and population-level synchrony. 
 % What do we do here? 
 % We test the definition of masting (look for evidence of alternative state) 
 % How does synchrony arise
 % We examine predictions for seed production in the future
 
-
 % Yet most models treat all trees identically---which could mask the true impact of climate. Here we address this gap with a predictive model where individual trees may alternate between two latent reproductive states. % These states explicitly encode endogenous constraints, i.e. the alternate bearing because of the temporal overlap between floral bud initiation and fruit development. 
 % For each observed tree and each year, the model estimates the reproductive state---given the previous state---and the subsequent seed production. Climate is included as an explicit driver of both state transitions (probability matrix), and seed production (number of seeds). From these individual reproductive dynamics, the model allows to scale up to population-level behavior and investigate how climate interacts with endogenous constraints to impact masting. We apply this model to seed data collected in beech forests of England, since 1980.
-
-
-
-
-
 
 % <!-- % \item How do individual trees cue to mast? -->
 % <!-- % \begin{itemize} -->
