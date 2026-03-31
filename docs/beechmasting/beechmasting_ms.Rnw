@@ -170,8 +170,81 @@ Fundamentally synchrony in seed production is one piece of a larger puzzle: unde
 %emw17Feb -- The below is exciting! It feels like you're introducing a big point though out of the blue ... if you just tweak it to be more 'if we can organize regeneration more we can then build up to a life cycle context [by the way, what is that? It feels a little like the life cycle of a plant but then you jump to forest regeneration without explaining] it could work ... 
 %vvdmFeb26: I tried to improve;
 
+\section*{Methods}
 
+\subsection*{Tree-level reproduction and climate data}
 
+We used annual seed production data from 57 individual beech trees (\emph{Fagus sylvatica}) across 7 populations in England, collected between 1980 and 2022, following the protocol described in previous publications [CITE]. Populations contained between X and Y trees and were monitored for X to Y years. Within populations, individual time series varied in length and contained some missing observations.
+
+We extracted daily climatic data from ERA5-Land [CITE], at a 0.01 degree resolution, for the 7 beech sites. We computed three climatic variables, for each year of observation: average maximum temperature in July and August (of the previous year), average spring temperature from , and growing degree days (GDD) until the last frost day as a measure of spring frost risk [CITE].
+
+\subsection*{A Hidden Markov model for individual tree reproduction}
+
+We modeled individual tree seed production with a Hidden Markov Model (HMM), in a Bayesian framework using the probabilistic programming language Stan [CITE]. 
+
+\subsubsection*{Structure of the model}
+
+In this model, each tree $t$ is assigned to a latent reproductive state $z_{t,i}$ each year $i$: a low reproductive state ($z_{t,i}=1$) or a high reproductive state ($z_{t,i}=2$). The latent state $z_{t,i}$ is conditionally dependent only on the state the preceding year (the \emph{Markovian} assumption), such as that for N years we have:
+
+\begin{equation}
+p(z_{t,1}, \ldots, z_{t,N}) = p(z_{t,1}) \, \prod_{i = 2}^{N} p(z_{t,i} \mid z_{t,i\text{-}1})
+\end{equation}
+
+\noindent The transitions between reproductive states are determined by a $2 \times 2$ matrix of probabilities:
+\begin{equation}
+\begin{bmatrix}
+p(z_{t,i} = 1 \mid z_{t,i\text{-}1} = 1) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) \\
+p(z_{t,i} = 1 \mid z_{t,i\text{-}1} = 2) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)
+\end{bmatrix}
+\end{equation}
+\noindent  which is by definition equivalent to:
+\begin{equation}
+\label{matrix}
+\begin{bmatrix}
+1-p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) \\
+1-p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)
+\end{bmatrix}\\
+\end{equation}
+
+\noindent Both the latent reproductive states and the transition probabilities were inferred from the seed data alone, i.e. the model identify the most probable state sequence for each individual tree given its observed seed counts.
+
+The latent state indeed determines the observational model responsible for the observed seed count $y_{t,i}$. We modeled the seed production in a low reproductive state with a zero-inflated negative binomial distribution, and the one in a high reproductive state with a negative binomial distribution, such as:
+
+\begin{align}
+\label{low}
+y_{t,i} \mid z_{t,i} = 1 &\sim \begin{cases} 0 & \text{with probability } \theta \\ \text{NegBin}(\lambda_\text{low}, \phi_\text{low}) & \text{with probability } 1 - \theta \end{cases} \\[2pt]
+\label{high}
+y_{t,i} \mid z_{t,i} = 2 &\sim \text{NegBin}(\lambda_\text{high}, \phi_\text{high})
+\end{align}
+
+\subsubsection*{Influence of climate on state transition and seed production}
+
+We expected the climatic conditions experienced by a tree to influence both the transition matrix (Equation \ref{matrix}) and the seeds produced in a high reproductive state (Equation \ref{high}).
+
+In \ref{matrix}, we assumed that only the transition from a low reproductive state to a high reproductive state was affected by climate (and thus, by construction, the probability of staying in a low reproductive as well):
+\begin{equation}
+ p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) = \text{logit}^{-1} \left( \alpha_{1 \rightarrow 2} + \beta^\text{summer}_{1 \rightarrow 2} \cdot (X^\text{summer}_{t,i\text{-}1}-X^\text{summer}_\text{baseline}) \right)
+\end{equation}
+
+\noindent where $X^\text{summer}_{t,i\text{-}1}$ is the average maximum temperature during summer (the preceding year $i\text{-}1$), $\beta^{summer}_{1 \rightarrow 2}$ is the effect of these summer temperature, and $\text{logit}^{-1}(\alpha_{1 \rightarrow 2})$ is the transition probability when $X^\text{summer}_{t,i\text{-}1}=X^\text{summer}_\text{baseline}$. \\
+We did not expect $X^\text{summer}_{t,i\text{-}1}$ to affect $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)$ because the temporal overlap between fruit development and floral bud initiation should prevent trees already in a high reproductive state to respond to favorable summer conditions (but we still checked that this effect was negligible, see Supp. Fig.).
+
+In \ref{high}, we assumed that both spring temperature $X^\text{spring}_{t,i}$ and frost risk $X^\text{frost}_{t,i}$ could impact the seed production in a high reproductive state, such as:
+\begin{align}
+\label{low}
+y_{t,i} \mid z_{t,i} = 2 \sim & ~ \text{NegBin}(\lambda^\text{high}_{t,i}, \phi_\text{high}) \\[2pt]
+\log \left(\lambda^\text{high}_{t,i}\right) = & \log(\lambda_\text{high}) 
+       + \beta_\text{high}^\text{spring} \cdot (X^\text{spring}_{t,i}-X^\text{spring}_\text{baseline})
+       + \beta_\text{high}^\text{frost} \cdot (X^\text{frost}_{t,i}-X^\text{frost}_\text{baseline}) &
+\end{align}
+
+\subsection*{Masting synchrony and model predictions}
+
+Individual tree states were aggregated within and across populations to quantify reproductive synchrony (the proportion of trees sharing the same reproductive state). Synchrony within populations was computed for each population as the maximum of the proportion of trees in a high or low reproductive state, then averaged across populations. Synchrony across populations was computed similarly, but the proportions of trees in each state were first averaged across all populations before taking the maximum (to avoid a population with more trees to have a higher contribution). Synchrony within populations can thus be higher than synchrony across populations when trees within a site tend to be in the same state but differ between sites.
+
+To forecast the effects of summer warming, we simulated seed production (and synchrony) for 50 trees representing an average English population with projected summer warming up to 7degC over one century [CITE]. To assess the role of biological constraints, we compared predictions from our model---in which reproductive constraints prevent trees to stay indefinitely in a high reproductive state---against a hypothetical model where summer temperatures had a similar effect on both $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1)$ (transition from low to high) and $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)$ (persistence in high).
+
+To illustrate the role of cold summers in reproductive synchrony, we also simulated seed production for 50 trees first experiencing a perfect alternation of cold (around 15°C) and warm summers (around 24°C), followed by a period of warm summers only.
 
 \section{References}
 \bibliography{beechmasting}
