@@ -44,6 +44,15 @@ wd <- '/home/victor/projects/seedsarentreal/docs/beechmasting'
 kq <- readRDS(file.path(wd, 'figures', 'key_quantities.rds'))
 @
 
+\begin{abstract}
+The synchronous 'boom-and-bust' reproduction of many tree species (masting) shapes forest regeneration globally. Yet, how climate and tree-level biological mechanisms interact to produce population-level synchrony remains poorly understood. Using seed production data from individual beech trees across England, we explicitly modeled individual reproductive cycles, alternating between low and high reproductive states. Scaling up tree-level predictions to population-level dynamics, we found that on average \Sexpr{round(kq$withinstand_synchrony['50%'],0)}\% of trees within a population shared the same reproductive state in any given year. Cold summers were the main driver of this synchrony: by maintaining most trees in a shared low reproductive state, they created the conditions for synchronous reproduction when a warm summer followed. Warm summers increased the probability that trees transitioned into a high reproductive state., but tree-level reproductive constraints---due to the trade-off between fruit development and floral bud initiation for the following year---prevented runaway increases in masting frequency, even under extreme warming scenarios. Yet, synchrony between populations declined over the last decade, from \Sexpr{round(kq$acrossstands_synchrony_before2015['50%'],0)}\% before 2015 to \Sexpr{round(kq$acrossstands_synchrony_2015onwards['50%'],0)}\% after, while synchrony within populations remained stable. This suggests that climate-driven desynchronization operates differently across spatial scales, and that determining which scale matters most for forest regeenration is critical for forecasting.
+\end{abstract}
+
+
+
+
+
+
 \section*{Introduction}
 
 %Maybe cite Daru for biotic homogenization? [Also, I try to avoid so much subjective fear-mongering language -- some is okay, but there is too much fear/threaten etc. for me. Happy to discuss this also whenever.]
