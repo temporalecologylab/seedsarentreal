@@ -1,0 +1,35 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\section{Intro}
+
+- especially as recent work suggests shifts in tree reproduction that could threaten forest resilience and regeneration ...
+-  In particular, many forest ecosystems are showing signs of increased sensitivity to biotic and abiotic disturbances . Forests could adapt only if they can rely on their regeneration capacity, which promotes post-disturbance recolonization with individuals that may be better adapted to new conditions \citep{StevensRumann2017, Turner2023}.
+
+- though these are rarely perfectly predictive, suggesting other cues may play a role (CITEsolstice). 
+- While compelling, the alternation between favorable and unfavorable years has generally failed to explain the intervals at which masting occurs \citep{Janzen1978}. 
+-Floral bud initiation requires warm summer temperatures \citep{Vacchiano2017}. 
+
+% Masting may thus depend on the combination of reproductive constraints, which operate at the individual-level, and climatic cues that operate over larger scales. 
+% Further, the population-level synchrony that defines masting would require most individual trees to be in the same reproductive state most years. 
+
+% Forecasting how climate change will affect masting then require accounting for the fact that climatic conditions may influence different stages of the reproductive cycle in distinct ways, before scaling up to predict population-level trends.
+
+\section{Results}
+
+% The evolutionary benefits of masting depend on the spatial scale at which trees reproduce synchronously, and this scale in turn depends on the evolutionary hypothesis that we consider \citep{Davies2024}. To overwhelm seed predators, synchrony scale should be on the order of predators foraging ranges (typically X km), making synchrony within a forest more relevant than synchrony across distant populations.
+% emwFeb6: I gave up on trying to discuss year 2006, maybe we can skip it? It seems obvious nothing happened then in our results.... 
+% The year 2006 was previously identified as a year of abrupt change, marked by a desynchronization across England \citep{Bogdziewicz2021}. A lower synchrony may mask different processes operating at different scales: it could be caused either by a desynchronization among trees within populations or by a desynchronization between populations. % <!-- % Disentangling these two scales is critical for understanding masting. -->
+% The apparent desynchronization of beech populations does not always arise from the same spatial scale. In the recent years (2015-2022), synchrony between populations has decreased more than synchrony within populations (Fig. \ref{fig:synchrony}A). Some years---such as 2018---appear desynchronized because of high uncertainty on tree-level reproductive states within populations, whereas in other years---such as 2019---populations are desynchronized but trees within the same population remain synchronized (Supp. Fig.). 
+
+Determining the extent to which this will happen in the coming decades will require more models that, like the one developed here, track individual reproductive states and scale them up to reveal when and where synchrony breaks down across time and space.
+% vvdm26Feb: I modify the last sentence % emw28Feb -- hmm, so do you really need 'more models' or do you have the model you need and you just need more data? This last sentence to me now seems like it goes with "At the tree level, a better understanding of the climatic drivers of masting will not be possible without a finer decoupling of the constraints acting on different stages of reproduction, including bud formation, flowering, and flower or bud abortion (frost damage of trees about to mast), rather than relying only on seed production data. One possible way to start disentangling these temporal constraints is to compare species with different reproductive cycles (e.g. two-year versus three-year cycles), and investigate whether their seed production respond differently to climate---using a similar modeling approach as the one we proposed here." from below .... and then you have a short final paragraph on other stages? Or, you can build on the change I ran with ... 
+% Determining the extent to which this will happen in the coming decades, and producing robust spatiotemporal forecasts, will require improved metrics of synchrony and better measurements of the scale at which synchrony appears and disappears across years (CITE?). %emw17Feb -- Sure, can you tell the reader how to do that? If not, this feels a broad sweeping argument missing a hint of how to do this *in* a paper all about how to better model this stuff. Maybe you could walk the reader quickly through what this model can do? I suspect it's improved metrics of syncrhony and the spatial scale? Then you could mention measurements separately but give a hint on what you actually want for measurements (does this model suggest any?) ... or do you just mean what you mention below in which case skip it here (or skip it here either way and move it down to keep the ideas together). [Or, wait, maybe you or I have just made my mistake of putting the next paragraph's topic sentence at the end of the last paragraph? ]
+
+% At the tree level, a better understanding of the climatic drivers of masting will not be possible without a finer decoupling of the constraints acting on different stages of reproduction, including bud formation, flowering, and flower or bud abortion (frost damage of trees about to mast), rather than relying only on seed production data. One possible way to start disentangling these temporal constraints is to compare species with different reproductive cycles (e.g. two-year versus three-year cycles), and investigate whether their seed production respond differently to climate---using a similar modeling approach as the one we proposed here. % emw28Feb -- I suggested this but it feels too specific for how the paper is wrapping up ... we would have to get into comparing species to make this point fit well I think... 
+%emw17Feb -- The below is exciting! It feels like you're introducing a big point though out of the blue ... if you just tweak it to be more 'if we can organize regeneration more we can then build up to a life cycle context [by the way, what is that? It feels a little like the life cycle of a plant but then you jump to forest regeneration without explaining] it could work ... 
+%vvdmFeb26: I tried to improve;
+
+\end{document}
