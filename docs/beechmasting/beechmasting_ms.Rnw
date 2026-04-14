@@ -35,7 +35,7 @@
 wd <- '/home/victor/projects/seedsarentreal/docs/beechmasting'
 # wd <- 
 
-kq <- readRDS(file.path(wd, 'figures/new', 'key_quantities.rds'))
+kq <- readRDS(file.path(wd, 'figures/new/min10obs', 'key_quantities.rds'))
 @
 
 \begin{abstract}
@@ -73,7 +73,7 @@ Here we test how climate affects masting by explicitly modeling how climatic cue
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1.1\linewidth]{figures/new/model_overview.pdf}
+  \includegraphics[width=1.1\linewidth]{figures/new/min10obs/model_overview.pdf}
   \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. \textbf{(B)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot). \textbf{(C)} The differences in transition probabilities between states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(D)} When added together across all populations, these individual cycles generate variability and synchrony in seed production across years. In \textbf{(A)} and \textbf{(C)}, the red line represents the median model prediction, while the shaded areas reporesent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts, and the grey lines and areas indicate model predictions for years when observations were missing.}
   \label{fig:overview}
 \end{figure}
@@ -96,7 +96,7 @@ While \Sexpr{round(kq$average_persistenceinlow['50%']*100,0)}\% of trees in a lo
 % vvdm9apr: NEED TO RE-ADD THE BOXPLOTS
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1.1\linewidth]{figures/new/climate_predictors_withdeltat.pdf}
+  \includegraphics[width=1.1\linewidth]{figures/new/min10obs/climate_predictors_withdeltat.pdf}
   \caption{\textbf{Climate conditions impact both transition probabilities between states and seed production in a high reproduction state.} \textbf{(A)} Average maximum temperature in July and August of the previous year increases the probability of transition from a low-reproduction to a high-reproduction state. \textbf{(B)} The accumulated growing-degree days (GDD) until the last frost day decreases the number of seeds produced in a high-reproduction state. Plants that have accumulated more GDD before a frost event are phenologically more advanced and thus face a higher risk of frost injury \citep{Vitasse2018}. \textbf{(C)} The interactions of previous summer conditions and previous latent states explain the apparent two-year lag effect of climate on observed synchrony across populations. In \textbf{(A)} and \textbf{(B)}, the solid red line and dashed lines respectively represent the median and the 5\% and 95\% quantiles, while the gray boxplots show observed conditions (1980–2022).}
   \label{fig:climate}
 \end{figure}
@@ -109,7 +109,7 @@ On the contrary, we found a `breakdown' because of climate change would require 
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/new/climate_nobreakdown.pdf}
+  \includegraphics[width=0.7\linewidth]{figures/new/min10obs/climate_nobreakdown.pdf}
   \caption{\textbf{Endogeneous constraints prevent masting breakdown under a significant summer warming.} We predicted the percentage of masting trees for 50 new trees in an average population in England under a strong summer warming of 7\celsius~in one century---which corresponds to the warmest regional climate model projections \citep{Schumacher2024}. The green line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the predictions with the model fitted on the data used in this paper. With this model, the fitted transition probabilities indicate that trees cannot remain continuously in a high-reproduction state. The orange line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the predictions from an hypothetical model where summer warming increases the probability of persisting into a high-reproduction state --- and would lead to most trees masting every year (i.e. reproductive breakdown). These predictions are not supported by the data used here.}
   \label{fig:future}
 \end{figure}
@@ -120,7 +120,7 @@ For masting, floral bud initiation at the individual tree level is promoted by w
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/new/synchrony_withoutdeltat.pdf}
+  \includegraphics[width=0.7\linewidth]{figures/new/min10obs/synchrony_withoutdeltat.pdf}
   \caption{\textbf{Reproductive synchrony arises from populations of individual trees.} Blue line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the synchrony within population, i.e. the average proportion of trees of the same population that are in the same state. Some populations can be in a non-masting year, while some population can be a masting year. Purple line and shaded areas (median, 25–75\% and 5–95\% quantile ranges) represent the synchrony across populations, i.e. the proportion of trees that are in the same state across all populations. Since our model includes only two states, the minimum synchrony is 0.5 (i.e. at least 50\% of the trees are in the same state).}
   \label{fig:synchrony}
 \end{figure}
@@ -137,7 +137,7 @@ Determining the extent to which this will happen in the coming decades, and prod
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/new/coldsummer_hingepoint.pdf}
+  \includegraphics[width=0.7\linewidth]{figures/new/min10obs/coldsummer_hingepoint.pdf}
   \caption{\textbf{Cold summers synchronize reproduction at the population level.} We predicted the percentage of masting trees in a population, that first experiences a perfect alternation of cold (around 15\celsius) and warm summers (around 24\celsius), in purple, and then only warm summers, in green.}
   \label{fig:hinge}
 \end{figure}
