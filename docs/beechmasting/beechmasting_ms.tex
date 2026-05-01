@@ -132,7 +132,7 @@ This stability in synchrony across both scales suggests that masting in these be
 
 Whether masting can continue to support forest regeneration in the next decades, however, depends on how synchrony will respond as climate continues to warm.
 While we find no evidence for a positive feedback of summer warming that would trigger runaway seed production at the individual level, our results suggest possible changes at the population level in synchrony as we lose the cold summers. Because cold summers act as potential hinge points for population synchronization, several consecutive years without cold summers could progressively decrease synchrony within a population (Fig. \ref{fig:hinge}). Repeated warm summers thus lead to low synchrony (52\% in Fig. \ref{fig:future}) not because they drive high seed production from most trees getting stuck in a high reproductive state \citep[as previously suggested,][]{Bogdziewicz2020, Foest2024}, but because of the loss of cold summers that drive most trees in a population into the same reproductive states. 
-Determining the extent to which this will happen in the coming decades, and producing robust spatiotemporal forecasts, will require better measurements of the temporal and spatial scales at which synchrony appears and disappears across years (CITE?). Our results suggest models of masting---and its inherent synchrony---should build from individual-level seed production data, which is still incredibly rare. Teasing out the effects of warm summers versus spring frosts will likely also require temporally finer resolution data than seed counts--including flowering (CITE Nussbaumer) but also ideally following from bud formation to flowering, thus including flower or bud abortion (frost damage of trees about to mast). 
+Determining the extent to which this will happen in the coming decades, and producing robust spatiotemporal forecasts, will require better measurements of the temporal and spatial scales at which synchrony appears and disappears across years \citep{LaMontagne2020}. Our results suggest models of masting---and its inherent synchrony---should build from individual-level seed production data, which is still incredibly rare. Teasing out the effects of warm summers versus spring frosts will likely also require temporally finer resolution data than seed counts--including flowering \cite{Nussbaumer2020} but also ideally following from bud formation to flowering, thus including flower or fruit abortion (frost or drought damage of trees about to mast). 
 
 
 
@@ -150,13 +150,13 @@ Fundamentally synchrony in seed production is one piece of a larger puzzle: unde
 
 \subsection*{Tree-level reproduction and climate data}
 
-We used annual seed production data from 57 individual beech trees (\emph{Fagus sylvatica}) across 7 populations in England, collected between 1980 and 2022, following the protocol described in previous publications [CITE]. Populations contained between X and Y trees and were monitored for X to Y years. Within populations, individual time series varied in length and contained some missing observations.
+We used annual seed production data from 57 individual beech trees (\emph{Fagus sylvatica}) across 7 populations in England, collected between 1980 and 2022, following the protocol described in previous publications \citep{Packham2008, Bogdziewicz2021,HacketPain2025}. Populations contained between X and Y trees and were monitored for X to Y years. Within populations, individual time series varied in length and contained some missing observations.
 
-We extracted daily climatic data from ERA5-Land [CITE], at a 0.01 degree resolution, for the 7 beech sites. We computed three climatic variables, for each year of observation: average maximum temperature in July and August (of the previous year), average spring temperature from , and growing degree days (GDD) until the last frost day as a measure of spring frost risk \citep{Vitasse2018}.
+We extracted daily climatic data from ERA5-Land \citep{MunozSabater2021}, at a 0.01 degree resolution, for the 7 beech sites. We computed three climatic variables, for each year of observation: average maximum temperature in July and August (of the previous year), average spring temperature from , and growing degree days (GDD) until the last frost day as a measure of spring frost risk \citep{Vitasse2018}.
 
 \subsection*{A Hidden Markov model for individual tree reproduction}
 
-We modeled individual tree seed production with a Hidden Markov Model (HMM), in a Bayesian framework using the probabilistic programming language Stan [CITE]. 
+We modeled individual tree seed production with a Hidden Markov Model (HMM), in a Bayesian framework using the probabilistic programming language Stan \citep{Carpenter2017}. 
 
 \subsubsection*{Structure of the model}
 
