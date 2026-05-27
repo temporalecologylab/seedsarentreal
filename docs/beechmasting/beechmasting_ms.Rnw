@@ -4,12 +4,9 @@
 \renewcommand{\baselinestretch}{1.2}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage[numbers]{natbib}
-\bibliographystyle{vancouver} % For PLOS, see %vancouverstylechanged for stuff to change back
-% \makeatletter \renewcommand\@biblabel[1]{#1.} \makeatother % PLOS wants the ref list to not have brackets
+\usepackage{natbib}
+\bibliographystyle{besjournals} 
 \usepackage{amsmath}
-% \usepackage{xr-hyper}
-% \usepackage{parskip}
 \newcommand{\R}[1]{\label{#1}\linelabel{#1}}
 \usepackage{gensymb}
 \usepackage{lineno}
@@ -22,10 +19,11 @@
 \SweaveOpts{concordance=FALSE, echo=FALSE, message=FALSE, warning=FALSE, results=hide, figs.only=TRUE, prefix.string = figs/}
 \setkeys{Gin}{width=0.95\textwidth}
 
+\linenumbers
+
 \title{Climatic drivers and biological constraints drive masting dynamics} 
 
 % \date{\today}
-% \author{EM Wolkovich$^{1*}$, Benjamin I Cook$^{2,3}$, \\ I\~naki Garc\'ia de Cort\'azar-Atauri$^{4}$, Victor Van der Meersch$^{1}$,  \\ Thierry Lacombe$^{5}$, C\'ecile Marchal$^{6}$ \& Ignacio Morales-Castilla$^{7}$}
 \author{Victor, Mike, Lizzie}
 \maketitle
   
@@ -40,7 +38,7 @@ kq <- readRDS(file.path(wd, 'figures/new', 'key_quantities.rds'))
 
 \begin{abstract}
 % emw7May -- I don't love using 'poorly understood' or 'poorly studied' much, and especially not in abstracts. A good gap should say WHY we need something not just to point out the existence of the gap; we actually have the why, we just missed the language for me... I tried to fix it but it needs work. I don't love focusing on the potential for bad things (you also do this with the last paragraph of the paper) when you don't have current data for them ... I tried to tweak the ending, I also think you could come back to your "This interplay between individual-level constraints and population-level climatic cues provides a physiological mechanism for reproductive synchrony that can persist over multiple years, and offers a simple explanation for previous findings that masting depends on the temperature difference between successive summers (the $\Delta T$ model; \citealp{Kelly2012})." angle more .... Maybe replace last sentence with something more like: "Our results thus provide a physiological mechanism for reproductive synchrony that can persist over multiple years--interplay between individual-level constraints and population-level climatic cues---and suggests that the loss of cold summers reduce population synchronization with continued warming. 
-Masting---the synchronous `boom-and-bust' reproduction observed across many tree species---shapes forest regeneration globally. Decades of research have identified climate as a potential driver of masting, raising concerns climate anthropogenic climate change may disrupt it, but cannot well predict synchrony. Here, we integrate a well-known constraint on reproduction---competition between floral buds and fruit maturation that drives a trade-off between the two processes across years---that operates at the individual tree level with known climatic drivers on masting in the temperate zone to forecast masting with climate change. Using long-term seed production data from individual beech trees across England, we scaled up tree-level predictions to population-level dynamics, and found strong evidence for synchrony, with \Sexpr{round(kq$withinstand_synchrony['50%'],0)}\% of trees within a population sharing the same reproductive state in any given year since 1980. Synchrony between populations did not appear to have declined significantly over the last decade despite significant warming (\Sexpr{round(kq$acrossstands_synchrony_before2015['50%'],0)}\% before 2015 to \Sexpr{round(kq$acrossstands_synchrony_2015onwards['50%'],0)}\% after). Over this period, cold summers were the main controller of synchrony because they drove most trees into a shared low reproductive state, providing the conditions for synchronous reproduction when a warm summer followed. Warm summers increased the probability that trees transitioned into a high reproductive state, but individual-level reproductive constraints prevented runaway increases in masting frequency, even under when forecasted under extreme warming scenarios. While our results suggest the loss of cold summers could reduce synchrony in the future, the current interplay of individual-level constraints and population-level climatic cues suggests past and continued synchrony. 
+Masting---the synchronous `boom-and-bust' reproduction observed across many tree species---shapes forest regeneration globally. Decades of research have identified climate as a potential driver of masting, raising concerns climate anthropogenic climate change may disrupt it, but cannot well predict synchrony. Here, we integrate a well-known constraint on reproduction---competition between floral buds and fruit maturation that drives a trade-off between the two processes across years---that operates at the individual tree level with known climatic drivers on masting in the temperate zone to forecast masting with climate change. Using long-term seed production data from individual beech trees across England, we scaled up tree-level predictions to population-level dynamics, and found strong evidence for synchrony, with \Sexpr{round(kq$withinstand_synchrony['50%'],0)}\% of trees within a population sharing the same reproductive state in any given year since 1980. Synchrony between populations did not appear to have declined significantly over the last decade despite significant warming (\Sexpr{round(kq$acrossstands_synchrony_before2015['50%'],0)}\% before 2015 to \Sexpr{round(kq$acrossstands_synchrony_2015onwards['50%'],0)}\% after). Over this period, cold summers were the main controller of synchrony because they drove most trees into a shared low reproductive state, providing the conditions for synchronous reproduction when a warm summer followed. Warm summers increased the probability that trees transitioned into a high reproductive state, but individual-level reproductive constraints prevented runaway increases in masting frequency, even when forecasted under extreme warming scenarios. While our results suggest the loss of cold summers could reduce synchrony in the future, the current interplay of individual-level constraints and population-level climatic cues suggests past and continued synchrony. 
 
 % Our results suggest cold summers could act as hinge points for population synchronization, many consecutive years without cold summers could progressively decrease synchrony as climate continues to warm.
 
@@ -53,9 +51,8 @@ Masting---the synchronous `boom-and-bust' reproduction observed across many tree
 
 % Somewhere cite \citep{Harrison2025}
 The acceleration of climate change may cause abrupt ecological effects worldwide \citep{Trisos2020}. Increasing extreme conditions could disrupt key ecological processes, and drive ecosystems toward critical transitions \citep{Wernberg2016}. 
-Across biomes, recent work has suggested major shifts in pests and pathogens, while the local extirpation of rare species and increase in invaders across taxa has driven biotic homogenization \citep{Carlson2025, Dornelas2014, Daru2021}. Forests in particular appear to be shifting, with lagging elevational and latitudinal range expansions (CITE) alongside increases in adult tree mortality. This has driven growing concerns about the future of forest carbon sinks globally \citep{Albrich2020, Forzieri2022, McDowell2020} and growing interest into the mechanisms that underlie forest regeneration \citep{Foest2024, HacketPain2025}.  %emw7May --  maybe relevant citation here? https://www.nature.com/articles/s41558-024-02080-5 ...  though I did not look closely;  many papers cover the 'migrational lag'
+Across biomes, recent work has suggested major shifts in pests and pathogens, while the local extirpation of rare species and increase in invaders across taxa has driven biotic homogenization \citep{Carlson2025, Dornelas2014, Daru2021}. Forests in particular appear to be shifting, with lagging elevational and latitudinal range expansions (CITE) alongside increases in adult tree mortality. This has driven growing concerns about the future of forest carbon sinks globally \citep{Albrich2020, Forzieri2022, McDowell2020} and growing interest into the mechanisms that underlie forest regeneration \citep{Foest2024, HacketPain2025, Chakraborty2024}. 
 
-%emw7May -- Not critical here but I recommend you switch to the journal's citation method LATER in the ms draft process, use something until close to to submission that lets co-authors see the citations more in line (author, yr). 
 Regeneration in many temperate and tropical forests depends on the widely observed phenomenon of masting. Masting---defined by `boom and bust' cycles of reproduction that are synchronous across most individuals of a population \citep{Janzen1978}---occurs across many trees species and is hypothesized to drive fitness benefits during reproduction and the early stages of establishment \citep{Kelly1994, Bogdziewicz2024}. The most commonly invoked fitness benefit, `predator satiation,' hypothesizes that years of high seed production overwhelm seed predators and thus allows a higher proportion of seeds and seedlings to escape predation and establish \citep{Janzen1971, Kelly1994}. Fitness benefits of masting may also operate earlier in reproduction, by increasing pollen exchange and genetic outcrossing \citep{Carlson2014, Bontrager2019}. These different hypotheses vary in their exact mechanism and life stage. Yet, they all imply that the benefits of masting depend on an economy of scale where most individual trees within a population (or location) must be synchronous.
 
 Despite the importance of synchrony to yielding fitness benefits, how synchronous masting is and how it occurs remain poorly understood.
@@ -81,8 +78,10 @@ Here we test how climate affects masting by explicitly modeling how climatic cue
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1.1\linewidth]{figures/new/model_overview.pdf} %emw7May -- ALERT! I don't think your letters in your caption text match your figure ... I would consider trying to open with top right, then go to lower right, then top to bottom of left. 
-  \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. \textbf{(B)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot). \textbf{(C)} The differences in transition probabilities between states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(D)} When added together across all populations, these individual cycles generate variability and synchrony in seed production across years. In \textbf{(A)} and \textbf{(C)}, the red line represents the median model prediction, while the shaded areas reporesent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts, and the grey lines and areas indicate model predictions for years when observations were missing.}
+  \includegraphics[width=1.1\linewidth]{figures/new/model_overview.pdf} 
+  \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} 
+  \textbf{(A)} The model identifies two distinct reproductive latent states that correspond to two different level of seed production. 
+  \textbf{(B)} The differences in transition probabilities between the two latent states reflect endogenous constraints that shape tree-level reproductive cycles. \textbf{(C)} At the tree level (illustrated here for one random tree), the alternation between these two latent states across time (upper plot) generates low and high seed production years (lower plot).  \textbf{(D)} When added together across all populations, these individual cycles generate variability and synchrony in seed production across years. In \textbf{(C)} and \textbf{(D)}, the blue line represents the median model prediction, while the shaded areas represent the 25–75\% and 5–95\% quantile ranges. The black lines represent the observed seed counts, and the grey lines and areas indicate model predictions for years when observations were missing.}
   \label{fig:overview}
 \end{figure}
 
@@ -93,7 +92,7 @@ Under the same average climate, a tree in a high reproductive state was almost c
 These results suggest that trees on average shift into a new reproductive state most years, but are more likely to remain in a low reproductive state, supporting the idea of non-mast years being more frequent than mast years \citep{Kelly1994}. 
 
 %emw7May -- I would move the first stats below to be together -- so: For example, the transition probability during a warm summer at \Sexpr{kq$warmsummertemp}\celsius was 8.1 times higher ... (98 vs 12% respectively, and ranges of. ... )
-Climate strongly affected these transition dynamics. Similar to previous studies \citep{Nussbaumer2018, Vacchiano2017, Journe2024}, we found that warm summer temperatures increased the probability that trees in a low-reproduction state transitioned to a high-reproduction state (Fig. \ref{fig:climate}A). For example, the transition probability during a warm summer at \Sexpr{kq$warmsummertemp}\celsius ~(\Sexpr{round(kq$warmsummer_prob['50%']*100,0)}\%, \Sexpr{round(kq$warmsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$warmsummer_prob['95%']*100,0)}\%) was \Sexpr{formatC(kq$warmcold_prob_ratio['50%'], format = "f", digits = 1)} times higher than during a \Sexpr{kq$coldsummertemp}\celsius ~summer (\Sexpr{round(kq$coldsummer_prob['50%']*100,0)}\%, \Sexpr{round(kq$coldsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$coldsummer_prob['95%']*100,0)}\%). % vvdmFeb2: 17 and 23 are just examples I took along the gradient of temp. represented in the figure...
+Climate strongly affected these transition dynamics. Similar to previous studies \citep{Nussbaumer2018, Vacchiano2017, Journe2024}, we found that warm summer temperatures increased the probability that trees in a low-reproduction state transitioned to a high-reproduction state (Fig. \ref{fig:climate}A). For example, the transition probability during a warm summer at \Sexpr{kq$warmsummertemp}\celsius ~was \Sexpr{formatC(kq$warmcold_prob_ratio['50%'], format = "f", digits = 1)} times higher than during a \Sexpr{kq$coldsummertemp}\celsius ~summer (\Sexpr{round(kq$warmsummer_prob['50%']*100,0)}\% vs. \Sexpr{round(kq$coldsummer_prob['50%']*100,0)}\% respectively, and ranges of \Sexpr{round(kq$warmsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$warmsummer_prob['95%']*100,0)}\% vs. \Sexpr{round(kq$coldsummer_prob['5%']*100,0)} -- \Sexpr{round(kq$coldsummer_prob['95%']*100,0)}\%).
 Additionally, our results support the common hypothesis that spring frosts may limit seed production \citep{Augspurger2009}, with seed production for trees in a high reproductive state reduced by \Sexpr{round(kq$frost_decrease['50%'],1)}\%  (\Sexpr{round(kq$frost_decrease['5%'],1)} -- \Sexpr{round(kq$frost_decrease['95%'],1)}\%, Fig. \ref{fig:climate}B) given a three-fold increase in a metric of frost risk \citep[growing-degree days until last frost,][]{Vitasse2018}, but no evidence that warm springs affected seed production (Supp. Fig.). 
 Given the reproductive constraints that prevent beeches and many other woody plants from repetitive years of high fruit \citep[from the competitive overlap of flower bud formation and fruit development,][]{Monselise1982, Geber1997}, we assumed the transition from a high to a low reproductive state was not affected by climate (we found strong support for this when we relaxed this assumption, Supp. Fig.). 
 %emw7May -- I am not sure what we were trying to say below -- did it go with frost? If so, it doesn't work since we're talking about the 'transition' .... remind me and we can try to fix together. 
@@ -102,6 +101,7 @@ Given the reproductive constraints that prevent beeches and many other woody pla
 Individual tree-level reproductive states (high or low) scaled up to produce population-level seed production that was synchronous, both within and between populations (sites). Within populations, \Sexpr{round(kq$withinstand_synchrony['50%'],0)}\%  (\Sexpr{round(kq$withinstand_synchrony['5%'],0)} -- \Sexpr{round(kq$withinstand_synchrony['95%'],0)}\%) of trees shared the same reproductive state on average each year, while synchrony across populations was only slightly lower (the proportion of trees in the same state across all populations was \Sexpr{round(kq$acrossstands_synchrony['50%'],0)}\%, \Sexpr{round(kq$acrossstands_synchrony['5%'],0)} -- \Sexpr{round(kq$acrossstands_synchrony['95%'],0)}\%). This high level of synchrony across populations could suggest that synchrony occurs across wide spatial scales, as sometimes suggested \citep{Bogdziewicz2021a, Journe2024}, but given that these populations were not widely separated spatially (Supp. Mat.), these results only provide evidence for synchrony over smaller spatial scales, as often suggested  \citep{Koenig1998, LaMontagne2020}. %emwFeb5: Will the map show whether there is any autocorrelation in synchrony? As that seems the obvious question from this point and could be worth addressing directly in the text here. 
 Whether this scale is sufficient for fitness benefits depends on the exact mechanism (e.g., predator satiation or pollination efficiency) and the species-level attributes \citep[e.g. predators foraging ranges or wind dispersal distances, which depend on seed shape, size and the local landscape][]{Davies2024}. For example, if beech masting in England mainly serves to overwhelm seed predators, such as wood mouse or bank vole \citep{Sachser2025}, then masting synchrony at the population level (given that sites are on average \Sexpr{round(kq$meandistance,0)} km apart, and the two closest sites \Sexpr{round(kq$mindistance,0)} km apart) should be sufficient to maintain the regeneration benefits of masting. 
 %emw7May -- I would add an estimated foraging distance maybe? 
+
 Climatic cues---especially cold summers---appeared critical to synchronizing the reproductive cycle of individual trees to produce the population-level synchrony that often defines masting \citep{Kelly2002}. 
 While \Sexpr{round(kq$average_persistenceinlow['50%']*100,0)}\% of trees in a low reproductive state are likely to stay in that state, cold summer temperatures prevent an additional subset from transitioning to a high reproductive state (because cold summer temperatures reduce the probability of transition to a high reproductive state). Thus natural reproductive constraints combined with cold summers can leave most trees in a low reproductive state (Fig. \ref{fig:climate}A). This synchrony of low reproduction appears to then drive synchrony of high reproduction when a cold summer is followed by a warm summer; in such years most trees responded consistently to the warm temperatures that promote floral induction, and transitioned together into a high reproductive state (Fig. \ref{fig:climate}C), thus generating a mast year at the population scale. This interplay between individual-level constraints and population-level climatic cues provides a physiological mechanism for reproductive synchrony that can persist over multiple years, and offers a simple explanation for previous findings that masting depends on the temperature difference between successive summers (the $\Delta T$ model; \citealp{Kelly2012}). %emwFeb5: Nice ending! %emw7May -- Also, you should ADD (copy over) this to the cover letter file (it's the sentence I also pulled for the abstract)
 % I was referring before to `epigenetic summer memory' \citep{Samarth2020} for deltaT... I don't know if we should leave it? %emwFeb5: Huh? I am not sure that I follow you... 
@@ -114,7 +114,7 @@ While \Sexpr{round(kq$average_persistenceinlow['50%']*100,0)}\% of trees in a lo
   \label{fig:climate}
 \end{figure}
 
-Our results appear to support the hypothesis that increasing summer temperatures with climate change could disrupt masting  \citep{Bogdziewicz2021, Foest2024}. This hypothesis---previously called breakdown \citep{Bogdziewicz2021,Foest2024}---predicts that warm summers will drive trees to  be in high reproductive state more frequently and thus years of low reproduction will become rarer, potentially leading to lower individual tree growth \citep{Koenig1998, HacketPain2025} and reducing variability and synchrony in seed production at the population level. 
+Our results appear to support the hypothesis that increasing summer temperatures with climate change could disrupt masting  \citep{Bogdziewicz2021, Foest2024}. This hypothesis---previously called breakdown---predicts that warm summers will drive trees to  be in high reproductive state more frequently and thus years of low reproduction will become rarer, potentially leading to lower individual tree growth \citep{Koenig1998, HacketPain2025} and reducing variability and synchrony in seed production at the population level. 
 %emw7May -- below also a great sentence, maybe copy to cover letter file
 While we do find that warmer summers increase the probability of trees transitioning into a high reproductive state---and thus increasing summer temperatures would increase the frequency of high seed production years---our results suggest that reproductive constraints prevent major shifts in the frequency of high seed production years. 
 Indeed, we found even with extreme summer warming (7\celsius~in one century, corresponding to the warmest regional climate model projections, \citealp{Schumacher2024}), only \Sexpr{round(kq$mastingtrees_warmfuture['50%'],1)}\%  (\Sexpr{round(kq$mastingtrees_warmfuture['5%'],1)} -- \Sexpr{round(kq$mastingtrees_warmfuture['95%'],1)}\%) of trees in a population would mast in any given year (Fig. \ref{fig:future}). 
@@ -149,9 +149,7 @@ This stability in synchrony across both scales suggests that masting in these be
 
 Whether masting can continue to support forest regeneration in the next decades, however, may depend on how synchrony will respond as climate continues to warm.
 While we find no evidence for a positive feedback of summer warming that would trigger runaway seed production at the individual level, our results predict possible changes at the population level in synchrony as we lose the cold summers. Because cold summers act as potential hinge points for population synchronization, several consecutive years without cold summers could progressively decrease synchrony within a population (Fig. \ref{fig:hinge}). Our predictions show how repeated warm summers could lead to low synchrony (\Sexpr{round(kq$mastingtrees_warmfuture['50%'],1)}\% in Fig. \ref{fig:future}) not because they drive high seed production from most trees getting stuck in a high reproductive state \citep[as previously suggested,][]{Bogdziewicz2020, Foest2024}, but because of the loss of cold summers that drive most trees in a population into the same reproductive states. 
-Determining the extent to which this will happen in the coming decades, and producing robust spatiotemporal forecasts, will require better measurements of the temporal and spatial scales at which synchrony appears and disappears across years \citep{LaMontagne2020}. Our results suggest models of masting---and its inherent synchrony---should build from individual-level seed production data, which is still incredibly rare. Teasing out the effects of warm summers versus spring frosts will likely also require temporally finer resolution data than seed counts--including flowering \cite{Nussbaumer2020} but also ideally following from bud formation to flowering, thus including flower or fruit abortion (frost or drought damage of trees about to mast). %emw7May --  this last sentence here needs some work, but how to fix it depends on how/if we change the below paragraph (I would wait and see what Mike and others think, and see how strongly you feel)
-
-
+Determining the extent to which this will happen in the coming decades, and producing robust spatiotemporal forecasts, will require better measurements of the temporal and spatial scales at which synchrony appears and disappears across years \citep{LaMontagne2020}. Our results suggest models of masting---and its inherent synchrony---should build from individual-level seed production data, which is still incredibly rare. Teasing out the effects of warm summers versus spring frosts will likely also require temporally finer resolution data than seed counts---including flowering \cite{Nussbaumer2020} but also ideally following from bud formation to flowering, thus including flower or fruit abortion (frost or drought damage of trees about to mast). %emw7May --  this last sentence here needs some work, but how to fix it depends on how/if we change the below paragraph (I would wait and see what Mike and others think, and see how strongly you feel)
 
 \begin{figure}[htbp]
   \centering
@@ -166,50 +164,49 @@ Fundamentally synchrony in seed production is one piece of a larger puzzle: unde
 \section*{Methods}
 
 \subsection*{Tree-level reproduction and climate data}
-%emw7May --  Try to fill in X and Y below if you can before next draft (three spots at least, I added one)
 
-We used annual seed production data from 57 individual beech trees (\emph{Fagus sylvatica}) across 7 populations in England, collected between 1980 and 2022, following the protocol described in previous publications \citep{Packham2008, Bogdziewicz2021,HacketPain2025}. Populations contained between X and Y trees and were monitored for X to Y years. Within populations, individual time series varied in length and contained some missing observations. %emw7May -- a little more detail on the missing observations? I guess if Hacket Pain is not clear we do not need to be, but then we should be sure to link directly here to the published data. 
+We used annual seed production data from \Sexpr{kq$ntrees} individual beech trees (\emph{Fagus sylvatica}) across \Sexpr{kq$nsites} populations in England, collected between 1980 and 2024, following the protocol described in previous publications \citep{Packham2008, Bogdziewicz2021,HacketPain2025}. Populations contained between \Sexpr{kq$ntrees_persite[1]} and \Sexpr{kq$ntrees_persite[2]} trees and were monitored for \Sexpr{kq$nyears_persite[1]} to \Sexpr{kq$nyears_persite[2]} years. Within populations, individual time series varied in length and contained some missing observations. %emw7May -- a little more detail on the missing observations? I guess if Hacket Pain is not clear we do not need to be, but then we should be sure to link directly here to the published data. 
 
-We extracted daily climatic data from ERA5-Land \citep{MunozSabater2021}, at a 0.01 degree resolution, for the 7 beech sites. We computed three climatic variables, for each year of observation: average maximum temperature in July and August (of the previous year), average spring temperature from X to Y, and growing degree days (GDD) until the last frost day as a measure of spring frost risk \citep{Vitasse2018}.
+We extracted daily climatic data from ERA5-Land \citep{MunozSabater2021}, at a 0.01 degree resolution, for the \Sexpr{kq$nsites} sites. We computed three climatic variables, for each year of observation: average maximum temperature in July and August (of the previous year), average spring temperature (April-May), and growing degree days (GDD) until the last frost day as a measure of spring frost risk \citep{Vitasse2018}.
 
 \subsection*{A Hidden Markov model for individual tree reproduction}
 
 We modeled individual tree seed production with a Hidden Markov Model (HMM), in a Bayesian framework using the probabilistic programming language Stan \citep{Carpenter2017}. 
 
 \subsubsection*{Structure of the model}
-%emw7May -- I feel like t is used most often for time and i most often for observation ... so I am not a big fan of these choices (not critical though). I don't see the full need for letters though, could we use tree and yr? 
-In this model, each tree $t$ is assigned to a latent reproductive state $z_{t,i}$ each year $i$: a low reproductive state ($z_{t,i}=1$) or a high reproductive state ($z_{t,i}=2$). The latent state $z_{t,i}$ is conditionally dependent only on the state the preceding year (the \emph{Markovian} assumption), such that for $N$ years we have:
+
+In this model, each tree $k$ is assigned to a latent reproductive state $z_{k,i}$ each year $i$: a low reproductive state ($z_{k,i}=1$) or a high reproductive state ($z_{k,i}=2$). The latent state $z_{k,i}$ is conditionally dependent only on the state the preceding year (the \emph{Markovian} assumption), such that for $N$ years we have:
 
 \begin{equation}
-p(z_{t,1}, \ldots, z_{t,N}) = p(z_{t,1}) \, \prod_{i = 2}^{N} p(z_{t,i} \mid z_{t,i\text{-}1})
+p(z_{k,1}, \ldots, z_{k,N}) = p(z_{k,1}) \, \prod_{i = 2}^{N} p(z_{k,i} \mid z_{k,i\text{-}1})
 \end{equation}
 
 \noindent The transitions between reproductive states are determined by a $2 \times 2$ matrix of probabilities:
 \begin{equation}
 \begin{bmatrix}
-p(z_{t,i} = 1 \mid z_{t,i\text{-}1} = 1) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) \\
-p(z_{t,i} = 1 \mid z_{t,i\text{-}1} = 2) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)
+p(z_{k,i} = 1 \mid z_{k,i\text{-}1} = 1) & p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 1) \\
+p(z_{k,i} = 1 \mid z_{k,i\text{-}1} = 2) & p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 2)
 \end{bmatrix}
 \end{equation}
 \noindent  which is by definition equivalent to:
 \begin{equation}
 \label{matrix}
 \begin{bmatrix}
-1-p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) \\
-1-p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2) & p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)
+1-p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 1) & p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 1) \\
+1-p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 2) & p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 2)
 \end{bmatrix}\\
 \end{equation}
 
 \noindent Both the latent reproductive states and the transition probabilities were inferred from the seed data alone, i.e. the model identify the most probable state sequence for each individual tree given its observed seed counts.
 
 %emw7May -- You could start from this and move down to the tree level ... not saying you need to, but something to consider as it may be more natural to biologists who do less math but think of boom and bust years... 
-The latent state determines the observational model responsible for the observed seed count $y_{t,i}$. We modeled the seed production in a low reproductive state with a zero-inflated negative binomial distribution, and the one in a high reproductive state with a negative binomial distribution, such as:
+The latent state determines the observational model responsible for the observed seed count $y_{k,i}$. We modeled the seed production in a low reproductive state with a zero-inflated negative binomial distribution, and the one in a high reproductive state with a negative binomial distribution, such as:
 
 \begin{align}
 \label{low}
-y_{t,i} \mid z_{t,i} = 1 &\sim \begin{cases} 0 & \text{with probability } \theta \\ \text{NegBin}(\lambda_\text{low}, \phi_\text{low}) & \text{with probability } 1 - \theta \end{cases} \\[2pt]
+y_{k,i} \mid z_{k,i} = 1 &\sim \begin{cases} 0 & \text{with probability } \theta \\ \text{NegBin}(\lambda_\text{low}, \phi_\text{low}) & \text{with probability } 1 - \theta \end{cases} \\[2pt]
 \label{high}
-y_{t,i} \mid z_{t,i} = 2 &\sim \text{NegBin}(\lambda_\text{high}, \phi_\text{high})
+y_{k,i} \mid z_{k,i} = 2 &\sim \text{NegBin}(\lambda_\text{high}, \phi_\text{high})
 \end{align}
 
 \subsubsection*{Influence of climate on state transition and seed production}
@@ -218,26 +215,26 @@ We expected the climatic conditions experienced by a tree to influence both the 
 
 In \ref{matrix}, we assumed that only the transition from a low reproductive state to a high reproductive state was affected by climate (and thus, by construction, the probability of staying in a low reproductive as well):
 \begin{equation}
- p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1) = \text{logit}^{-1} \left( \alpha_{1 \rightarrow 2} + \beta^\text{summer}_{1 \rightarrow 2} \cdot (X^\text{summer}_{t,i\text{-}1}-X^\text{summer}_\text{baseline}) \right)
+ p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 1) = \text{logit}^{-1} \left( \alpha_{1 \rightarrow 2} + \beta^\text{summer}_{1 \rightarrow 2} \cdot (X^\text{summer}_{k,i\text{-}1}-X^\text{summer}_\text{baseline}) \right)
 \end{equation}
 
-\noindent where $X^\text{summer}_{t,i\text{-}1}$ is the average maximum temperature during summer (the preceding year $i\text{-}1$), $\beta^{summer}_{1 \rightarrow 2}$ is the effect of these summer temperature, and $\text{logit}^{-1}(\alpha_{1 \rightarrow 2})$ is the transition probability when $X^\text{summer}_{t,i\text{-}1}=X^\text{summer}_\text{baseline}$. \\
-We did not expect $X^\text{summer}_{t,i\text{-}1}$ to affect $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)$ because the temporal overlap between fruit development and floral bud initiation should prevent trees already in a high reproductive state to respond to favorable summer conditions (but we still checked that this effect was negligible, see Supp. Fig.).
+\noindent where $X^\text{summer}_{k,i\text{-}1}$ is the average maximum temperature during summer (the preceding year $i\text{-}1$), $\beta^{summer}_{1 \rightarrow 2}$ is the effect of these summer temperature, and $\text{logit}^{-1}(\alpha_{1 \rightarrow 2})$ is the transition probability when $X^\text{summer}_{t,i\text{-}1}=X^\text{summer}_\text{baseline}$. \\
+We did not expect $X^\text{summer}_{k,i\text{-}1}$ to affect $p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 2)$ because the temporal overlap between fruit development and floral bud initiation should prevent trees already in a high reproductive state to respond to favorable summer conditions (but we still checked that this effect was negligible, see Supp. Fig.).
 
-In \ref{high}, we assumed that both spring temperature $X^\text{spring}_{t,i}$ and spring frost risk $X^\text{frost}_{t,i}$ could impact the seed production in a high reproductive state, such as:
+In \ref{high}, we assumed that both spring temperature $X^\text{spring}_{k,i}$ and spring frost risk $X^\text{frost}_{k,i}$ could impact the seed production in a high reproductive state, such as:
 \begin{align}
 \label{low}
-y_{t,i} \mid z_{t,i} = 2 \sim & ~ \text{NegBin}(\lambda^\text{high}_{t,i}, \phi_\text{high}) \\[2pt]
-\log \left(\lambda^\text{high}_{t,i}\right) = & \log(\lambda_\text{high}) 
-       + \beta_\text{high}^\text{spring} \cdot (X^\text{spring}_{t,i}-X^\text{spring}_\text{baseline})
-       + \beta_\text{high}^\text{frost} \cdot (X^\text{frost}_{t,i}-X^\text{frost}_\text{baseline}) &
+y_{k,i} \mid z_{k,i} = 2 \sim & ~ \text{NegBin}(\lambda^\text{high}_{k,i}, \phi_\text{high}) \\[2pt]
+\log \left(\lambda^\text{high}_{k,i}\right) = & \log(\lambda_\text{high}) 
+       + \beta_\text{high}^\text{spring} \cdot (X^\text{spring}_{k,i}-X^\text{spring}_\text{baseline})
+       + \beta_\text{high}^\text{frost} \cdot (X^\text{frost}_{k,i}-X^\text{frost}_\text{baseline}) &
 \end{align}
 
 \subsection*{Masting synchrony and model predictions}
 
 Individual tree states were aggregated within and across populations to quantify reproductive synchrony (the proportion of trees sharing the same reproductive state). Synchrony within populations was computed for each population as the maximum of the proportion of trees in a high or low reproductive state, then averaged across populations. Synchrony across populations was computed similarly, but the proportions of trees in each state were first averaged across all populations before taking the maximum (to avoid a population with more trees to have a higher contribution). Synchrony within populations can thus be higher than synchrony across populations when trees within a site tend to be in the same state but differ between sites.
 
-To forecast the effects of summer warming, we simulated seed production (and synchrony) for 50 trees representing an average English population with projected summer warming up to 7°C over one century \citep{Schumacher2024}. To assess the role of biological constraints, we compared predictions from our model---in which reproductive constraints prevent trees to stay indefinitely in a high reproductive state---against a hypothetical model where summer temperatures had a similar effect on both $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 1)$ (transition from low to high) and $p(z_{t,i} = 2 \mid z_{t,i\text{-}1} = 2)$ (persistence in high).
+To forecast the effects of summer warming, we simulated seed production (and synchrony) for 50 trees representing an average English population with projected summer warming up to 7°C over one century \citep{Schumacher2024}. To assess the role of biological constraints, we compared predictions from our model---in which reproductive constraints prevent trees to stay indefinitely in a high reproductive state---against a hypothetical model where summer temperatures had a similar effect on both $p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 1)$ (transition from low to high) and $p(z_{k,i} = 2 \mid z_{k,i\text{-}1} = 2)$ (persistence in high).
 
 To illustrate the role of cold summers in reproductive synchrony, we also simulated seed production for 50 trees first experiencing a perfect alternation of cold (around 15°C) and warm summers (around 24°C), followed by a period of warm summers only.
 
