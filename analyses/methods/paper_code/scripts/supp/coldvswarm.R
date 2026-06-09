@@ -1,9 +1,12 @@
 
 
 pdf(file = file.path(figpath, 'supp', 'coldvswarmsummer.pdf'),
-    width = 5, height = 3.5)
+    width = 9, height = 2.5)
 
-par(mfrow = c(1,1), mar = c(4,4,1,1))
+layout(matrix(c(1,2,3), nrow = 1),
+       widths = c(0.5,1, 0.5))
+par(mar = c(4,4,1,1))
+plot.new()
 util$plot_expectand_pushforward(samples_transition_warm, 50, 
                                 "Probability of transition from low to high state", 
                                 flim = c(0,1), col = util$c_mid)

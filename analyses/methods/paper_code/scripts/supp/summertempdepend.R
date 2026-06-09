@@ -1,7 +1,7 @@
 
 
 pdf(file = file.path(figpath, 'supp', 'summertempdepend.pdf'),
-    width = 6.5, height = 4)
+    width = 5, height = 3)
 
 tau_nm_m_df <- data.frame()
 for(temp_prevsummer in seq(12,26,0.1)){
@@ -55,7 +55,7 @@ legend(
   col = c('#728595', '#B85C2E'),
   legend = c('from low to high state',
             'from high to high state\n(persistence)'),
-  box.lwd = NA)
+  box.lwd = NA, cex = 0.8)
 
 dev.off()
 
