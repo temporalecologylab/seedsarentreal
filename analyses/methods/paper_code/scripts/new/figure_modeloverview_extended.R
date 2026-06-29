@@ -3,11 +3,7 @@ par(mfrow=c(1, 1), mar = c(4,4,2,2))
 
 nsamples <- length(samples[['theta1']])
 
-pdf(file = file.path(figpath, 'model_overview.pdf'),
-    width = 10, height = 6)
-# layout( matrix(c(1,1,1,4,4,4,2,2,3,3,5,5), ncol=2, byrow = F))
-layout( matrix(c(2,2,3,3,5,5,1,1,1,4,4,4), ncol=2, byrow = F))
-par(mar = c(3,2,2,2))
+
 
 
 nonmasting <- c()
@@ -21,6 +17,13 @@ for(t in 1:data$N_trees){
 }
 masting <- as.numeric(masting)
 nonmasting <- as.numeric(nonmasting)
+
+pdf(file = file.path(figpath, 'model_overview.pdf'),
+    width = 10, height = 6)
+layout( matrix(c(1,1,1,4,4,4,2,2,3,3,5,5), ncol=2, byrow = F))
+# layout( matrix(c(2,2,3,3,5,5,1,1,1,4,4,4), ncol=2, byrow = F))
+par(mar = c(3,2,2,2))
+
 
 maxx <- 3000
 hist(nonmasting, breaks=seq(0,maxx,l=600), col = '#48754860', border = 'white', 
@@ -38,7 +41,7 @@ hist(masting, breaks=seq(0,maxx,l=600), col = "#8F272760", border = 'white',
 text(x = 25, y = 0.03, labels = 'Low reproductive \nstate', col = '#487548', font = 1, adj = 0, cex = 1.2)
 text(x = 100, y = 0.01, labels = 'High reproductive state', col = util$c_mid_highlight, font = 1, adj = 0, cex = 1.2)
 
-mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 'grey30')
 
 
 # Two modalities
@@ -147,7 +150,7 @@ for(n in 1:N){
 }
 
 
-mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[3], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
 
 # Tree-level alternation in seeds
 par(mar = c(3,3.5,0,2))
@@ -258,7 +261,7 @@ plot(x = NULL, y = NULL,
      ylab = '',
      main = '',
      frame.plot	= FALSE)
-mtext(LETTERS[4], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 'grey30')
 param <- hist(samples_persistenceinlow, breaks = seq(0,1, 0.025), plot = FALSE)
 param_counts <- param$counts / max(param$counts)*0.9
 rect(ybottom = param$breaks[1:(length(param$breaks)-1)] + 1.2,
@@ -437,7 +440,7 @@ for(n in 1:N){
         col= "#728595" , lwd=2)
 }
 
-mtext(LETTERS[3], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[4], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
 
 dev.off()
 

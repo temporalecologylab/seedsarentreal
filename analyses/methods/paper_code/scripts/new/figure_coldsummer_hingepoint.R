@@ -1,11 +1,12 @@
 
 # Make new predictions with summer temp. alternating
 # Create hypothetical trees c/w. summer alternations
-years_to_predict <- seq(1980,  2010, 1)
-summertemp_ww <- rnorm(length(years_to_predict), 24, 2/2.57)
-summertemp_cw <- c(rnorm(9, 24, 2/2.57), rnorm(1, 15, 1/2.57), rnorm(1, 24, 2/2.57),  rnorm(1, 15, 1/2.57),
-                   rnorm(1, 24, 2/2.57),  rnorm(1, 15, 1/2.57), rnorm(1, 24, 2/2.57),  rnorm(1, 15, 1/2.57),
-                   rnorm(1, 24, 2/2.57),  rnorm(1, 15, 1/2.57),  rnorm(13, 24, 2/2.57))
+years_to_predict <- seq(1980,  2021, 1)
+summertemp_ww <- rnorm(length(years_to_predict), 22, 1/2.57)
+summertemp_cw <- c(rnorm(9, 22, 1/2.57), rnorm(1, 17, 1/2.57), rnorm(1, 22, 1/2.57),  rnorm(1, 17, 1/2.57),
+                   rnorm(1, 22, 1/2.57),  rnorm(1, 17, 1/2.57), rnorm(1, 22, 1/2.57),  rnorm(1, 17, 1/2.57),
+                   rnorm(1, 22, 1/2.57),  rnorm(1, 17, 1/2.57), rnorm(1, 22, 1/2.57))
+summertemp_cw <- c(summertemp_cw, rnorm(length(years_to_predict)-length(summertemp_cw), 22, 1/2.57))
 
 
 trees_per_stand <- 50
@@ -23,7 +24,7 @@ newtree_cw_start_idxs <- c()
 newtree_cw_end_idxs <- c()
 for (i in 1:N_newtrees_cw) {
   
-  newyears_tree <- years_to_predict-first_newyear+1
+  newyears_tree <- years_to_predict-first_newyear_cw+1
   newyears_cw <- c(newyears_cw, newyears_tree)
   
   N_newyears_tree <- length(newyears_tree)
@@ -137,12 +138,12 @@ segments(x0 = 0.5,  x1 = N+0.5, y0 = usr[3], y1 = usr[3], lwd = 1.5)
 axis(1, at= seq(0.5,N+0.5,1),
      # labels=years_to_plot, 
      labels = NA,
-     lwd = 0, lwd.ticks = 1, tck = -0.03, 
+     lwd = 0, lwd.ticks = 1, tck = -0.02, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))  
 axis(1, at= c(0.5,10.5,N+0.5),
      # labels=years_to_plot, 
      labels = NA,
-     lwd = 0, lwd.ticks = 1.2, tck = -0.07, 
+     lwd = 0, lwd.ticks = 1.2, tck = -0.04, 
      cex.axis = 0.9, mgp = c(2, 0.7, 0))    
 #title(xlab = "Year", line = 1.5)
 
@@ -198,7 +199,7 @@ legend("bottomleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.05, -0.18))
+       inset = c(0, -0.18))
 legend("bottomleft",
        legend = c("\n"),
        col = c("#5b278f"),
@@ -207,7 +208,7 @@ legend("bottomleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.05, -0.18))
+       inset = c(0, -0.18))
 
 
 legend("bottomleft",
@@ -218,7 +219,7 @@ legend("bottomleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.55, -0.18))
+       inset = c(0.45, -0.18))
 legend("bottomleft",
        legend = c(''),
        col = c("#278f5b"),
@@ -227,11 +228,11 @@ legend("bottomleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.55, -0.18))
+       inset = c(0.45, -0.18))
 
 par(xpd=FALSE)
 
 text(y = 0.515, x = 0.5, labels = 'Minimum synchrony', cex = 0.75, col = 'grey70', adj = 0)
-segments(y0 = 0.5, x0 = -0.5, x1 = 22.5, lty = 2, col = 'grey70')
+segments(y0 = 0.5, x0 = -0.5, x1 = length(years_to_predict)+0.5, lty = 2, col = 'grey70')
 
 dev.off()

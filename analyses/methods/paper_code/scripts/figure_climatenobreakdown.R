@@ -44,10 +44,16 @@ plot(1, type="n", main=main,
 
 usr <- par("usr")
 segments(x0 = 10,  x1 = 121, y0 = usr[3], y1 = usr[3], lwd = 1.7)
-axis(1, at= c(19, 34, 48, 62, 76, 91, 105, 119),
-     labels=seq(18,25,1), 
-     lwd = 0, lwd.ticks = 1, tck = -0.03, 
-     cex.axis = 0.9, mgp = c(0, 0.6, 0))  
+# axis(1, at= c(19, 34, 48, 62, 76, 91, 105, 119),
+#      labels=seq(18,25,1), 
+#      lwd = 0, lwd.ticks = 1, tck = -0.03, 
+#      cex.axis = 0.9, mgp = c(0, 0.6, 0))  
+axis(1, at= c(12, 26, 40, 55, 69, 83, 98, 112),
+     labels=seq(19,26,1),
+     lwd = 0, lwd.ticks = 1, tck = -0.03,
+     cex.axis = 0.9, mgp = c(0, 0.6, 0))
+
+
 title(xlab = "Previous summer temperature (°C)", line = 1.7)
 
 axis(2, at=seq(0,1,0.25), seq(0,100,25), 
@@ -118,7 +124,7 @@ legend("topleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.5, 0.70))
+       inset = c(0.45, 0.70))
 legend("topleft",
        legend = c("", ""),
        col = c("#278f5b", "#c98139"),
@@ -127,7 +133,7 @@ legend("topleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.5, 0.70))
+       inset = c(0.45, 0.70))
 
 
 

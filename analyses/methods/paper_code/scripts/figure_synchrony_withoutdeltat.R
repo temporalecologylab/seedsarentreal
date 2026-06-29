@@ -1,11 +1,11 @@
 
 
 # Manipulate posteriors
-sites <- stringr::str_split_i(uniq_tree_ids, '_', 1)
+sites <- stringr::str_split_i(uniq_tree_ids[trees_tokeep], '_', 1)
 uniq_sites <- unique(sites)
 synchrony_within <- synchrony_across <- c()
-trees <- 1:data$N_trees
-for(y in 1980:2022){
+trees <- trees_tokeep
+for(y in 1980:2024){
   
   ## Look at all trees within one year
   year <- y-1980+1
@@ -22,7 +22,7 @@ for(y in 1980:2022){
   }
   
   trees_persite <- rep(0, length(uniq_sites))
-  for(t in 1:data$N_trees){
+  for(t in 1:length(idxs_tree)){
     name <- paste0('masting_site[', which(uniq_sites == sites[t]), ']')
     samples[[name]] <- samples[[name]] + (samples[[names[t]]]-1)
     
@@ -82,7 +82,7 @@ intervals <- list('1980s' = 1980:1984, '1985s' = 1985:1989,
                   '1990s' = 1990:1994, '1995s' = 1995:1999, 
                   '2000s' = 2000:2004, '2005s' = 2005:2009, 
                   '2010s' = 2010:2014, '2015s' = 2015:2019,
-                  '2020s' = 2020:2022)
+                  '2020s' = 2020:2024)
 
 for(i in 1:length(intervals)){
   newname <- paste0('withinstand_synchrony_', names(intervals)[i])
@@ -217,7 +217,7 @@ for(i in seq(1, 2*N, 2)){
 text(x = 1:N, y = 0.44, labels = 
        c('1980-\n1984', '1985-\n1989', '1990-\n1994', '1995-\n1999',
          '2000-\n2004', '2005-\n2009', '2010-\n2014', '2015-\n2019',
-         '2020-\n2022'),
+         '2020-\n2024'),
      cex = 0.77)
 
 legend("topleft",
@@ -228,7 +228,7 @@ legend("topleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.05, 0.07))
+       inset = c(0.55, 0.6))
 legend("topleft",
        legend = c("", ""),
        col = c("#754875", "#466f8a"),
@@ -237,7 +237,7 @@ legend("topleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.05, 0.07))
+       inset = c(0.55, 0.6))
 
 text(y = 0.515, x = 0.3, labels = 'Minimum synchrony', cex = 0.75, col = 'grey70', adj = 0)
 segments(y0 = 0.5, x0 = 0, x1 = 9.5, lty = 2, col = 'grey70')

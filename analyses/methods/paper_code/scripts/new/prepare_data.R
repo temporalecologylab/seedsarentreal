@@ -1,16 +1,40 @@
 
 
 # Load data
-raw_data <- read.csv(file.path(wd, 'data',  'ebms', 'Beech_tree-ring_masting_data.csv'))
-clim_data <- readRDS(file.path(wd, 'data',  'ebms', 'era5land_sitesextract.rds'))
+raw_data <- read.csv(file.path(wd, 'data',  'ebms/new', 'beech_masting_merged.csv'))
+clim_data <- readRDS(file.path(wd, 'data',  'era5land', 'ebms_sitesextract_updateApril2026.rds'))
 
+site_names <- data.frame(c(
+  site1  = "Beechwoods", 
+  site2  = "Benwell",
+  site3  = "Buckholt",
+  site5  = "FishHill",
+  site7  = "Himley", 
+  site9  = "Killerton",
+  site10 = "Nettlebed",
+  site11 = "Painswick", 
+  site12 = "Patcham",
+  site13 = "Ripon", 
+  site14 = "Spennymoor", 
+  site15 = "Woodbury"
+))
+colnames(site_names) <- "site.ID"
+site_names$site.num <- rownames(site_names)
+clim_data <- merge(clim_data, site_names)
 
-raw_data$uniqueID <- paste0(raw_data$site.ID, "_", raw_data$tree.ID)
-raw_data <- na.omit(raw_data[,c('site.ID', 'uniqueID', 'year', 'seeds')])
+# sites_to_keep <-  unique(clim_data$site.ID)
+# raw_data <- raw_data_new[raw_data_new$site_name %in% sites_to_keep, ]
 
-uniq_tree_ids <- unique(raw_data$uniqueID)
+# nobs per tree... Keep only >= 5?
+# trees_to_keep <- names(which(table(raw_data$tree_id) >= 5))
+# raw_data <- raw_data[raw_data$tree_id %in% trees_to_keep, ]
+
+raw_data <- na.omit(raw_data[,c('site_name', 'tree_id', 'year', 'seeds')])
+
+uniq_tree_ids <- unique(raw_data$tree_id)
 N_trees <- length(uniq_tree_ids)
-N_sites <- length(unique(raw_data$site.ID))
+
+N_sites <- length(unique(raw_data$site_name))
 first_year <- min(raw_data$year)
 last_year <- max(raw_data$year)
 max_years <- first_year:max(raw_data$year)
@@ -28,7 +52,7 @@ tree_start_idxs <- c()
 tree_end_idxs <- c()
 for (tid in uniq_tree_ids) {
   
-  raw_data_tree <- raw_data[raw_data$uniqueID == tid,]
+  raw_data_tree <- raw_data[raw_data$tree_id == tid,]
   
   years_tree <- raw_data_tree$year-first_year+1
   years <- c(years, years_tree)
@@ -39,13 +63,13 @@ for (tid in uniq_tree_ids) {
   seed_count_tree <- raw_data_tree$seeds
   seed_counts <- c(seed_counts, seed_count_tree)
   
-  prevsummer_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'meantmax_ja'] # all years, even those unobserved
+  prevsummer_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site_name[1] & clim_data$year %in% (max_years-1), 'meantmax_ja'] # all years, even those unobserved
   prevsummer_temps <- c(prevsummer_temps, prevsummer_temps_tree)
   
-  spring_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'meantmean_am'] # all years, even those unobserved
+  spring_temps_tree <- clim_data[clim_data$site.ID == raw_data_tree$site_name[1] & clim_data$year %in% (max_years-1), 'meantmean_am'] # all years, even those unobserved
   spring_temps <- c(spring_temps, spring_temps_tree)
   
-  gdd_lastfrost_tree <- clim_data[clim_data$site.ID == raw_data_tree$site.ID[1] & clim_data$year %in% (max_years-1), 'gdd_b5_tolastfrost']/10 # all years, even those unobserved, in *10degC
+  gdd_lastfrost_tree <- clim_data[clim_data$site.ID == raw_data_tree$site_name[1] & clim_data$year %in% (max_years-1), 'gdd_b5_tolastfrost']/10 # all years, even those unobserved, in *10degC
   gdd_lastfrost <- c(gdd_lastfrost, gdd_lastfrost_tree)
   
   tree_start_idxs <- c(tree_start_idxs, idx)
@@ -58,7 +82,7 @@ for (tid in uniq_tree_ids) {
 years_to_predict <- (1980:2100)
 ## summer temperature
 clim_df <- clim_data[clim_data$site.ID == 'Benwell',]
-baseline_2000 <- mean(clim_df[clim_df$year %in% c(1980:2000), 'meantmax_ja']) # average summer temp. from 1980-2000 in Benwell
+baseline_2000 <- mean(clim_data[clim_data$year %in% c(1980:2000), 'meantmax_ja']) # average summer temp. from 1980-2000 the 7 sites
 trend <- 0.07 # 7degC warming in 100 years
 summertemp <- baseline_2000 + trend * (years_to_predict-2000)
 ## frost GDD

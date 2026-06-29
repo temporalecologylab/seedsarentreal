@@ -1,11 +1,4 @@
 
-logit <- function(p){
-  return(log(p/(1-p)))
-}
-
-invlogit <- function(r){
-  return(1/(1+exp(-r)))
-}
 
 pdf(file = file.path(figpath, 'climate_predictors.pdf'),
     width = 10, height = 3.3)

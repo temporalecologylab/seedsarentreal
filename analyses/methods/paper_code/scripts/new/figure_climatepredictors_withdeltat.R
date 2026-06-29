@@ -26,7 +26,7 @@ for(temp_prevsummer in seq(12,26,0.1)){
 par(mar = c(2.5,4.5,2,2))
 plot(1, type="n", main=main,
      xlim=c(12, 26), xlab='', xaxt="n", yaxt="n",
-     ylim=c(-0.05,1), ylab='', frame = FALSE)
+     ylim=c(0,1), ylab='', frame = FALSE)
 
 lines(tau_nm_m_df$X5. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
 lines(tau_nm_m_df$X95. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
@@ -60,7 +60,7 @@ for(gdd in seq(0,35,0.1)){
 par(mar = c(3.5,4.5,1,2))
 plot(1, type="n", main=main,
      xlim=c(0, 350), xlab='', xaxt="n", yaxt="n",
-     ylim=c(115,220), ylab='', frame = FALSE)
+     ylim=c(120,220), ylab='', frame = FALSE)
 
 lines(lambda2_df$X5. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
 lines(lambda2_df$X95. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
@@ -70,7 +70,7 @@ usr <- par("usr")
 axis(1, at=seq(0,350,50), labels=seq(0,350,50), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
      cex.axis = 0.85, mgp = c(0, 0.3, 0))
-title(xlab = 'Frost risk (GDD until last frost day, °C)', line = 1.5, cex.lab = 0.9)
+title(xlab = 'GDD until the last frost day (°C)', line = 1.5, cex.lab = 0.9)
 
 axis(2, at=seq(120,220,20), seq(120,220,20), 
      lwd = 1, lwd.ticks = 1, tck = -0.03, 
@@ -80,6 +80,19 @@ title(ylab = 'Average seed production in\na high reproductive state', line = 2.5
 
 mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.18, cex = 1.2, font = 2, col = 'grey30')
 
+# par(fig = c(0,0.5, 0, 0.6), new = T)  
+# plot(1, type="n", main=main,
+#      xlim=c(12, 26), xlab='', xaxt="n", yaxt="n",
+#      ylim=c(0.4,2.4), ylab='', frame = FALSE)
+# boxplot(clim_data$meantmax_ja[clim_data$year %in% c(1980:2022)], horizontal = TRUE, add = T, frame = F, axes = F,
+#         outline=FALSE)
+# 
+# par(fig = c(0.5,1, 0, 0.6), new = T)  
+# plot(1, type="n", main=main,
+#      xlim=c(0, 350), xlab='', xaxt="n", yaxt="n",
+#      ylim=c(0.4,2.4), ylab='', frame = FALSE)
+# boxplot(clim_data$gdd_b5_tolastfrost[clim_data$year %in% c(1980:2022)], horizontal = TRUE, add = T, frame = F, axes = F,
+#         outline=FALSE)
 
 
 ### Part 3: deltaT
@@ -101,7 +114,6 @@ quantiles_nm <- sapply(1:N_max_years, calc)
 
 prevsummer_n2 <- aggregate(meantmax_ja ~ year, data = clim_data[clim_data$year %in% c(1978:2022),], FUN = mean)$meantmax_ja
 prevsummer_n1 <- aggregate(meantmax_ja ~ year, data = clim_data[clim_data$year %in% c(1979:2023),], FUN = mean)$meantmax_ja
-
 delta <- prevsummer_n1-prevsummer_n2
 
 par(mar=c(1.5,5,2,0.5), cex.lab = 0.85)
@@ -152,20 +164,5 @@ fit <- lm(quantiles_nm['50%',] ~ delta)
 xlim <- c(-4, 4)
 x <- seq(xlim[1], xlim[2], length.out = 100)
 lines(x, predict(fit, newdata = data.frame(delta = x)), col = "#487548", lty = 2, lwd = 1.2)
-
-
-par(fig = c(0,0.5, 0.47, 0.67), new = T)
-plot(1, type="n", main=main,
-     xlim=c(12, 26), xlab='', xaxt="n", yaxt="n",
-     ylim=c(0.6,2.4), ylab='', frame = FALSE)
-boxplot(clim_data$meantmax_ja[clim_data$year %in% c(1980:2024)], horizontal = TRUE, add = T, frame = F, axes = F,
-        outline=FALSE)
-
-par(fig = c(0,0.5, 0, 0.2), new = T)
-plot(1, type="n", main=main,
-     xlim=c(0, 350), xlab='', xaxt="n", yaxt="n",
-     ylim=c(0.6,2.4), ylab='', frame = FALSE)
-boxplot(clim_data$gdd_b5_tolastfrost[clim_data$year %in% c(1980:2024)], horizontal = TRUE, add = T, frame = F, axes = F,
-        outline=FALSE)
 
 dev.off()
