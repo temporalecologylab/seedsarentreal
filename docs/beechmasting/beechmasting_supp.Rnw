@@ -21,7 +21,7 @@
 
 \linenumbers
 
-\title{Title! Supp} 
+\title{Biological and climatic constraints drive reproductive synchrony\\Supplementary figures} 
 
 % \date{\today}
 \author{Victor, Mike, Lizzie}
@@ -68,16 +68,16 @@ kq <- readRDS(file.path(wd, 'figures/new', 'key_quantities.rds'))
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/new/supp/summertempdepend.pdf}
-  \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state.}}
-  \label{fig:warmpersist}
+  \includegraphics{figures/new/supp/map.pdf}
+  \caption{\textbf{(A) Map of the beech forest sites (England). (B) Distributions of pairwise distance between sites.}}
+  \label{fig:map}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics{figures/new/supp/map.pdf}
-  \caption{\textbf{(A) Map of the beech forest sites (England). (B) Distributions of pairwise distance between sites.}}
-  \label{fig:map}
+  \includegraphics[width=0.6\linewidth]{figures/new/supp/summertempdepend.pdf}
+  \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state.}}
+  \label{fig:warmpersist}
 \end{figure}
 
 
