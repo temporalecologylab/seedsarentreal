@@ -41,42 +41,43 @@ kq <- readRDS(file.path(wd, 'figures/new', 'key_quantities.rds'))
   \centering
   \includegraphics{figures/new/supp/negbin_parameters.pdf}
   \caption{\textbf{Posterior distributions of the parameters related to seed count distributions (main text model).}}
-  \label{fig:conceptfig}
+  \label{fig:seedcount}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/transition_parameters.pdf}
   \caption{\textbf{Posterior distributions of the parameters related to state transitions (main text model).}}
-  \label{fig:conceptfig}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics{figures/new/supp/transition_parameters_fullsummer.pdf}
-  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).}}
-  \label{fig:conceptfig}
+  \label{fig:transition}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/coldvswarmsummer.pdf}
   \caption{\textbf{Posterior distributions of transition probability from low to high reproductive states in a cold vs. a warm summer.}}
-  \label{fig:conceptfig}
+  \label{fig:coldvswarm}
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{figures/new/supp/transition_parameters_fullsummer.pdf}
+  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).}}
+  \label{fig:transitionboth}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.6\linewidth]{figures/new/supp/summertempdepend.pdf}
   \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state.}}
-  \label{fig:conceptfig}
+  \label{fig:warmpersist}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/map.pdf}
   \caption{\textbf{(A) Map of the beech forest sites (England). (B) Distributions of pairwise distance between sites.}}
-  \label{fig:conceptfig}
+  \label{fig:map}
 \end{figure}
 
 
