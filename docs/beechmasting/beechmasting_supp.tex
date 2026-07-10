@@ -19,7 +19,7 @@
 
 \setkeys{Gin}{width=0.95\textwidth}
 
-\linenumbers
+% \linenumbers
 
 \title{Biological and climatic constraints drive reproductive synchrony\\Supplementary figures} 
 
@@ -34,21 +34,21 @@
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/negbin_parameters.pdf}
-  \caption{\textbf{Posterior distributions of the parameters related to seed count distributions (main text model).}}
+  \caption{\textbf{Posterior distributions of the parameters related to seed count distributions (main text model).} These parameters control the number of seeds produced in low and high states. \emph{Spring temp.} corresponds to the average spring temperature in April and May. \emph{Spring frost} correspond to the growing degree days accumulated until the last frost day. See Methods for details. }
   \label{fig:seedcount}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/transition_parameters.pdf}
-  \caption{\textbf{Posterior distributions of the parameters related to state transitions (main text model).}}
+  \caption{\textbf{Posterior distributions of the parameters related to state transitions (main text model).} These parameters control the transition probabilities between states (1 = low, 2 = high). \emph{Prev. summer temp.} corresponds to the average maximum temperature in July and August (of the previous year). See Methods for details. }
   \label{fig:transition}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/coldvswarmsummer.pdf}
-  \caption{\textbf{Posterior distributions of transition probability from low to high reproductive states in a cold vs. a warm summer.}}
+  \caption{\textbf{Posterior distributions of transition probability from low to high reproductive states in a cold vs. a warm summer.} On average, the transition probability during a warm summer is 3.6 times higher than during a cold summer.}
   \label{fig:coldvswarm}
 \end{figure}
 
@@ -56,21 +56,23 @@
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/transition_parameters_fullsummer.pdf}
-  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).}}
+  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).} In this model, we tested whether the persistence in a high state was affected by previous summer temperature ($\beta^\text{summer}_{2 \rightarrow 2}$). Because this model is more complex (one additional parameter), we constrained both beta parameters to be $> 0$, otherwise the model would not fit. This lower bound constraint was not present in the model presented in the main text.}
   \label{fig:transitionboth}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/map.pdf}
-  \caption{\textbf{(A) Map of the beech forest sites (England). (B) Distributions of pairwise distance between sites.}}
+  \caption{\textbf{(A) Map of the beech forest sites (England).} We used data from 171 trees on 12 sites. \\
+  \textbf{(B) Distributions of pairwise distance between sites.} Sites are on average 224 km apart.}
   \label{fig:map}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.6\linewidth]{figures/new/supp/summertempdepend.pdf}
-  \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state.}}
+  \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state (model with summer temp.
+on both transitions, see Supp. Fig \ref{fig:transitionboth}).} Even when summer temperature could influence both the transition to a high state and the persistence in a high state, trees could not become stuck indefinitely in a high state.}
   \label{fig:warmpersist}
 \end{figure}
 
