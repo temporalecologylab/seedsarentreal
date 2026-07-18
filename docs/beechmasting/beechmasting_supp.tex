@@ -12,6 +12,9 @@
 \usepackage{lineno}
 \usepackage{caption}
 
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
 \captionsetup{font={sf,small}} 
 
 
@@ -21,7 +24,7 @@
 
 % \linenumbers
 
-\title{Biological and climatic constraints drive reproductive synchrony\\Supplementary figures} 
+\title{Biological and climatic constraints drive reproductive synchrony\\\emph{Supplementary figures}}
 
 % \date{\today}
 \author{Victor, Mike, Lizzie}
@@ -56,7 +59,7 @@
 \begin{figure}[htbp]
   \centering
   \includegraphics{figures/new/supp/transition_parameters_fullsummer.pdf}
-  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).} In this model, we tested whether the persistence in a high state was affected by previous summer temperature ($\beta^\text{summer}_{2 \rightarrow 2}$). Because this model is more complex (one additional parameter), we constrained both beta parameters to be $> 0$, otherwise the model would not fit. This lower bound constraint was not present in the model presented in the main text.}
+  \caption{\textbf{Posterior distributions of the parameters related to state transitions (model with summer temp. on both transitions).} In this model, we tested whether the persistence in a high state was affected by previous summer temperature ($\beta^\text{summer}_{2 \rightarrow 2}$). Because this model is more complex (one additional parameter), we constrained both beta parameters to be > 0. This lower bound constraint limits the effect of higher summer temperatures (both previous and current year) to increase seed count as is widely expected (though this constraint was not present in the model presented in the main text and we found the same positive response).}
   \label{fig:transitionboth}
 \end{figure}
 
