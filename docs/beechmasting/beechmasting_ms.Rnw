@@ -4,8 +4,9 @@
 \renewcommand{\baselinestretch}{1.2}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{natbib}
-\bibliographystyle{besjournals} 
+% \usepackage[square,sort,comma,numbers]{natbib}
+\usepackage[numbers,compress,super]{natbib}
+\bibliographystyle{unsrtnat} 
 \usepackage{amsmath}
 \newcommand{\R}[1]{\label{#1}\linelabel{#1}}
 \usepackage{gensymb}
@@ -143,6 +144,13 @@ With warmer summers, individual trees would invest in flowers and fruit in most 
 of masting \citep{Bogdziewicz2021}. 
 Because our model captures the reproductive states underlying observed seed production, it allows us to separate these two components of variability---at the inter-annual tree-level and at the population level (population synchrony)---and our results suggest that they respond differently to warming. % emw18Aug  - I tried to flagpost this for the readers to follow better... 
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/new/climate_nobreakdown.pdf}
+  \caption{\textbf{Reproductive constraints prevent individual trees from reproducing in most years, even under significant summer warming.} Our results suggest trees cannot remain continuously in a high reproductive state with increased warming due to reproductive constraints (green). We could only replicate a potential breakdown of individual reproductive variability with warming through a hypothetical model (not supported by the data here) where we removed reproductive constraints and forced summer warming to increase the probability of persisting into a high reproductive state (brown, see Methods for more details). We show the medians (lines) with 50\% and 90\% uncertainty intervals (darker and lighter shading respectively) from model predictions.} 
+  \label{fig:future}
+\end{figure}
+
 For inter-annual variability, we find no evidence that warming pushes individual trees towards reproducing in most years. 
 While we do find that warmer summers increase the probability of trees transitioning into a high reproductive state, and therefore increasing summer temperatures would increase the frequency of high seed production years, they do not increase the probability of a tree remaining in that state.
 Reproductive constraints continue to return trees to a low reproductive state, preventing trees from reproducing heavily in consecutive years.
@@ -150,13 +158,6 @@ Reproductive constraints continue to return trees to a low reproductive state, p
 Indeed, we found even with extreme summer warming (7 \celsius~in one century, corresponding to the warmest regional climate model projections, \citealp{Schumacher2024}), only \Sexpr{round(kq$mastingtrees_warmfuture['50%'],1)}\%  (\Sexpr{round(kq$mastingtrees_warmfuture['5%'],1)} -- \Sexpr{round(kq$mastingtrees_warmfuture['95%'],1)}\%) of trees in a population would mast in any given year (Fig. \ref{fig:future}). 
 This result holds when we relax reproductive constraints and allow warm summers to increase the probability of trees staying a high-reproductive state (Supp. Fig. \ref{supp-fig:warmpersist}). Even with this additional effect, we do not observe a breakdown of individual reproduction variability. 
 On the contrary, we found a `breakdown' because of climate change would require summer warming to have a similar impact on both the transition and persistence into a high reproductive year---an hypothesis not supported by the data used here (Fig. \ref{fig:future}). 
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.7\linewidth]{figures/new/climate_nobreakdown.pdf}
-  \caption{\textbf{Reproductive constraints prevent individual trees from reproducing in most years, even under significant summer warming.} Our results suggest trees cannot remain continuously in a high reproductive state with increased warming due to reproductive constraints (green). We could only replicate a potential breakdown of individual reproductive variability with warming through a hypothetical model (not supported by the data here) where we removed reproductive constraints and forced summer warming to increase the probability of persisting into a high reproductive state (brown, see Methods for more details). We show the medians (lines) with 50\% and 90\% uncertainty intervals (darker and lighter shading respectively) from model predictions.} 
-  \label{fig:future}
-\end{figure}
 
 These results highlight how biological constraints on plant reproduction may limit runaway effects of climate change. 
 For masting, floral bud initiation at the individual tree level is promoted by warm summer temperatures, potentially leading to a higher number of flowers and fruits in the following year \citep{Vacchiano2017, Bogdziewicz2024, Journe2024}. In the next summer, however, the development of a larger fruit load inherently imposes a trade-off that limits the tree from initiating a large number of floral buds again \citep{Monselise1982, Wilkie2008}. 
