@@ -28,8 +28,14 @@ plot(1, type="n", main=main,
      xlim=c(12, 26), xlab='', xaxt="n", yaxt="n",
      ylim=c(-0.05,1), ylab='', frame = FALSE)
 
-lines(tau_nm_m_df$X5. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
-lines(tau_nm_m_df$X95. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
+# lines(tau_nm_m_df$X5. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
+# lines(tau_nm_m_df$X95. ~ tau_nm_m_df$temp_prevsummer, col = "#a4bed5", lty = 2)
+polygon(
+  x = c(tau_nm_m_df$temp_prevsummer, rev(tau_nm_m_df$temp_prevsummer)),
+  y = c(tau_nm_m_df$X95., rev(tau_nm_m_df$X5.)),
+  col = "#c8d8e5",
+  border = NA
+)
 lines(tau_nm_m_df$X50. ~ tau_nm_m_df$temp_prevsummer, col = '#728595', lwd = 2)
 
 usr <- par("usr")
@@ -62,8 +68,16 @@ plot(1, type="n", main=main,
      xlim=c(0, 350), xlab='', xaxt="n", yaxt="n",
      ylim=c(115,220), ylab='', frame = FALSE)
 
-lines(lambda2_df$X5. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
-lines(lambda2_df$X95. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
+# lines(lambda2_df$X5. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
+# lines(lambda2_df$X95. ~ c(lambda2_df$gdd*10), col = "#a4bed5", lty = 2)
+# 
+
+polygon(
+  x = c(lambda2_df$gdd * 10, rev(lambda2_df$gdd * 10)),
+  y = c(lambda2_df$X95., rev(lambda2_df$X5.)),
+  col = "#c8d8e5",
+  border = NA
+)
 lines(lambda2_df$X50. ~ c(lambda2_df$gdd*10), col = '#728595', lwd = 2)
 
 usr <- par("usr")
@@ -98,11 +112,11 @@ calc <- function(n) {
 }
 quantiles_nm <- sapply(1:N_max_years, calc)
 
-
 prevsummer_n2 <- aggregate(meantmax_ja ~ year, data = clim_data[clim_data$year %in% c(1978:2022),], FUN = mean)$meantmax_ja
 prevsummer_n1 <- aggregate(meantmax_ja ~ year, data = clim_data[clim_data$year %in% c(1979:2023),], FUN = mean)$meantmax_ja
 
 delta <- prevsummer_n1-prevsummer_n2
+
 
 par(mar=c(1.5,5,2,0.5), cex.lab = 0.85)
 plot(1, type="n", main=main,
@@ -119,11 +133,15 @@ axis(2, at=seq(0,1,0.25), seq(0,100,25),
 
 segments(x0 = delta, y0 = quantiles_m['10%',], y1 = quantiles_m['90%',], col=util$c_light, lwd = 0.75)
 points(quantiles_m['50%',] ~ delta, col = util$c_light, pch = 20)
-fit <- lm(quantiles_m['50%',] ~ delta)
-xlim <- c(-4, 4)
-x <- seq(xlim[1], xlim[2], length.out = 100)
-lines(x, predict(fit, newdata = data.frame(delta = x)), col = util$c_mid, lty = 2, lwd = 1.2)
+# fit <- lm(quantiles_m['50%',] ~ delta)
+# xlim <- c(-4, 4)
+# x <- seq(xlim[1], xlim[2], length.out = 100)
+# lines(x, predict(fit, newdata = data.frame(delta = x)), col = util$c_mid, lty = 2, lwd = 1.2)
 
+# Using posterior predictions as input in a simple linear model
+ynames <- paste0('acrossstands_masting_synchrony[', 1:N_max_years, ']')
+source(file.path(wd, 'paper_code/scripts/new', 'simple_linear_model.R'))
+lines(x_grid, y_pred_mean, col = util$c_mid, lty = 2, lwd = 1.2)
 
 
 mtext(LETTERS[3], side = 3, line = 0.5, adj = -0.18, cex = 1.2, font = 2, col = 'grey30')
@@ -148,24 +166,32 @@ title(xlab = 'Temperature diff. between two previous summers (°C)', line = 1.5,
 
 segments(x0 = delta, y0 = quantiles_nm['10%',], y1 = quantiles_nm['90%',], col='#96b096', lwd = 0.75)
 points(quantiles_nm['50%',] ~ delta, col = '#96b096', pch = 20)
-fit <- lm(quantiles_nm['50%',] ~ delta)
-xlim <- c(-4, 4)
-x <- seq(xlim[1], xlim[2], length.out = 100)
-lines(x, predict(fit, newdata = data.frame(delta = x)), col = "#487548", lty = 2, lwd = 1.2)
+# fit <- lm(quantiles_nm['50%',] ~ delta)
+# xlim <- c(-4, 4)
+# x <- seq(xlim[1], xlim[2], length.out = 100)
+# lines(x, predict(fit, newdata = data.frame(delta = x)), col = "#487548", lty = 2, lwd = 1.2)
 
+# Using posterior predictions as input in a simple linear model
+ynames <- paste0('acrossstands_nonmasting_synchrony[', 1:N_max_years, ']')
+source(file.path(wd, 'paper_code/scripts/new', 'simple_linear_model.R'))
+lines(x_grid, y_pred_mean, col = "#487548", lty = 2, lwd = 1.2)
 
-par(fig = c(0,0.5, 0.47, 0.67), new = T)
+mtext(LETTERS[4], side = 3, line = -0.5, adj = -0.18, cex = 1.2, font = 2, col = 'grey30')
+
+par(mar = c(2.5,4.5,2,2))
+par(fig = c(0,0.5, 0.5, 1), new = T)
 plot(1, type="n", main=main,
      xlim=c(12, 26), xlab='', xaxt="n", yaxt="n",
-     ylim=c(0.6,2.4), ylab='', frame = FALSE)
+     ylim=c(0.8,6), ylab='', frame = FALSE)
 boxplot(clim_data$meantmax_ja[clim_data$year %in% c(1980:2024)], horizontal = TRUE, add = T, frame = F, axes = F,
-        outline=FALSE)
+        outline=FALSE, border = 'grey30', col = 'grey80')
 
-par(fig = c(0,0.5, 0, 0.2), new = T)
+par(mar = c(3.5,4.5,1,2))
+par(fig = c(0,0.5, 0, 0.5), new = T)
 plot(1, type="n", main=main,
      xlim=c(0, 350), xlab='', xaxt="n", yaxt="n",
-     ylim=c(0.6,2.4), ylab='', frame = FALSE)
+     ylim=c(0.8,6), ylab='', frame = FALSE)
 boxplot(clim_data$gdd_b5_tolastfrost[clim_data$year %in% c(1980:2024)], horizontal = TRUE, add = T, frame = F, axes = F,
-        outline=FALSE)
+        outline=FALSE, border = 'grey30', col = 'grey80')
 
 dev.off()

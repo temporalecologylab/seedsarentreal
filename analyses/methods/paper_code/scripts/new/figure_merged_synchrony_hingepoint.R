@@ -118,7 +118,7 @@ legend("topleft",
        text.col = "black",
        horiz = F,
        bty = "n",
-       inset = c(0.55, 0.6))
+       inset = c(0.5, 0.75))
 legend("topleft",
        legend = c("", ""),
        col = c("#4f1d4b", "#1b3f5a"),
@@ -127,7 +127,7 @@ legend("topleft",
        cex = 0.85,
        text.col = "black",
        horiz = F,
-       inset = c(0.55, 0.6))
+       inset = c(0.5, 0.75))
 
 par(xpd=TRUE)
 
@@ -198,7 +198,7 @@ title(ylab = ylab, line = 2.5)
 
 for(n in 1:N){
   
-  col <- ifelse(years_to_plot[n] %in% c(1989:1998), "#bba6bb", '#bcdccc90')
+  col <- ifelse(years_to_plot[n] %in% c(1989:1998), "#BCDCCC", '#e4c19d')
   idplot <- c(n*2-1, n*2)
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
           c(plot_quantiles[1,idplot], rev(plot_quantiles[5,idplot])),
@@ -206,7 +206,7 @@ for(n in 1:N){
   # polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
   #         c(plot_quantiles[2,idplot], rev(plot_quantiles[8,idplot])),
   #         col = "#99c7b090", border = NA)
-  col <- ifelse(years_to_plot[n] %in%  c(1989:1998), "#a488a4", '#7cb99b90')
+  col <- ifelse(years_to_plot[n] %in%  c(1989:1998), "#7CB99B", '#d49b61')
   polygon(c(plot_xs[idplot], rev(plot_xs[idplot])),
           c(plot_quantiles[2,idplot], rev(plot_quantiles[4,idplot])),
           col = col, border = NA)
@@ -214,7 +214,7 @@ for(n in 1:N){
   #         c(plot_quantiles[4,idplot], rev(plot_quantiles[6,idplot])),
   #         col = "#50a27990", border = NA)
   
-  col <- ifelse(years_to_plot[n] %in%  c(1989:1998), "#4f1d4b", '#278f5b')
+  col <- ifelse(years_to_plot[n] %in%  c(1989:1998), "#278F5B", '#b77432')
   lines(plot_xs[idplot], plot_quantiles[3, idplot],
         col= col, lwd=2)
 }
@@ -237,7 +237,7 @@ plot_quantiles <- do.call(cbind, lapply(plot_idxs,
 par(xpd=TRUE)
 legend("bottomleft",
        legend = c("Alternation of cold\nand warm summers"),
-       col = c("#bba6bb"),
+       col = c("#bcdccc"),
        lwd = 8,
        cex = 0.85,
        text.col = "black",
@@ -246,7 +246,7 @@ legend("bottomleft",
        inset = c(-0.06, -0.18))
 legend("bottomleft",
        legend = c("\n"),
-       col = c("#4f1d4b"),
+       col = c("#278f5b"),
        lwd = 2,
        bty = "n",
        cex = 0.85,
@@ -257,7 +257,7 @@ legend("bottomleft",
 
 legend("bottomleft",
        legend = c("Only warm summers"),
-       col = c("#bcdccc"),
+       col = c("#e4c19d"),
        lwd = 8,
        cex = 0.85,
        text.col = "black",
@@ -266,7 +266,7 @@ legend("bottomleft",
        inset = c(0.45, -0.18))
 legend("bottomleft",
        legend = c(''),
-       col = c("#278f5b"),
+       col = c("#b77432"),
        lwd = 2,
        bty = "n",
        cex = 0.85,

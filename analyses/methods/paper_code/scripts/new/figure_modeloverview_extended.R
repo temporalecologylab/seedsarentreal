@@ -76,7 +76,7 @@ mtext(LETTERS[1], side = 3, line = 0.5, adj = -0.05, cex = 1.2, font = 2, col = 
 
 # Tree-level alternation in states
 par(mar = c(3,3.5,2,2))
-t <- 58
+t <- 127
 
 idxs_tree <-(1+N_max_years*(t-1)):(N_max_years*t)
 observed_idxs_tree <- tree_start_idxs[t]:tree_end_idxs[t]
@@ -234,7 +234,8 @@ for(i in observed_idxs_tree) {
         rep(data$seed_counts[i], 2),
         col="black", lwd=2)
 }  
-# mtext(LETTERS[2], side = 3, line = 0.5, adj = -0.15, cex = 1.2, font = 2, col = 'grey30')
+
+mtext(LETTERS[4], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
 
 # Probabilities
 
@@ -440,7 +441,7 @@ for(n in 1:N){
         col= "#728595" , lwd=2)
 }
 
-mtext(LETTERS[4], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
+mtext(LETTERS[5], side = 3, line = 0.5, adj = -0.1, cex = 1.2, font = 2, col = 'grey30')
 
 dev.off()
 
