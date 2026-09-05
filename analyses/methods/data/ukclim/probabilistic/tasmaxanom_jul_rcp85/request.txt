@@ -1,0 +1,14 @@
+Area = country|England and Wales
+Baseline = b8110
+Collection = land-prob
+DataFormat = netcdf
+JobLabel = july
+SamplingMethod = all
+Scenario = rcp85
+TemporalAverage = jul
+TimeSlice = 2070-2099
+TimeSliceDuration = 30y
+Variable = ['tasmaxAnom']
+
+Process Identifier = LS1_Sample_01
+Software Version = WPS-2.16.0-DP-2.16.0-CV-1.0.10
