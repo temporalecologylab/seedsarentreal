@@ -5,7 +5,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{natbib}
-\bibliographystyle{besjournals} 
+\bibliographystyle{unsrtnat_custom} 
 \usepackage{amsmath}
 \newcommand{\R}[1]{\label{#1}\linelabel{#1}}
 \usepackage{gensymb}
@@ -32,7 +32,13 @@
   
 % \noindent $^{1}$Forest and Conservation Sciences, University of British Columbia, Vancouver, BC, Canada\\
 
-
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{figures/new/supp/map.pdf}
+  \caption{\textbf{(A) Map of the beech forest sites (England).} We used data from 171 trees on 12 sites. \\
+  \textbf{(B) Distributions of pairwise distance between sites.} Sites are on average 224 km apart.}
+  \label{fig:map}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
@@ -65,20 +71,29 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics{figures/new/supp/map.pdf}
-  \caption{\textbf{(A) Map of the beech forest sites (England).} We used data from 171 trees on 12 sites. \\
-  \textbf{(B) Distributions of pairwise distance between sites.} Sites are on average 224 km apart.}
-  \label{fig:map}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
   \includegraphics[width=0.6\linewidth]{figures/new/supp/summertempdepend.pdf}
   \caption{\textbf{Effect on previous summer temperature on the probability of transition from a low reproductive to a high reproductive state, and on the probability of persistence in a high reproductive state (model with summer temp.
 on both transitions, see Supp. Fig \ref{fig:transitionboth}).} Even when summer temperature could influence both the transition to a high state and the persistence in a high state, trees could not become stuck indefinitely in a high state.}
   \label{fig:warmpersist}
 \end{figure}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figures/new/supp/summerstrings.pdf}
+  \caption{\textbf{Projected frequency of strings of warm summers under scenario (A) RCP 4.5 and (B) RCP 8.5.}  Each bar shows, for one site, the proportion of 1000 UKCP18 probabilistic projections \citep{ukcp18} falling into each categorie of 5-year strings of consecutive summers at least 5  warmer than the 1981-2000 baseline. Strings are counted as 5-year windows and can overlap, so a 20-year period contains 16 strings maximum. Within each 20-year period, bars show the 12 sites, ordered by latitude (from south to north). RCP 8.5 represents a high-emission scenario now considered unlikely given current policies and energy trends \citep{Hausfather2020}. However, climate models also underestimate recent summer warming and heat extremes in Western Europe \citep{Schumacher2024}.}
+  \label{fig:deltareg}
+\end{figure}
 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/new/supp/deltat_regressions.pdf}
+  \caption{\textbf{The interaction of previous-year summer conditions and latent reproductive states (\textbf{C}: high reproductive state, \textbf{D}: low reproductive state) explain the apparent two-year lag effect of climate on observed synchrony across populations.} The solid line represents the median, the dashed lines the 90\% uncertainty interval.}
+  \label{fig:deltareg}
+\end{figure}
+
+\newpage
+
+\bibliography{beechmasting}
 
 \end{document}
