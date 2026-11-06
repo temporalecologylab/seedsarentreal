@@ -101,7 +101,7 @@ Using seed count data collected from individual trees across populations of beec
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1.1\linewidth]{figures/new/model_overview.pdf} 
+  \includegraphics[width=1\linewidth]{figures/new/model_overview.pdf} 
   \caption{\textbf{Distinct tree reproductive states generates variability at the population level.} 
   \textbf{(A)} Our two-state model (see Fig. \ref{fig:conceptfig}) identifies two distinct reproductive latent states (high and low) that correspond to two different levels of seed production. 
   \textbf{(B)} Differences in transition probabilities between the two latent states reflect constraints that shape tree-level reproductive cycles. \textbf{(C-D)} At the tree level (illustrated here for one arbitrary tree), these alternating latent states over time (\textbf{C}) generate low and high seed production years (\textbf{D}).  \textbf{(E)} When added together across all populations (Supp. Fig. \ref{supp-fig:map}), these individual cycles generate variability and synchrony in seed production across years. In \textbf{(C)}, \textbf{(D)} and \textbf{(E)}, we show median model predictions (blue lines) with 50\% and 90\% uncertainty intervals (shaded areas) overlaid with observed seed counts (black lines) or model predictions for years when observations were missing (gray).}
