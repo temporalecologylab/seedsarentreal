@@ -24,7 +24,7 @@
 
 \linenumbers
 
-\title{Biological and climatic constraints drive reproductive synchrony} 
+\title{Biological constraints buffer the runaway effect of climate change on reproductive synchrony} 
 % emw17Jun: Ideas:
 % Reproductive constraints and cold snaps drive synchrony in masting
 % Biological and climatic constraints drive reproductive synchrony 
